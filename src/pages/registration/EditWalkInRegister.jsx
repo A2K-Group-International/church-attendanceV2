@@ -37,6 +37,7 @@ export default function EditWalkInRegister() {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("guardian");
   const [preferredTime, setPreferredTime] = useState("");
+  const [selectedDay, setSelectedDay] = useState("");
   const [attendanceCode, setAttendanceCode] = useState("");
   const [children, setChildren] = useState([
     { id: "", firstName: "", lastName: "" },
@@ -57,6 +58,7 @@ export default function EditWalkInRegister() {
       setGuardianLastName("");
       setGuardianFirstName("");
       setGuardianTelephone("");
+      setSelectedDay("");
       setSelectedEvent("");
       setSelectedTime("");
       setChildren([{ id: "", firstName: "", lastName: "" }]);
@@ -83,6 +85,7 @@ export default function EditWalkInRegister() {
         setGuardianFirstName(fetchData[0].guardian_first_name);
         setGuardianTelephone(fetchData[0].guardian_telephone);
         setSelectedEvent(fetchData[0].selected_event);
+        setSelectedDay(fetchData[0].schedule_day);
         setSelectedTime(fetchData[0].preferred_time);
         setAttendanceCode(fetchData[0].attendance_code);
         setChildren(newChildren);
@@ -120,14 +123,14 @@ export default function EditWalkInRegister() {
           .from("attendance_pending")
           .delete()
           .eq("id", childToRemove.id); // Delete the child record by ID
-  
+
         if (error) {
           console.error("Error deleting child:", error.message);
           setError("An error occurred while deleting the child record.");
           return;
         }
       }
-      
+
       // Remove the child from the local state
       setChildren(children.filter((_, i) => i !== index));
     }
@@ -173,6 +176,7 @@ export default function EditWalkInRegister() {
           guardian_last_name: guardianLastName,
           preferred_time: preferredTime,
           selected_event: selectedEvent,
+          schedule_day: selectedDay,
           guardian_telephone: guardianTelephone,
           children_last_name: child.lastName,
           children_first_name: child.firstName,
@@ -197,7 +201,7 @@ export default function EditWalkInRegister() {
             has_attended: false,
             attendance_code: attendanceCode,
             preferred_time: preferredTime,
-            schedule_day: filteredMassSchedule,
+            schedule_day: selectedDay,
             selected_event: selectedEvent,
           });
 

@@ -3,14 +3,47 @@ import RegisterUser from "./registration/RegisterUser";
 import EditWalkInRegister from "./registration/EditWalkInRegister";
 import DialogWalkInRegister from "./registration/DialogWalkInRegister";
 import churchWithManyChildren from "../assets/images/church-with-many-children.png";
+import churchBg from "../assets/images/church-background.png";
 import holyCross from "../assets/images/Holy-Cross.png";
 
 export default function Home() {
   return (
+    // <>
+    //   {/* Hero */}
+    //   <div
+    //     className="relative overflow-hidden bg-cover bg-center bg-no-repeat"
+    //     style={{
+    //       backgroundImage: `url(${churchBg})`,
+    //     }}
+    //   >
+    //     <div className="absolute h-screen w-full bg-white/40 backdrop-opacity-70"></div>
+    //     <div
+    //       className={`mx-auto grid h-svh max-w-[85rem] px-4 py-20 sm:px-6 lg:px-8`}
+    //     >
+    //       <div className="z-10 mx-auto">
+    //         <div className="border-2 p-2 w-[40rem]">
+    //           <div className="flex gap-2">
+    //             <Login />
+    //             <RegisterUser />
+    //             <DialogWalkInRegister />
+    //             <EditWalkInRegister />
+    //           </div>
+    //         </div>
+    //       </div>
+    //       <div>test</div>
+    //     </div>
+    //   </div>
+    //   {/* End Hero */}
+    // </>
     <>
       {/* Hero */}
-      <div className="overflow-hidden">
-        <div className="mx-auto grid h-svh max-w-[85rem] place-content-center px-4 py-20 sm:px-6 lg:px-8">
+      <div
+        className="overflow-hidden"
+      >
+        <div className="absolute h-screen w-ful"></div>
+        <div
+          className={`mx-auto grid h-svh max-w-[85rem] place-content-center px-4 py-20 sm:px-6 lg:px-8`}
+        >
           <div className="relative mx-auto grid max-w-4xl space-y-5 sm:space-y-10">
             {/* Title */}
             <div className="text-center">
