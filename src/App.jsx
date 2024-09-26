@@ -7,6 +7,7 @@ import UsersPage from "./pages/admin/UserPage";
 import Schedule from "./pages/admin/Schedule";
 import EventsPage from "./pages/user/EventsPage";
 import FamilyPage from "./pages/user/FamilyPage";
+import EventInfo from "./pages/user/EventInfo";
 
 function App() {
   return (
@@ -37,7 +38,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/schedule"
           element={
             <ProtectedRoute>
@@ -50,6 +51,14 @@ function App() {
           element={
             <ProtectedRoute>
               <EventsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/event-info/:eventId"
+          element={
+            <ProtectedRoute>
+              <EventInfo />
             </ProtectedRoute>
           }
         />
