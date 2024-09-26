@@ -36,10 +36,9 @@ export default function DialogWalkInRegister() {
   const [error, setError] = useState("");
   const [guardianFirstName, setGuardianFirstName] = useState("");
   const [guardianLastName, setGuardianLastName] = useState("");
+  const [guardianTelephone, setGuardianTelephone] = useState("");
   const [preferredTime, setPreferredTime] = useState("");
-  const [children, setChildren] = useState([
-    { firstName: "", lastName: "", telephone: "" },
-  ]);
+  const [children, setChildren] = useState([{ firstName: "", lastName: "" }]);
   const [eventName, setEventName] = useState([]);
   const [activeTab, setActiveTab] = useState("guardian");
   const [selectedEvent, setSelectedEvent] = useState("");
@@ -53,17 +52,17 @@ export default function DialogWalkInRegister() {
       setActiveTab("children");
     }
   };
- // add child form
+  // add child form
   const handleAddChild = () => {
-    setChildren([...children, { firstName: "", lastName: "", telephone: "" }]);
+    setChildren([...children, { firstName: "", lastName: "" }]);
   };
-// remove child form
+  // remove child form
   const handleRemoveChild = (index) => {
     if (children.length > 1) {
       setChildren(children.filter((_, i) => i !== index));
     }
   };
-// Update a specific child's field value in the children array
+  // Update a specific child's field value in the children array
   const handleChangeChild = (index, field, value) => {
     const newChildren = [...children];
     newChildren[index] = { ...newChildren[index], [field]: value };
@@ -79,7 +78,7 @@ export default function DialogWalkInRegister() {
   // submit to supabase
   const handleSubmit = async () => {
     const hasEmptyChild = children.some(
-      (child) => !child.firstName || !child.lastName || !child.telephone,
+      (child) => !child.firstName || !child.lastName,
     );
 
     if (
@@ -92,13 +91,21 @@ export default function DialogWalkInRegister() {
       return;
     }
 
-    const parsedChildren = children.map((child) => ({
-      ...child,
-      telephone: parseInt(child.telephone, 10),
-    }));
+    {
+      /* For future reference if telephone move to child's information */
+    }
+    // const parsedChildren = children.map((child) => ({
+    //   ...child,
+    //   telephone: parseInt(child.telephone, 10),
+    // }));
 
-    if (parsedChildren.some((child) => isNaN(child.telephone))) {
-      setError("Telephone must be a number.");
+    // if (parsedChildren.some((child) => isNaN(child.telephone))) {
+    //   setError("Telephone must be a number.");
+    //   return;
+    // }
+
+    if (isNaN(parseInt(guardianTelephone, 10))) {
+      setError("Guardian's telephone must be a number.");
       return;
     }
 
@@ -109,10 +116,10 @@ export default function DialogWalkInRegister() {
       const { error: dataError } = await supabase
         .from("attendance_pending")
         .insert(
-          parsedChildren.map((child) => ({
+          children.map((child) => ({
             guardian_first_name: guardianFirstName,
             guardian_last_name: guardianLastName,
-            guardian_telephone: child.telephone,
+            guardian_telephone: guardianTelephone,
             children_last_name: child.lastName,
             children_first_name: child.firstName,
             has_attended: false,
@@ -127,6 +134,7 @@ export default function DialogWalkInRegister() {
 
       setGuardianFirstName("");
       setGuardianLastName("");
+      setGuardianTelephone("");
       setPreferredTime("");
       setSelectedEvent("");
       setChildren([{ firstName: "", lastName: "", telephone: "" }]);
@@ -163,13 +171,13 @@ export default function DialogWalkInRegister() {
   const filteredMassTimes = eventName
     .filter((event) => event.name === selectedEvent)
     .flatMap((event) => event.time || []);
- // filter the schedule in selected event
+  // filter the schedule in selected event
   const filteredMassSchedule = eventName
     .filter((event) => event.name === selectedEvent)
     .flatMap((event) => event.schedule);
 
   // format the date
-  const date = new Date(filteredMassSchedule); 
+  const date = new Date(filteredMassSchedule);
   const options = { year: "numeric", month: "long", day: "numeric" };
   const formattedDate = date.toLocaleDateString("en-GB", options);
 
@@ -287,6 +295,19 @@ export default function DialogWalkInRegister() {
                 <div className="flex flex-col gap-x-4 md:flex-row">
                   <FormLabel>
                     <Label htmlFor="firstName" className="text-sm font-medium">
+                      First Name
+                    </Label>
+                    <Input
+                      id="firstName"
+                      placeholder="Enter your first name"
+                      value={guardianFirstName}
+                      onChange={(e) => setGuardianFirstName(e.target.value)}
+                      required
+                      className="mt-1"
+                    />
+                  </FormLabel>
+                  <FormLabel>
+                    <Label htmlFor="firstName" className="text-sm font-medium">
                       Last Name
                     </Label>
                     <Input
@@ -299,16 +320,20 @@ export default function DialogWalkInRegister() {
                     />
                   </FormLabel>
                   <FormLabel>
-                    <Label htmlFor="firstName" className="text-sm font-medium">
-                      First Name
+                    <Label
+                      htmlFor="guardianTelephone"
+                      className="text-sm font-medium"
+                    >
+                      Telephone
                     </Label>
                     <Input
-                      id="firstName"
-                      placeholder="Enter your first name"
-                      value={guardianFirstName}
-                      onChange={(e) => setGuardianFirstName(e.target.value)}
-                      required
+                      id="guardianTelephone"
+                      type="text"
+                      placeholder="Enter your telephone"
+                      value={guardianTelephone}
+                      onChange={(e) => setGuardianTelephone(e.target.value)}
                       className="mt-1"
+                      required
                     />
                   </FormLabel>
                 </div>
@@ -319,7 +344,7 @@ export default function DialogWalkInRegister() {
                   >
                     <div className="flex items-center justify-between">
                       <h4 className="text-sm font-semibold">
-                        Add Child/Children
+                        Add Child
                         <span className="block text-xs font-normal text-black">
                           Please provide your child's information. You can add
                           multiple children
@@ -338,34 +363,15 @@ export default function DialogWalkInRegister() {
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                       <FormLabel>
                         <Label
-                          htmlFor={`childrenLastName_${index}`}
-                          className="text-sm font-medium"
-                        >
-                          Last Name
-                        </Label>
-                        <Input
-                          id={`childrenLastName_${index}`}
-                          type="text"
-                          placeholder="Children's Last Name"
-                          value={child.lastName}
-                          onChange={(e) =>
-                            handleChangeChild(index, "lastName", e.target.value)
-                          }
-                          className="mt-1"
-                          required
-                        />
-                      </FormLabel>
-                      <FormLabel>
-                        <Label
-                          htmlFor={`childrenFirstName_${index}`}
+                          htmlFor={`childFirstName_${index}`}
                           className="text-sm font-medium"
                         >
                           First Name
                         </Label>
                         <Input
-                          id={`childrenFirstName_${index}`}
+                          id={`childFirstName_${index}`}
                           type="text"
-                          placeholder="Children's First Name"
+                          placeholder="Child's First Name"
                           value={child.firstName}
                           onChange={(e) =>
                             handleChangeChild(
@@ -380,22 +386,18 @@ export default function DialogWalkInRegister() {
                       </FormLabel>
                       <FormLabel>
                         <Label
-                          htmlFor={`telephone_${index}`}
+                          htmlFor={`childLastName_${index}`}
                           className="text-sm font-medium"
                         >
-                          Telephone
+                          Last Name
                         </Label>
                         <Input
-                          id={`telephone_${index}`}
-                          type="number"
-                          placeholder="Guardian's Telephone"
-                          value={child.telephone}
+                          id={`childLastName_${index}`}
+                          type="text"
+                          placeholder="Child's Last Name"
+                          value={child.lastName}
                           onChange={(e) =>
-                            handleChangeChild(
-                              index,
-                              "telephone",
-                              e.target.value,
-                            )
+                            handleChangeChild(index, "lastName", e.target.value)
                           }
                           className="mt-1"
                           required
