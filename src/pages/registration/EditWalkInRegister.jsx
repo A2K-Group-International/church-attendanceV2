@@ -37,19 +37,29 @@ export default function EditWalkInRegister() {
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("guardian");
   const [preferredTime, setPreferredTime] = useState("");
+  const [attendanceCode, setAttendanceCode] = useState("");
   const [children, setChildren] = useState([
-    {id: "", firstName: "", lastName: "", telephone: "" },
+    { id: "", firstName: "", lastName: "" },
   ]);
   const [guardianFirstName, setGuardianFirstName] = useState("");
   const [guardianLastName, setGuardianLastName] = useState("");
+  const [guardianTelephone, setGuardianTelephone] = useState("");
   const [eventName, setEventName] = useState([]);
   const [error, setError] = useState("");
-
   const [selectedEvent, setSelectedEvent] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleSubmit = async () => {
     try {
+      // Reset the form state before fetching new data
+      setGuardianLastName("");
+      setGuardianFirstName("");
+      setGuardianTelephone("");
+      setSelectedEvent("");
+      setSelectedTime("");
+      setChildren([{ id: "", firstName: "", lastName: "" }]);
+
       // Fetch the attendance record that matches the userCode
       const { data: fetchData, error } = await supabase
         .from("attendance_pending")
@@ -60,25 +70,23 @@ export default function EditWalkInRegister() {
       if (error) throw error;
 
       // Check if any records are returned
+      // Check if any records are returned
       if (fetchData.length > 0) {
-        fetchData.forEach((item) => {
-          setGuardianLastName(item.guardian_last_name);
-          setGuardianFirstName(item.guardian_first_name);
-          setSelectedEvent(item.selected_event);
-          setSelectedTime(item.preferred_time);
-          console.log(item.preferred_time);
-          setChildren((prevChildren) => [
-            ...prevChildren,
-            {
-              id: item.id,
-              firstName: item.children_first_name,
-              lastName: item.children_last_name,
-              telephone: item.guardian_telephone,
-            },
-          ]);
-        });
+        const newChildren = fetchData.map((item) => ({
+          id: item.id,
+          firstName: item.children_first_name,
+          lastName: item.children_last_name,
+        }));
+
+        // Set the new values in the form
+        setGuardianLastName(fetchData[0].guardian_last_name);
+        setGuardianFirstName(fetchData[0].guardian_first_name);
+        setGuardianTelephone(fetchData[0].guardian_telephone);
+        setSelectedEvent(fetchData[0].selected_event);
+        setSelectedTime(fetchData[0].preferred_time);
+        setAttendanceCode(fetchData[0].attendance_code);
+        setChildren(newChildren);
         setAttendanceRecord(fetchData); // Store the fetched record
-        console.log(fetchData);
         setIsEditing(true); // Transition to edit mode
         setError("");
       } else {
@@ -100,7 +108,7 @@ export default function EditWalkInRegister() {
     }
   };
   const handleAddChild = () => {
-    setChildren([...children, { firstName: "", lastName: "", telephone: "" }]);
+    setChildren([...children, { firstName: "", lastName: "" }]);
   };
 
   const handleRemoveChild = (index) => {
@@ -115,49 +123,75 @@ export default function EditWalkInRegister() {
     setChildren(newChildren);
   };
 
-  const parsedChildren = children.map((child) => ({
-    ...child,
-    telephone: parseInt(child.telephone, 10),
-  }));
+  {
+    /* For future reference if child adding telephone */
+  }
+  // const parsedChildren = children.map((child) => ({
+  //   ...child,
+  //   telephone: parseInt(child.telephone, 10),
+  // }));
 
-  const validateChildren = (children) => {
-    for (const child of children) {
-      if (isNaN(parseInt(child.telephone, 10))) {
-        setError("Telephone must be a number.");
-        return false;
-      }
-    }
-    return true;
-  };
+  // const validateChildren = (children) => {
+  //   for (const child of children) {
+  //     if (isNaN(parseInt(child.telephone, 10))) {
+  //       setError("Telephone must be a number.");
+  //       return false;
+  //     }
+  //   }
+  //   return true;
+  // };
 
   const handleSave = async () => {
-    if (!validateChildren(parsedChildren)) {
-      return;
-    }
-  
     try {
-      const updates = parsedChildren.map(async (child, index) => {
-        // Retrieve the unique identifier from the attendanceRecord array
-        const { id } = attendanceRecord[index]; // id is fetched for each child
-  
-        const { error } = await supabase
-          .from("attendance_pending")
-          .update({
+      // Check if the guardian's telephone is a valid number
+      if (isNaN(parseInt(guardianTelephone, 10))) {
+        setError("Guardian's telephone must be a number.");
+        return;
+      }
+      // array of promises for updates/inserts
+      const childUpdatesPromises = children.map(async (child, index) => {
+        const { id } = attendanceRecord[index] || {}; // Get the id or undefined
+
+        const baseRecord = {
+          guardian_first_name: guardianFirstName,
+          guardian_last_name: guardianLastName,
+          preferred_time: preferredTime,
+          selected_event: selectedEvent,
+          guardian_telephone: guardianTelephone,
+          children_last_name: child.lastName,
+          children_first_name: child.firstName,
+        };
+
+        if (id) {
+          // Update existing child
+          const { error } = await supabase
+            .from("attendance_pending")
+            .update(baseRecord)
+            .eq("id", id); // Use the existing id for updating
+
+          if (error) throw error;
+        } else {
+          // Insert new child record if no id found
+          const { error } = await supabase.from("attendance_pending").insert({
             guardian_first_name: guardianFirstName,
             guardian_last_name: guardianLastName,
-            preferred_time: preferredTime,
-            selected_event: selectedEvent,
-            guardian_telephone: child.telephone,
+            guardian_telephone: guardianTelephone,
             children_last_name: child.lastName,
             children_first_name: child.firstName,
-          })
-          .eq("id", id); // Correct id from the attendanceRecord
-  
-        if (error) throw error;
+            has_attended: false,
+            attendance_code: attendanceCode,
+            preferred_time: preferredTime,
+            schedule_day: filteredMassSchedule,
+            selected_event: selectedEvent,
+          });
+
+          if (error) throw error;
+        }
       });
-  
-      await Promise.all(updates); // Wait for all updates to complete
-  
+
+      // Wait for all updates/inserts to complete
+      await Promise.all(childUpdatesPromises);
+
       alert("Registration updated successfully!");
       resetForm();
     } catch (error) {
@@ -171,6 +205,12 @@ export default function EditWalkInRegister() {
     setAttendanceRecord(null);
     setIsEditing(false);
     setError("");
+  };
+
+  // reset the form after closing
+  const handleDialogOpen = (isOpen) => {
+    setIsDialogOpen(isOpen);
+    !isOpen && resetForm();
   };
 
   useEffect(() => {
@@ -217,7 +257,7 @@ export default function EditWalkInRegister() {
   const formattedDate = date.toLocaleDateString("en-GB", options);
 
   return (
-    <Dialog>
+    <Dialog open={isDialogOpen} onOpenChange={handleDialogOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">Edit Registration</Button>
       </DialogTrigger>
@@ -370,19 +410,6 @@ export default function EditWalkInRegister() {
                 <CardContent className="space-y-6">
                   <div className="flex flex-col gap-x-4 md:flex-row">
                     <FormLabel>
-                      <Label htmlFor="lastName" className="text-sm font-medium">
-                        Last Name
-                      </Label>
-                      <Input
-                        id="lastName"
-                        placeholder="Enter your last name"
-                        value={guardianLastName}
-                        onChange={(e) => setGuardianLastName(e.target.value)}
-                        required
-                        className="mt-1"
-                      />
-                    </FormLabel>
-                    <FormLabel>
                       <Label
                         htmlFor="firstName"
                         className="text-sm font-medium"
@@ -396,6 +423,36 @@ export default function EditWalkInRegister() {
                         onChange={(e) => setGuardianFirstName(e.target.value)}
                         required
                         className="mt-1"
+                      />
+                    </FormLabel>
+                    <FormLabel>
+                      <Label htmlFor="lastName" className="text-sm font-medium">
+                        Last Name
+                      </Label>
+                      <Input
+                        id="lastName"
+                        placeholder="Enter your last name"
+                        value={guardianLastName}
+                        onChange={(e) => setGuardianLastName(e.target.value)}
+                        required
+                        className="mt-1"
+                      />
+                    </FormLabel>
+
+                    <FormLabel>
+                      <Label
+                        htmlFor="guardianTelephone"
+                        className="text-sm font-medium"
+                      >
+                        Telephone
+                      </Label>
+                      <Input
+                        id="guardianTelephone"
+                        type="text"
+                        value={guardianTelephone}
+                        onChange={(e) => setGuardianTelephone(e.target.value)}
+                        className="mt-1"
+                        required
                       />
                     </FormLabel>
                   </div>
@@ -425,28 +482,6 @@ export default function EditWalkInRegister() {
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                         <FormLabel>
                           <Label
-                            htmlFor={`childrenLastName_${index}`}
-                            className="text-sm font-medium"
-                          >
-                            Last Name
-                          </Label>
-                          <Input
-                            id={`childrenLastName_${index}`}
-                            type="text"
-                            value={child.lastName}
-                            onChange={(e) =>
-                              handleChangeChild(
-                                index,
-                                "lastName",
-                                e.target.value,
-                              )
-                            }
-                            className="mt-1"
-                            required
-                          />
-                        </FormLabel>
-                        <FormLabel>
-                          <Label
                             htmlFor={`childrenFirstName_${index}`}
                             className="text-sm font-medium"
                           >
@@ -469,19 +504,19 @@ export default function EditWalkInRegister() {
                         </FormLabel>
                         <FormLabel>
                           <Label
-                            htmlFor={`telephone_${index}`}
+                            htmlFor={`childrenLastName_${index}`}
                             className="text-sm font-medium"
                           >
-                            Telephone
+                            Last Name
                           </Label>
                           <Input
-                            id={`telephone_${index}`}
-                            type="number"
-                            value={child.telephone}
+                            id={`childrenLastName_${index}`}
+                            type="text"
+                            value={child.lastName}
                             onChange={(e) =>
                               handleChangeChild(
                                 index,
-                                "telephone",
+                                "lastName",
                                 e.target.value,
                               )
                             }
