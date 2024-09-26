@@ -45,7 +45,7 @@ export default function EditWalkInRegister() {
   const [guardianLastName, setGuardianLastName] = useState("");
   const [guardianTelephone, setGuardianTelephone] = useState("");
   const [eventName, setEventName] = useState([]);
-  const [selectedEventId, setSelectedEventId] = useState("");
+  // const [selectedEventId, setSelectedEventId] = useState("");
   const [error, setError] = useState("");
   const [selectedEvent, setSelectedEvent] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
@@ -165,8 +165,8 @@ export default function EditWalkInRegister() {
         return;
       }
       // array of promises for updates/inserts
-      const childUpdatesPromises = children.map(async (child, index) => {
-        const { id } = attendanceRecord[index] || {}; // Get the id or undefined
+      const childUpdatesPromises = children.map(async (child) => {
+        const { id } = child; // Get the id or undefined
 
         const baseRecord = {
           guardian_first_name: guardianFirstName,
