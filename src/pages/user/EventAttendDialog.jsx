@@ -28,6 +28,8 @@ export default function EventAttendDialog({ open, onClose, eventData }) {
   const [selectedTime, setSelectedTime] = useState("");
   const [selectedMembers, setSelectedMembers] = useState([]); // Store selected members as objects
   const [error, setError] = useState(""); // State to hold error messages
+  const [successMessage, setSuccessMessage] = useState(""); // State to hold success messages
+  const [guardianData, setGuardianData] = useState("");
 
   useEffect(() => {
     if (open) {
@@ -53,6 +55,7 @@ export default function EventAttendDialog({ open, onClose, eventData }) {
         console.error("Error fetching user data:", error);
         return;
       }
+      setGuardianData(userData);
 
       // Use the fetched user data to get family members based on guardian ID
       const { data, error: fetchError } = await supabase
@@ -68,7 +71,6 @@ export default function EventAttendDialog({ open, onClose, eventData }) {
           userData.user_id,
         );
       }
-
       setFamilyMembers(data);
     } catch (error) {
       console.error("Error fetching family members:", error);
@@ -112,10 +114,50 @@ export default function EventAttendDialog({ open, onClose, eventData }) {
       return;
     }
 
-    console.log("Selected Members for Event:", selectedMembers);
-    console.log("Selected Time:", selectedTime);
-    console.log(eventData);
-    // Proceed with further submission logic...
+    try {
+      // Loop through each selected family member and insert data
+      for (const member of selectedMembers) {
+        const { data, error } = await supabase
+          .from("attendance_pending")
+          .insert({
+            guardian_first_name:
+              member.guardian === false ? guardianData.user_name : "N/A",
+            guardian_last_name: member.guardian === false ? null : "N/A",
+            guardian_telephone:
+              member.guardian === false ? guardianData.user_contact : "N/A",
+            children_first_name: member.family_first_name,
+            children_last_name: member.family_last_name,
+            has_attended: false, // Default attendance status
+            preferred_time: selectedTime,
+            schedule_day: eventData.schedule_day, // Example: assuming schedule_day is part of eventData
+            attendance_type: null, // Modify if needed
+            attendance_code: eventData.attendance_code, // Assuming eventData has this field
+            children_age: member.family_age, // Assuming family member has an age field
+            selected_event: eventData.name, // Event name from eventData
+            schedule_id: eventData.schedule_id, // Assuming eventData has a schedule ID field
+          });
+
+        if (error) {
+          throw error;
+        }
+      }
+
+      // Refresh query cache or trigger any further action as needed
+      queryClient.invalidateQueries(["attendance_pending"]);
+
+      // Show success message and clear previous errors
+      setSuccessMessage("Attendance successfully submitted!");
+      setError("");
+
+      // Automatically close the dialog after 2 seconds
+      setTimeout(() => {
+        onClose(); // Close the dialog after successful submission
+        setSuccessMessage(""); // Clear success message after closing
+      }, 2000);
+    } catch (error) {
+      console.error("Error submitting attendance data:", error);
+      setError("An error occurred while submitting attendance data.");
+    }
   };
 
   // Function to format time to 9:00 AM/PM
@@ -176,6 +218,9 @@ export default function EventAttendDialog({ open, onClose, eventData }) {
         </div>
 
         {error && <p className="mt-4 text-red-600">{error}</p>}
+        {successMessage && (
+          <p className="mt-4 text-green-600">{successMessage}</p>
+        )}
 
         <DialogFooter className="mt-6">
           <DialogClose asChild>
