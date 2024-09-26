@@ -44,6 +44,7 @@ export default function DialogWalkInRegister() {
   const [activeTab, setActiveTab] = useState("guardian");
   const [selectedEvent, setSelectedEvent] = useState("");
 
+  // if no time selected, step 2 is disabled
   const handleNext = () => {
     if (!preferredTime) {
       setError("Please fill out all fields.");
@@ -52,29 +53,30 @@ export default function DialogWalkInRegister() {
       setActiveTab("children");
     }
   };
-
+ // add child form
   const handleAddChild = () => {
     setChildren([...children, { firstName: "", lastName: "", telephone: "" }]);
   };
-
+// remove child form
   const handleRemoveChild = (index) => {
     if (children.length > 1) {
       setChildren(children.filter((_, i) => i !== index));
     }
   };
-
+// Update a specific child's field value in the children array
   const handleChangeChild = (index, field, value) => {
     const newChildren = [...children];
     newChildren[index] = { ...newChildren[index], [field]: value };
     setChildren(newChildren);
   };
-
+  // generate random code. Used it for editing registration
   const handleGenerateRandomCode = () => {
     const randomNumber =
       Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
     return randomNumber;
   };
 
+  // submit to supabase
   const handleSubmit = async () => {
     const hasEmptyChild = children.some(
       (child) => !child.firstName || !child.lastName || !child.telephone,
@@ -137,6 +139,7 @@ export default function DialogWalkInRegister() {
     }
   };
 
+  // fetch the event and time
   useEffect(() => {
     const fetchSchedule = async () => {
       try {
@@ -156,16 +159,17 @@ export default function DialogWalkInRegister() {
     fetchSchedule();
   }, []);
 
-  //check the time and day of the event
+  //check filter the time in selected event
   const filteredMassTimes = eventName
     .filter((event) => event.name === selectedEvent)
     .flatMap((event) => event.time || []);
-
+ // filter the schedule in selected event
   const filteredMassSchedule = eventName
     .filter((event) => event.name === selectedEvent)
     .flatMap((event) => event.schedule);
 
-  const date = new Date(filteredMassSchedule);
+  // format the date
+  const date = new Date(filteredMassSchedule); 
   const options = { year: "numeric", month: "long", day: "numeric" };
   const formattedDate = date.toLocaleDateString("en-GB", options);
 
