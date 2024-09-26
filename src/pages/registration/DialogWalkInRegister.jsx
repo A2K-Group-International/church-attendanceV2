@@ -40,6 +40,7 @@ export default function DialogWalkInRegister() {
   const [preferredTime, setPreferredTime] = useState("");
   const [children, setChildren] = useState([{ firstName: "", lastName: "" }]);
   const [eventName, setEventName] = useState([]);
+  const [selectedEventId, setSelectedEventId] = useState("");
   const [activeTab, setActiveTab] = useState("guardian");
   const [selectedEvent, setSelectedEvent] = useState("");
 
@@ -125,7 +126,7 @@ export default function DialogWalkInRegister() {
             has_attended: false,
             attendance_code: randomCode,
             preferred_time: preferredTime,
-            schedule_day: filteredMassSchedule,
+            schedule_day: filteredMassSchedule[0],
             selected_event: selectedEvent,
           })),
         );
@@ -167,14 +168,26 @@ export default function DialogWalkInRegister() {
     fetchSchedule();
   }, []);
 
-  //check filter the time in selected event
+  const handleSelectEvent = (eventId) => {
+    const selectedEvent = eventName.find((event) => event.id === eventId);
+    if (selectedEvent) {
+      setSelectedEvent(selectedEvent.name);
+      setSelectedEventId(eventId); // Set the selected ID
+      setPreferredTime("");
+    }
+  };
+
+  // Check and filter the time in the selected event
   const filteredMassTimes = eventName
-    .filter((event) => event.name === selectedEvent)
-    .flatMap((event) => event.time || []);
-  // filter the schedule in selected event
+    .filter((event) => event.id === selectedEventId) // Filter by selected event ID
+    .flatMap((event) => event.time || []); // Get times
+
+  // Filter the schedule in the selected event
   const filteredMassSchedule = eventName
-    .filter((event) => event.name === selectedEvent)
-    .flatMap((event) => event.schedule);
+    .filter(
+      (event) => event.name === selectedEvent && event.id === selectedEventId,
+    )
+    .flatMap((event) => event.schedule || []); // Get schedules
 
   // format the date
   const date = new Date(filteredMassSchedule);
@@ -223,18 +236,13 @@ export default function DialogWalkInRegister() {
                   <Label htmlFor="Event" className="text-sm font-medium">
                     Upcoming Events
                   </Label>
-                  <Select
-                    onValueChange={(value) => {
-                      setSelectedEvent(value);
-                      setPreferredTime("");
-                    }}
-                  >
+                  <Select onValueChange={handleSelectEvent}>
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Select Event" />
                     </SelectTrigger>
                     <SelectContent>
-                      {eventName.map((event, index) => (
-                        <SelectItem key={index} value={event.name}>
+                      {eventName.map((event) => (
+                        <SelectItem key={event.id} value={event.id}>
                           {event.name}
                         </SelectItem>
                       ))}

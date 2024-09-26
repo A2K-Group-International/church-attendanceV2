@@ -13,9 +13,11 @@ import {
   DialogClose,
 } from "../shadcn/dialog";
 import { Button } from "../shadcn/button";
+import { useState } from "react";
 
 export default function Login() {
   const { login, isLoading, isError } = useLogin();
+  const [visible, setVisible] = useState("");
 
   const {
     register,
@@ -31,17 +33,17 @@ export default function Login() {
     }
   };
 
+  const handleVisiblePassword = () => setVisible(!visible);
+
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="w-full">
-          Login
-        </Button>
+        <Button className="w-full">Login</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader className="space-y-3">
           <DialogTitle className="text-2xl font-semibold">Login</DialogTitle>
-          <DialogDescription className="text-muted-foreground text-sm">
+          <DialogDescription className="text-sm text-muted-foreground">
             Enter your account information to access your dashboard.
           </DialogDescription>
         </DialogHeader>
@@ -59,7 +61,7 @@ export default function Login() {
                 placeholder="Enter your email"
               />
               {errors.email && (
-                <p className="text-destructive text-sm font-medium">
+                <p className="text-sm font-medium text-destructive">
                   {errors.email.message}
                 </p>
               )}
@@ -70,20 +72,27 @@ export default function Login() {
               </Label>
               <Input
                 id="password"
-                type="password"
-                {...register("password", { required: "Password is required" })}
+                type={visible ? "text" : "password"}
+                {...register("password", {
+                  required: "Password is required",
+                })}
                 className="w-full"
                 placeholder="Enter your password"
               />
+              <div className="text-end">
+                <input type="checkbox" onClick={handleVisiblePassword} />
+                <span> Show password</span>
+              </div>
+
               {errors.password && (
-                <p className="text-destructive text-sm font-medium">
+                <p className="text-sm font-medium text-destructive">
                   {errors.password.message}
                 </p>
               )}
             </div>
           </div>
           {isError && (
-            <p className="text-destructive text-sm font-medium">
+            <p className="text-sm font-medium text-destructive">
               Invalid login credentials. Please try again.
             </p>
           )}
