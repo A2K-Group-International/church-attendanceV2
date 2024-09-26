@@ -7,7 +7,7 @@ import CalendarIcon from "../../assets/svg/calendarIcon.svg";
 import HamburgerIcon from "../../assets/svg/hamburgerIcon.svg";
 
 const userLinks = [
-  { link: "/events", label: "Events", icon: CalendarIcon },
+  { link: "/events-page", label: "Events", icon: CalendarIcon },
   { link: "/family", label: "Family", icon: FamilyIcon },
 ];
 
