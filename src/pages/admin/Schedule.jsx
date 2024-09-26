@@ -49,7 +49,7 @@ export default function AdminNewSchedule() {
     setValue,
     reset,
     formState: { errors },
-  } = useForm();
+  } = useForm(); // react-hook-forms
 
   const resetForm = () => {
     reset();
@@ -122,6 +122,7 @@ export default function AdminNewSchedule() {
     fetchEvents();
   }, [currentPage, fetchEvents]);
 
+  // format the time 
   const formatTime = (timeString) => {
     if (!timeString) return "N/A";
     const [hours, minutes] = timeString.split(":");
@@ -134,7 +135,7 @@ export default function AdminNewSchedule() {
     event.time && event.time.length > 0
       ? event.time.map((t) => formatTime(t)).join(", ")
       : "N/A",
-    <div
+    <div key={event.name}
       style={{
         maxWidth: "200px", // Adjust the width to your preference
         maxHeight: "100px", // Adjust the height to your preference
@@ -146,16 +147,17 @@ export default function AdminNewSchedule() {
     </div>, // Limit width and height for the description field
   ]);
 
+  // Add more time
   const handleAddTimeInput = () => {
     setTime([...time, ""]);
   };
-
+  // Remove time
   const handleRemoveTimeInput = (index) => {
     if (time.length > 1) {
       setTime(time.filter((_, i) => i !== index));
     }
   };
-
+// Function to changetime
   const handleChangeTime = (index, value) => {
     const updatedTimes = [...time];
     updatedTimes[index] = value;

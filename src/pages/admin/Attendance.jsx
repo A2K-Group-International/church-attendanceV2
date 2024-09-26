@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import supabase from "../../api/supabase";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import Table from "../../components/Table";
-import ExcelJS from "exceljs"; // Importing ExcelJS
-import { saveAs } from "file-saver"; // Keep using file-saver for downloading files
+import ExcelJS from "exceljs"; 
+import { saveAs } from "file-saver";
 import { CalendarIcon, Clock, Filter } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "../../shadcn/button";
@@ -20,6 +20,7 @@ import {
 } from "../../shadcn/pagination";
 import downloadIcon from "../../assets/svg/download.svg";
 
+// Headers for table
 const headers = [
   "Action",
   "#",
@@ -30,13 +31,12 @@ const headers = [
 ];
 
 export default function Attendance() {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState([]); // Data from the database
   const [loading, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [availableTimes, setAvailableTimes] = useState([]);
-
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
@@ -47,8 +47,8 @@ export default function Attendance() {
       setLoading(true);
       setError(null);
       try {
-        const formattedDate = new Date(date).toISOString().split("T")[0];
-
+        const formattedDate = new Date(date).toISOString().split("T")[0]; // format the date
+        // Query setup
         let query = supabase
           .from("attendance_pending")
           .select("*", { count: "exact" })
@@ -58,20 +58,24 @@ export default function Attendance() {
             currentPage * itemsPerPage - 1,
           ); // Pagination
 
+        // fetch or filter from preferred time
         if (time) {
           query = query.eq("preferred_time", time);
         }
-
+        // fetch or filter from status
         if (status !== "all") {
           query = query.eq("has_attended", status === "attended");
         }
 
+        // fetching the data
         const { data: fetchedData, error, count } = await query;
 
         if (error) throw error;
 
+        // calculate the pages
         setTotalPages(Math.ceil(count / itemsPerPage));
 
+        // formatting the date
         const formattedData = fetchedData.map((item) => ({
           ...item,
           formattedDate: new Date(item.schedule_day).toLocaleDateString(
@@ -83,13 +87,13 @@ export default function Attendance() {
             },
           ),
         }));
-
+        // extract the times
         const uniqueTimes = [
           ...new Set(fetchedData.map((item) => item.preferred_time)),
         ];
 
-        setData(formattedData);
-        setAvailableTimes(uniqueTimes);
+        setData(formattedData); // formatted data
+        setAvailableTimes(uniqueTimes); // format the available times
       } catch (error) {
         setError("Error fetching data. Please try again.");
         console.error("Error in fetchData function:", error);
@@ -100,20 +104,24 @@ export default function Attendance() {
     [currentPage, itemsPerPage],
   );
 
+  // Fetch data when selectedDate, selectedTime, statusFilter, or currentPage changes
   useEffect(() => {
     fetchData(selectedDate, statusFilter, selectedTime);
   }, [selectedDate, selectedTime, statusFilter, currentPage, fetchData]);
 
+  // Set the selected date and reset to the first page
   const handleDateChange = (date) => {
     setSelectedDate(date ? new Date(date) : new Date());
     setCurrentPage(1);
   };
 
+  // Set the selected time and reset to the first page
   const handleTimeChange = (event) => {
     setSelectedTime(event.target.value);
     setCurrentPage(1);
   };
 
+  // Set the status filter and reset to the first page
   const handleStatusChange = (event) => {
     setStatusFilter(event.target.value);
     setCurrentPage(1);
@@ -121,6 +129,7 @@ export default function Attendance() {
 
   const handleSwitchChange = async (itemId, checked) => {
     try {
+      // Update attendance status in the database
       const { error } = await supabase
         .from("attendance_pending")
         .update({ has_attended: checked })
@@ -128,12 +137,12 @@ export default function Attendance() {
 
       if (error) throw error;
 
+      // Update the local data with the new attendance status
       const updatedData = data.map((dataItem) =>
         dataItem.id === itemId
           ? { ...dataItem, has_attended: checked }
           : dataItem,
       );
-
       setData(updatedData);
     } catch (error) {
       setError("Error updating attendance. Please try again.");
@@ -141,6 +150,7 @@ export default function Attendance() {
     }
   };
 
+  // Filter attended data and format it for the Excel file
   const handleExportExcel = async () => {
     const attendedData = data
       .filter((item) => item.has_attended)
@@ -152,15 +162,19 @@ export default function Attendance() {
         Status: "Attended",
       }));
 
+    // Create a new workbook and worksheet for the attendance data
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Attendance");
 
+    // Set the headers for the worksheet columns
     worksheet.columns = headers.map((header) => ({ header, key: header }));
 
+    // Add the attended data to the worksheet
     attendedData.forEach((dataRow) => {
       worksheet.addRow(dataRow);
     });
 
+    // Create a buffer and download the Excel file
     const buffer = await workbook.xlsx.writeBuffer();
     const dataBlob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -215,11 +229,11 @@ export default function Attendance() {
             </Popover>
           </div>
           <div className="flex w-full items-center space-x-2 sm:w-auto">
-            <Clock className="text-muted-foreground h-4 w-4" />
+            <Clock className="h-4 w-4 text-muted-foreground" />
             <select
               value={selectedTime}
               onChange={handleTimeChange}
-              className="border-input bg-background rounded-md border p-2"
+              className="rounded-md border border-input bg-background p-2"
             >
               <option value="" disabled={availableTimes.length === 0}>
                 {availableTimes.length > 0
@@ -235,11 +249,11 @@ export default function Attendance() {
           </div>
 
           <div className="flex w-full items-center space-x-2 sm:w-auto">
-            <Filter className="text-muted-foreground h-4 w-4" />
+            <Filter className="h-4 w-4 text-muted-foreground" />
             <select
               value={statusFilter}
               onChange={handleStatusChange}
-              className="border-input bg-background rounded-md border p-2"
+              className="rounded-md border border-input bg-background p-2"
             >
               <option value="all">All</option>
               <option value="attended">Attended</option>
@@ -254,11 +268,11 @@ export default function Attendance() {
             <img src={downloadIcon} alt="Download Icon" />
           </Button>
         </div>
-        <div className="bg-card rounded-lg shadow">
+        <div className="rounded-lg bg-card shadow">
           {loading ? (
             <div className="p-8 text-center">
-              <div className="border-primary mx-auto h-8 w-8 animate-spin rounded-full border-b-2"></div>
-              <p className="text-muted-foreground mt-4">
+              <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+              <p className="mt-4 text-muted-foreground">
                 Loading attendance records...
               </p>
             </div>
