@@ -11,12 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../../shadcn/dialog";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../../shadcn/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../shadcn/tabs";
 import {
   Card,
   CardHeader,
@@ -43,7 +38,7 @@ export default function EditWalkInRegister() {
   const [activeTab, setActiveTab] = useState("guardian");
   const [preferredTime, setPreferredTime] = useState("");
   const [children, setChildren] = useState([
-    { firstName: "", lastName: "", telephone: "" },
+    {id: "", firstName: "", lastName: "", telephone: "" },
   ]);
   const [guardianFirstName, setGuardianFirstName] = useState("");
   const [guardianLastName, setGuardianLastName] = useState("");
@@ -59,7 +54,7 @@ export default function EditWalkInRegister() {
       const { data: fetchData, error } = await supabase
         .from("attendance_pending")
         .select("*")
-        .eq("attendance_code", userCode); // Filter by userCode
+        .eq("attendance_code", userCode); // Filter by userCode;
 
       // Handle error if any
       if (error) throw error;
@@ -75,13 +70,15 @@ export default function EditWalkInRegister() {
           setChildren((prevChildren) => [
             ...prevChildren,
             {
+              id: item.id,
               firstName: item.children_first_name,
               lastName: item.children_last_name,
               telephone: item.guardian_telephone,
             },
           ]);
         });
-        setAttendanceRecord(fetchData[0]); // Store the fetched record
+        setAttendanceRecord(fetchData); // Store the fetched record
+        console.log(fetchData);
         setIsEditing(true); // Transition to edit mode
         setError("");
       } else {
@@ -137,28 +134,30 @@ export default function EditWalkInRegister() {
     if (!validateChildren(parsedChildren)) {
       return;
     }
-
+  
     try {
-      const updates = parsedChildren.map(async (child) => {
-        // Ensure child has a unique identifier for updating
-        const { id } = attendanceRecord; // Replace this with your actual identifier property
+      const updates = parsedChildren.map(async (child, index) => {
+        // Retrieve the unique identifier from the attendanceRecord array
+        const { id } = attendanceRecord[index]; // id is fetched for each child
+  
         const { error } = await supabase
           .from("attendance_pending")
           .update({
             guardian_first_name: guardianFirstName,
             guardian_last_name: guardianLastName,
             preferred_time: preferredTime,
+            selected_event: selectedEvent,
             guardian_telephone: child.telephone,
             children_last_name: child.lastName,
             children_first_name: child.firstName,
           })
-          .eq("id", id); // Use the unique identifier for the update
-
+          .eq("id", id); // Correct id from the attendanceRecord
+  
         if (error) throw error;
       });
-
+  
       await Promise.all(updates); // Wait for all updates to complete
-
+  
       alert("Registration updated successfully!");
       resetForm();
     } catch (error) {
@@ -222,7 +221,12 @@ export default function EditWalkInRegister() {
       <DialogTrigger asChild>
         <Button variant="outline">Edit Registration</Button>
       </DialogTrigger>
-      <DialogContent className={isEditing && "sm:max-w-[42rem]"}>
+      <DialogContent
+        className={
+          isEditing &&
+          "no-scrollbar max-h-screen overflow-scroll sm:max-w-[42rem]"
+        }
+      >
         <DialogHeader>
           <DialogTitle>
             {isEditing ? "Edit Registration" : "Enter Code"}
