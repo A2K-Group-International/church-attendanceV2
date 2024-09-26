@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import supabase from "../../api/supabase";
-import FamilyMembersDialog from "../../components/user/FamilyMembersDialog";
-import { useQueryClient } from "@tanstack/react-query";
 import UserSidebar from "../../components/user/UserSidebar";
 import {
   Card,
@@ -14,20 +13,14 @@ import {
 export default function Eventspage() {
   const [eventItems, setEventItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [familyMembers, setFamilyMembers] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const queryClient = useQueryClient();
-
-  const userData = queryClient.getQueryData(["userData"]);
-  console.log("user data", userData);
+  const navigate = useNavigate();
 
   const formatTime = (timeStr) => {
-    if (!timeStr) return "Invalid time"; // Handle undefined or invalid time
+    if (!timeStr) return "Invalid time";
     const [time, timezone] = timeStr.split("+");
     const [hours, minutes] = time.split(":");
     const hours24 = parseInt(hours, 10);
-    const ampm = hours24 >= 12 ? "pM" : "AM";
+    const ampm = hours24 >= 12 ? "PM" : "AM";
     const hours12 = hours24 % 12 || 12;
     return `${hours12}:${minutes} ${ampm}`;
   };
@@ -43,16 +36,13 @@ export default function Eventspage() {
         if (error) throw error;
 
         const formattedEvents = data.map((event) => {
-          const eventTime = event.time;
+          const eventTimes = event.time; // array of available times
           return {
             id: event.id,
             title: event.name,
             content: event.description,
             date: new Date(event.schedule).toLocaleDateString(),
-            time:
-              eventTime && eventTime.length === 2
-                ? `${formatTime(eventTime[0])} - ${formatTime(eventTime[1])}`
-                : "Time not available", // Handle cases where time is not defined correctly
+            times: eventTimes ? eventTimes.map(formatTime) : [], // Format each available time
           };
         });
 
@@ -69,31 +59,8 @@ export default function Eventspage() {
     fetchEvents();
   }, []);
 
-  const fetchFamilyMembers = async () => {
-    if (!userData) {
-      console.error("User data not available");
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from("family_list")
-        .select("*")
-        .eq("guardian_id", userData.user_id);
-
-      if (error) throw error;
-
-      setFamilyMembers(data);
-      console.log(data);
-    } catch (error) {
-      console.error("Error fetching family members:", error);
-    }
-  };
-
   const handleEventClick = (event) => {
-    setSelectedEvent(event);
-    fetchFamilyMembers();
-    setDialogOpen(true);
+    navigate(`/event-info/${event.id}`);
   };
 
   if (loading) {
@@ -138,10 +105,26 @@ export default function Eventspage() {
                     </p>
                   </div>
                   <div className="mt-2">
-                    <strong className="text-lg">Time:</strong>
-                    <p className="text-gray-700 dark:text-gray-300">
-                      {item.time}
-                    </p>
+                    <strong className="text-lg">
+                      Time{item.times.length > 1 ? "s" : ""}:
+                    </strong>
+                    {item.times.length > 0 ? (
+                      item.times.length === 1 ? (
+                        // Display a single time without using a list
+                        <p className="text-gray-700 dark:text-gray-300">
+                          {item.times[0]}
+                        </p>
+                      ) : (
+                        // Display multiple times as a list
+                        <ul className="text-gray-700 dark:text-gray-300">
+                          {item.times.map((time, index) => (
+                            <li key={index}>{time}</li>
+                          ))}
+                        </ul>
+                      )
+                    ) : (
+                      <p>Time not available</p>
+                    )}
                   </div>
                 </CardDescription>
               </CardContent>
@@ -149,13 +132,6 @@ export default function Eventspage() {
           ))}
         </div>
       </main>
-
-      <FamilyMembersDialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        familyMembers={familyMembers}
-        selectedEvent={selectedEvent}
-      />
     </UserSidebar>
   );
 }
