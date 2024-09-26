@@ -122,14 +122,15 @@ export default function EventAttendDialog({ open, onClose, eventData }) {
           .insert({
             guardian_first_name:
               member.guardian === false ? guardianData.user_name : "N/A",
-            guardian_last_name: member.guardian === false ? null : "N/A",
+            guardian_last_name:
+              member.guardian === false ? guardianData.user_last_name : null,
             guardian_telephone:
               member.guardian === false ? guardianData.user_contact : "N/A",
             children_first_name: member.family_first_name,
             children_last_name: member.family_last_name,
             has_attended: false, // Default attendance status
             preferred_time: selectedTime,
-            schedule_day: eventData.schedule_day, // Example: assuming schedule_day is part of eventData
+            schedule_day: eventData.schedule, // Example: assuming schedule_day is part of eventData
             attendance_type: null, // Modify if needed
             attendance_code: eventData.attendance_code, // Assuming eventData has this field
             children_age: member.family_age, // Assuming family member has an age field
