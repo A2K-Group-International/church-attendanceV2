@@ -45,6 +45,7 @@ export default function EditWalkInRegister() {
   const [guardianLastName, setGuardianLastName] = useState("");
   const [guardianTelephone, setGuardianTelephone] = useState("");
   const [eventName, setEventName] = useState([]);
+  const [selectedEventId, setSelectedEventId] = useState("");
   const [error, setError] = useState("");
   const [selectedEvent, setSelectedEvent] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
@@ -69,7 +70,6 @@ export default function EditWalkInRegister() {
       // Handle error if any
       if (error) throw error;
 
-      // Check if any records are returned
       // Check if any records are returned
       if (fetchData.length > 0) {
         const newChildren = fetchData.map((item) => ({
@@ -111,8 +111,24 @@ export default function EditWalkInRegister() {
     setChildren([...children, { firstName: "", lastName: "" }]);
   };
 
-  const handleRemoveChild = (index) => {
+  const handleRemoveChild = async (index) => {
     if (children.length > 1) {
+      const childToRemove = children[index];
+      // Delete from the database if the child's ID exists
+      if (childToRemove.id) {
+        const { error } = await supabase
+          .from("attendance_pending")
+          .delete()
+          .eq("id", childToRemove.id); // Delete the child record by ID
+  
+        if (error) {
+          console.error("Error deleting child:", error.message);
+          setError("An error occurred while deleting the child record.");
+          return;
+        }
+      }
+      
+      // Remove the child from the local state
       setChildren(children.filter((_, i) => i !== index));
     }
   };
@@ -219,8 +235,6 @@ export default function EditWalkInRegister() {
         const events = await fetchAllEvents();
         if (events.length > 0) {
           setEventName(events);
-          // setNextMassDate(events[0].schedule);
-          // setMassTime(events[0].time);
         } else {
           setError("No schedule found.");
         }
@@ -232,7 +246,6 @@ export default function EditWalkInRegister() {
     fetchSchedule();
   }, []);
 
-  //check the time and day of the event
   const filteredMassTimes = eventName
     .filter((event) => event.name === selectedEvent)
     .flatMap((event) => event.time || []);
@@ -251,6 +264,29 @@ export default function EditWalkInRegister() {
     // Format the time in HH:mm
     return date.toISOString().substr(11, 5); // Returns the formatted time
   });
+
+  // // Check and filter the time in the selected event
+  // const filteredMassTimes = eventName
+  //   .filter((event) => event.id === selectedEventId) // Filter by selected event ID
+  //   .flatMap((event) => event.time || []); // Get times
+
+  // // Filter the schedule in the selected event
+  // const filteredMassSchedule = eventName
+  //   .filter(
+  //     (event) => event.name === selectedEvent && event.id === selectedEventId,
+  //   )
+  //   .flatMap((event) => event.schedule || []); // Get schedules
+
+  // const formattedMassTimes = filteredMassTimes.map((timeString) => {
+  //   // Extract the time part
+  //   const timePart = timeString.split("+")[0];
+
+  //   // Create a Date object using the time part
+  //   const date = new Date(`1970-01-01T${timePart}Z`); // Use Z to indicate UTC
+
+  //   // Format the time in HH:mm
+  //   return date.toISOString().substr(11, 5); // Returns the formatted time
+  // });
 
   const date = new Date(filteredMassSchedule);
   const options = { year: "numeric", month: "long", day: "numeric" };
@@ -353,6 +389,25 @@ export default function EditWalkInRegister() {
                         ))}
                       </SelectContent>
                     </Select>
+                    {/* <Select
+                      value={selectedEvent}
+                      onValueChange={(value) => {
+                        setSelectedEvent(value);
+                        // setPreferredTime("");
+                      }}
+                      // onValueChange={handleSelectEvent}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select Event" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {eventName.map((event) => (
+                          <SelectItem key={event.id} value={event.id}>
+                            {event.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select> */}
                   </FormLabel>
                   <Label htmlFor="Event" className="text-sm font-medium">
                     Schedule: {formattedDate}
