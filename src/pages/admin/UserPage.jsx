@@ -12,7 +12,7 @@ import {
   PaginationPrevious,
 } from "../../shadcn/pagination";
 
-const headers = ["#", "Email", "Name", "Registered", "Action"];
+const headers = ["#", "Email", "Name", "Confirmed", "Action"];
 
 export default function UsersPage() {
   const [data, setData] = useState([]);
@@ -22,7 +22,6 @@ export default function UsersPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [signUpLoading, setSignUpLoading] = useState(false);
   const itemsPerPage = 7;
 
   const fetchData = useCallback(async () => {
@@ -30,7 +29,7 @@ export default function UsersPage() {
     setError(null);
     try {
       const query = supabase
-        .from("account_pending")
+        .from("user_list")
         .select("*", { count: "exact" })
         .range(
           (currentPage - 1) * itemsPerPage,
@@ -55,55 +54,22 @@ export default function UsersPage() {
     fetchData();
   }, [currentPage, fetchData]);
 
-  const signUp = async (email, password, userData) => {
-    setSignUpLoading(true);
-    try {
-      const { data: user, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (signUpError) {
-        throw signUpError;
-      }
-
-      const { error: insertError } = await supabase.from("user_list").insert([
-        {
-          user_uuid: user.user.id,
-          user_name: userData.name,
-          user_role: "user",
-          user_email: email,
-          user_password: password,
-          user_contact: userData.contact,
-        },
-      ]);
-
-      if (insertError) {
-        throw insertError;
-      }
-
-      const { error: updateError } = await supabase
-        .from("account_pending")
-        .update({ registered: true })
-        .eq("id", userData.id);
-
-      if (updateError) {
-        throw updateError;
-      }
-
-      fetchData();
-
-      return user;
-    } catch (error) {
-      console.error("Error during sign-up:", error);
-    } finally {
-      setSignUpLoading(false);
-    }
-  };
-
   const handleApproveAccount = async (userData) => {
-    await signUp(userData.email, userData.password, userData);
-    setIsDialogOpen(false);
+    try {
+      const { error } = await supabase
+        .from("user_list")
+        .update({ is_confirmed: true })
+        .eq("user_id", userData.user_id);
+
+      if (error) throw error;
+
+      fetchData(); // Refresh the data after updating
+    } catch (error) {
+      console.error("Error approving account:", error);
+    } finally {
+      console.log("user approved");
+      setIsDialogOpen(false);
+    }
   };
 
   const handleApproveClick = (userData) => {
@@ -117,36 +83,33 @@ export default function UsersPage() {
     }
   };
 
-  const getRowClassName = (registered) => {
-    return registered ? "bg-green-100" : "bg-red-100";
+  const getRowClassName = (isConfirmed) => {
+    return isConfirmed ? "bg-green-100" : "bg-red-100";
   };
 
   const rows = data.map((item, index) => {
-    const isRegistered = item.registered;
+    const isConfirmed = item.is_confirmed;
     return [
       index + 1 + (currentPage - 1) * itemsPerPage,
-      item.email,
-      item.name,
-      isRegistered ? (
-        <span className="font-bold text-green-600">Yes</span> // Emphasized for registered users
+      item.user_email,
+      item.user_name,
+      isConfirmed ? (
+        <span className="font-bold text-green-600">Yes</span> // Emphasized for confirmed users
       ) : (
-        <span className="text-red-600">No</span> // Highlighted for non-registered users
+        <span className="text-red-600">No</span> // Highlighted for non-confirmed users
       ),
       <Button
-        key={item.id}
+        key={item.user_uuid}
         onClick={() => handleApproveClick(item)}
         variant="primary"
-        disabled={isRegistered || signUpLoading}
-        className={isRegistered ? "cursor-not-allowed opacity-50" : ""} // Style for registered users
+        disabled={isConfirmed}
+        className={isConfirmed ? "cursor-not-allowed opacity-50" : ""} // Style for confirmed users
       >
-        {signUpLoading && selectedUser?.id === item.id
-          ? "Registering..."
-          : isRegistered
-            ? "Registered"
-            : "Approve Account"}
+        {isConfirmed ? "Confirmed" : "Approve Account"}
       </Button>,
     ];
   });
+
   return (
     <AdminSidebar>
       <main className="mx-auto max-w-7xl p-4 lg:p-8">
@@ -216,7 +179,7 @@ export default function UsersPage() {
             <h2 className="text-lg font-bold">Approve Account</h2>
             <p className="mt-2">
               Are you sure you want to approve the account for{" "}
-              <strong>{selectedUser?.name}</strong>?
+              <strong>{selectedUser?.user_name}</strong>?
             </p>
             <div className="mt-4 flex justify-end space-x-2">
               <Button

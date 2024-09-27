@@ -4,28 +4,29 @@ import { Input } from "../../shadcn/input";
 import { Label } from "../../shadcn/label";
 import { useRegister } from "./useRegister";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-    DialogClose,
-  } from "../../shadcn/dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "../../shadcn/dialog";
 
 export default function RegisterUser() {
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState(""); // Added last name state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); // State for confirm password
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [contactNumber, setContactNumber] = useState("");
-  const [passwordMismatchError, setPasswordMismatchError] = useState(false); // Error for password mismatch
-  const [passwordLengthError, setPasswordLengthError] = useState(false); // Error for password length
+  const [passwordMismatchError, setPasswordMismatchError] = useState(false);
+  const [passwordLengthError, setPasswordLengthError] = useState(false);
   const [successDialogOpen, setSuccessDialogOpen] = useState(false);
   const [registerDialogOpen, setRegisterDialogOpen] = useState(false);
 
-  const { requestAccount, isLoading, isError, errorMessage } = useRegister({
+  const { registerUser, isLoading, isError, errorMessage } = useRegister({
     onSuccess: () => {
       setSuccessDialogOpen(true);
       setRegisterDialogOpen(false);
@@ -34,7 +35,8 @@ export default function RegisterUser() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (!name || !email || !password || !contactNumber) return;
+    if (!firstName || !lastName || !email || !password || !contactNumber)
+      return;
 
     // Check if password is at least 6 characters long
     if (password.length < 6) {
@@ -45,14 +47,22 @@ export default function RegisterUser() {
     // Check if passwords match
     if (password !== confirmPassword) {
       setPasswordMismatchError(true);
-      setPasswordLengthError(false); // Reset the length error
+      setPasswordLengthError(false);
       return;
     }
 
     // If all validations pass, proceed with the account request
     setPasswordMismatchError(false);
     setPasswordLengthError(false);
-    requestAccount({ name, email, password, contactNumber });
+    registerUser({ firstName, lastName, email, password, contactNumber });
+  }
+
+  // Function to restrict contact number input to only numbers
+  function handleContactNumberChange(e) {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) {
+      setContactNumber(value);
+    }
   }
 
   return (
@@ -70,16 +80,30 @@ export default function RegisterUser() {
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium">
-                Name
+              <Label htmlFor="firstName" className="text-sm font-medium">
+                First Name
               </Label>
               <Input
-                id="name"
+                id="firstName"
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 className="w-full"
-                placeholder="Enter your full name"
+                placeholder="Enter your first name"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName" className="text-sm font-medium">
+                Last Name
+              </Label>
+              <Input
+                id="lastName"
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="w-full"
+                placeholder="Enter your last name"
                 required
               />
             </div>
@@ -91,7 +115,7 @@ export default function RegisterUser() {
                 id="contactNumber"
                 type="tel"
                 value={contactNumber}
-                onChange={(e) => setContactNumber(e.target.value)}
+                onChange={handleContactNumberChange}
                 className="w-full"
                 placeholder="Enter your contact number"
                 required

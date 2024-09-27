@@ -77,3 +77,49 @@ export async function insertNewSchedule(schedule, time) {
     console.error("Error inserting new schedule:", error.message);
   }
 }
+
+const signUp = async (email, password, userData) => {
+  setSignUpLoading(true);
+  try {
+    const { data: user, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (signUpError) {
+      throw signUpError;
+    }
+
+    const { error: insertError } = await supabase.from("user_list").insert([
+      {
+        user_uuid: user.user.id,
+        user_name: userData.name,
+        user_role: "user",
+        user_email: email,
+        user_password: password,
+        user_contact: userData.contact,
+      },
+    ]);
+
+    if (insertError) {
+      throw insertError;
+    }
+
+    const { error: updateError } = await supabase
+      .from("account_pending")
+      .update({ registered: true })
+      .eq("id", userData.id);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    fetchData();
+
+    return user;
+  } catch (error) {
+    console.error("Error during sign-up:", error);
+  } finally {
+    setSignUpLoading(false);
+  }
+};
