@@ -22,19 +22,28 @@ export default function UsersPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Toggle for dropdown visibility
   const itemsPerPage = 7;
+  const [filter, setFilter] = useState("all"); // New state for filter
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const query = supabase
+      let query = supabase
         .from("user_list")
         .select("*", { count: "exact" })
         .range(
           (currentPage - 1) * itemsPerPage,
           currentPage * itemsPerPage - 1,
         );
+
+      // Apply filter based on selected option
+      if (filter === "approved") {
+        query = query.eq("is_confirmed", true);
+      } else if (filter === "not_approved") {
+        query = query.eq("is_confirmed", false);
+      }
 
       const { data: fetchedData, error, count } = await query;
 
@@ -48,7 +57,7 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, itemsPerPage]);
+  }, [currentPage, itemsPerPage, filter]); // Include filter in dependencies
 
   useEffect(() => {
     fetchData();
@@ -67,7 +76,7 @@ export default function UsersPage() {
     } catch (error) {
       console.error("Error approving account:", error);
     } finally {
-      console.log("user approved");
+      console.log("User approved");
       setIsDialogOpen(false);
     }
   };
@@ -114,6 +123,72 @@ export default function UsersPage() {
     <AdminSidebar>
       <main className="mx-auto max-w-7xl p-4 lg:p-8">
         <h1 className="text-2xl font-bold">Users</h1>
+
+        {/* Dropdown for Filter */}
+        <div className="relative mb-4 mt-4 inline-block text-left">
+          <div>
+            <Button
+              variant="default"
+              className="flex w-56 items-center justify-between rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              onClick={() => setIsDropdownOpen((prev) => !prev)}
+            >
+              {filter === "all" && "All Users"}
+              {filter === "approved" && "Approved Users"}
+              {filter === "not_approved" && "Not Approved Users"}
+              <svg
+                className={`-mr-1 ml-2 h-5 w-5 transition-transform duration-200 ${
+                  isDropdownOpen ? "rotate-180 transform" : ""
+                }`}
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </Button>
+          </div>
+
+          {/* Conditionally render the dropdown menu */}
+          {isDropdownOpen && (
+            <div className="absolute right-0 z-10 mt-2 w-56 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+              <div
+                className="py-1"
+                role="menu"
+                aria-orientation="vertical"
+                aria-labelledby="options-menu"
+              >
+                {["all", "approved", "not_approved"].map((option) => (
+                  <button
+                    key={option}
+                    className={`block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 ${
+                      filter === option
+                        ? "bg-gray-100 font-semibold text-gray-900"
+                        : ""
+                    }`}
+                    role="menuitem"
+                    onClick={() => {
+                      setFilter(option);
+                      setCurrentPage(1); // Reset to first page when filter changes
+                      setIsDropdownOpen(false); // Close the dropdown after selection
+                    }}
+                  >
+                    {option === "all"
+                      ? "All Users"
+                      : option === "approved"
+                        ? "Approved Users"
+                        : "Not Approved Users"}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         <div className="mt-4 rounded-lg bg-card shadow">
           {loading ? (
             <div className="p-8 text-center">
@@ -183,7 +258,7 @@ export default function UsersPage() {
             </p>
             <div className="mt-4 flex justify-end space-x-2">
               <Button
-                variant="secondary"
+                variant="destructive"
                 onClick={() => setIsDialogOpen(false)}
               >
                 Cancel
