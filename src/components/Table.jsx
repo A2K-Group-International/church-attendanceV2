@@ -1,6 +1,6 @@
 export default function Table({ headers, rows }) {
   return (
-    <table className="min-w-full divide-y divide-gray-200">
+    <table className="block max-w-sm overflow-x-scroll md:table md:min-w-full divide-y divide-gray-200">
       <thead>
         <tr>
           {headers.map((header, index) => (
