@@ -1,34 +1,58 @@
+import { useCallback, useState, useEffect } from "react";
 import Logout from "../../authentication/Logout";
 import { Sheet, SheetTrigger, SheetContent } from "../../shadcn/sheet";
 import { Button } from "../../shadcn/button";
 import NavigationItem from "../NavigationItem";
-import CalendarIcon from "../../assets/svg/calendarIcon.svg";
-import PersonIcon from "../../assets/svg/person.svg";
-import CheckListIcon from "../../assets/svg/checklist.svg";
 import DashboardIcon from "../../assets/svg/dashboard.svg";
 import HamburgerIcon from "../../assets/svg/hamburgerIcon.svg";
+import { useUser } from "../../authentication/useUser";
+import supabase from "../../api/supabase"; // Ensure you have imported supabase
 
-const adminLinks = [
-  { link: "/admin-dashboard", label: "Dashboard", icon: DashboardIcon },
-  { link: "/attendance", label: "Attendance", icon: CheckListIcon },
-  { link: "/users", label: "Users", icon: PersonIcon },
-  { link: "/volunteers", label: "Volunteers", icon: PersonIcon },
-  { link: "/schedule", label: "Schedule", icon: CalendarIcon },
+const volunteerLinks = [
+  { link: "/volunteer-dashboard", label: "Dashboard", icon: DashboardIcon },
+  { link: "/volunteer-events", label: "Events", icon: DashboardIcon },
 ];
 
-export default function AdminSidebar({ children }) {
+export default function VolunteerSidebar({ children }) {
+  const { user } = useUser();
+  const [userData, setUserData] = useState(null);
+  const [error, setError] = useState(null);
+
+  const fetchUserData = useCallback(async () => {
+    try {
+      const { data: fetchedUserData, error: userError } = await supabase
+        .from("user_list")
+        .select("user_id")
+        .eq("user_uuid", user.id)
+        .single();
+
+      if (userError) throw userError;
+      setUserData(fetchedUserData);
+    } catch (error) {
+      setError("Error fetching user data. Please try again.");
+      console.error("Error in fetchUserData function:", error);
+    }
+  }, [user]);
+
+  // Fetch user data when component mounts
+  useEffect(() => {
+    if (user) {
+      fetchUserData();
+    }
+  }, [user, fetchUserData]);
+
   return (
     <div className="flex h-screen w-full">
-      {/* large screens */}
+      {/* Large screens */}
       <div className="hidden lg:block lg:w-64 lg:shrink-0 lg:border-r lg:bg-gray-100 dark:lg:bg-gray-800">
         <div className="flex h-full flex-col justify-between px-4 py-6">
           <div className="space-y-6">
             <div className="flex items-center gap-2 font-bold">
-              <span className="text-xl">Admin Management Centre</span>
+              <span className="text-xl">Volunteer Management Centre</span>
             </div>
             <nav className="space-y-1">
               <ul>
-                {adminLinks.map(({ link, label, icon }) => (
+                {volunteerLinks.map(({ link, label, icon }) => (
                   <NavigationItem key={link} link={link} icon={icon}>
                     {label}
                   </NavigationItem>
@@ -65,7 +89,7 @@ export default function AdminSidebar({ children }) {
                   <div className="space-y-6">
                     <nav className="space-y-1">
                       <ul>
-                        {adminLinks.map(({ link, label, icon }) => (
+                        {volunteerLinks.map(({ link, label, icon }) => (
                           <NavigationItem key={link} link={link} icon={icon}>
                             {label}
                           </NavigationItem>
@@ -82,6 +106,8 @@ export default function AdminSidebar({ children }) {
           </div>
         </header>
         {children}
+
+        {error && <div className="error-message">{error}</div>}
       </div>
     </div>
   );

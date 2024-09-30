@@ -122,7 +122,7 @@ export default function AdminNewSchedule() {
     fetchEvents();
   }, [currentPage, fetchEvents]);
 
-  // format the time 
+  // format the time
   const formatTime = (timeString) => {
     if (!timeString) return "N/A";
     const [hours, minutes] = timeString.split(":");
@@ -135,7 +135,8 @@ export default function AdminNewSchedule() {
     event.time && event.time.length > 0
       ? event.time.map((t) => formatTime(t)).join(", ")
       : "N/A",
-    <div key={event.name}
+    <div
+      key={event.name}
       style={{
         maxWidth: "200px", // Adjust the width to your preference
         maxHeight: "100px", // Adjust the height to your preference
@@ -157,7 +158,7 @@ export default function AdminNewSchedule() {
       setTime(time.filter((_, i) => i !== index));
     }
   };
-// Function to changetime
+  // Function to changetime
   const handleChangeTime = (index, value) => {
     const updatedTimes = [...time];
     updatedTimes[index] = value;

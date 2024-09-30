@@ -8,6 +8,9 @@ import Schedule from "./pages/admin/Schedule";
 import EventsPage from "./pages/user/EventsPage";
 import FamilyPage from "./pages/user/FamilyPage";
 import EventInfo from "./pages/user/EventInfo";
+import VolunteersPage from "./pages/admin/VolunteersPage";
+import VolunteerDashboard from "./pages/volunteer/VolunteerDashboard";
+import VolunteerEvents from "./pages/volunteer/VolunteerEvents";
 
 function App() {
   return (
@@ -35,6 +38,14 @@ function App() {
           element={
             <ProtectedRoute>
               <UsersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteers"
+          element={
+            <ProtectedRoute>
+              <VolunteersPage />
             </ProtectedRoute>
           }
         />
@@ -67,6 +78,22 @@ function App() {
           element={
             <ProtectedRoute>
               <FamilyPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer-dashboard"
+          element={
+            <ProtectedRoute>
+              <VolunteerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer-events"
+          element={
+            <ProtectedRoute>
+              <VolunteerEvents />
             </ProtectedRoute>
           }
         />

@@ -19,7 +19,7 @@ export default function UserSidebar({ children }) {
         <div className="flex h-full flex-col justify-between px-4 py-6">
           <div className="space-y-6">
             <div className="flex items-center gap-2 font-bold">
-              <span className="text-xl">Management Centre</span>
+              <span className="text-xl">Family Management Centre</span>
             </div>
             <nav className="space-y-1">
               <ul>
