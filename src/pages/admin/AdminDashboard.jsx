@@ -1,5 +1,5 @@
 import AdminChart from "../../components/admin/AdminChart";
-import AdminSidebar from "../../components/admin/AdminSidebar";
+import AdminSidebar from "";
 
 export default function AdminDashboard() {
   return (

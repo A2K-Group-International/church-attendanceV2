@@ -2,33 +2,26 @@ import Logout from "../../authentication/Logout";
 import { Sheet, SheetTrigger, SheetContent } from "../../shadcn/sheet";
 import { Button } from "../../shadcn/button";
 import NavigationItem from "../NavigationItem";
-import CalendarIcon from "../../assets/svg/calendarIcon.svg";
-import PersonIcon from "../../assets/svg/person.svg";
-import CheckListIcon from "../../assets/svg/checklist.svg";
-import DashboardIcon from "../../assets/svg/dashboard.svg";
+import DashboardIcon from "../../assets/svg/dashboard.svg"; // Ensure you have an appropriate icon for the dashboard
 import HamburgerIcon from "../../assets/svg/hamburgerIcon.svg";
 
-const adminLinks = [
-  { link: "/admin-dashboard", label: "Dashboard", icon: DashboardIcon },
-  { link: "/attendance", label: "Attendance", icon: CheckListIcon },
-  { link: "/users", label: "Users", icon: PersonIcon },
-  { link: "/volunteers", label: "Volunteers", icon: PersonIcon },
-  { link: "/schedule", label: "Schedule", icon: CalendarIcon },
+const volunteerLinks = [
+  { link: "/volunteer-dashboard", label: "Dashboard", icon: DashboardIcon },
 ];
 
-export default function AdminSidebar({ children }) {
+export default function VolunteerSidebar({ children }) {
   return (
     <div className="flex h-screen w-full">
-      {/* large screens */}
+      {/* Large screens */}
       <div className="hidden lg:block lg:w-64 lg:shrink-0 lg:border-r lg:bg-gray-100 dark:lg:bg-gray-800">
         <div className="flex h-full flex-col justify-between px-4 py-6">
           <div className="space-y-6">
             <div className="flex items-center gap-2 font-bold">
-              <span className="text-xl">Admin Management Centre</span>
+              <span className="text-xl">Volunteer Management Centre</span>
             </div>
             <nav className="space-y-1">
               <ul>
-                {adminLinks.map(({ link, label, icon }) => (
+                {volunteerLinks.map(({ link, label, icon }) => (
                   <NavigationItem key={link} link={link} icon={icon}>
                     {label}
                   </NavigationItem>
@@ -65,7 +58,7 @@ export default function AdminSidebar({ children }) {
                   <div className="space-y-6">
                     <nav className="space-y-1">
                       <ul>
-                        {adminLinks.map(({ link, label, icon }) => (
+                        {volunteerLinks.map(({ link, label, icon }) => (
                           <NavigationItem key={link} link={link} icon={icon}>
                             {label}
                           </NavigationItem>

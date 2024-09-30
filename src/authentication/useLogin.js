@@ -21,7 +21,7 @@ export function useLogin() {
 
       const { data: userData, error } = await supabase
         .from("user_list")
-        .select("user_role")
+        .select("*") // Fetch all fields
         .eq("user_uuid", user.id)
         .single();
 
@@ -30,17 +30,22 @@ export function useLogin() {
         return;
       }
 
-      //Check use_role and navigate accordingly
+      // Save the entire userData object in the cache
+      queryClient.setQueriesData(["userData", user.id], userData); // Use a unique key
 
+      // Check user_role and navigate accordingly
       if (userData.user_role === "admin") {
         navigate("/admin-dashboard", { replace: true });
-      } else {
+      } else if (userData.user_role === "user") {
         navigate("/events-page", { replace: true });
+      } else if (userData.user_role === "volunteer") {
+        navigate("/volunteer-dashboard", { replace: true });
       }
     },
     onError: (err) => {
       console.log("Login error", err.message);
     },
   });
+
   return { login, isLoading, isError };
 }
