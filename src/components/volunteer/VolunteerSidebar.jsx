@@ -1,15 +1,46 @@
+import { useCallback, useState, useEffect } from "react";
 import Logout from "../../authentication/Logout";
 import { Sheet, SheetTrigger, SheetContent } from "../../shadcn/sheet";
 import { Button } from "../../shadcn/button";
 import NavigationItem from "../NavigationItem";
-import DashboardIcon from "../../assets/svg/dashboard.svg"; // Ensure you have an appropriate icon for the dashboard
+import DashboardIcon from "../../assets/svg/dashboard.svg";
 import HamburgerIcon from "../../assets/svg/hamburgerIcon.svg";
+import { useUser } from "../../authentication/useUser";
+import supabase from "../../api/supabase"; // Ensure you have imported supabase
 
 const volunteerLinks = [
   { link: "/volunteer-dashboard", label: "Dashboard", icon: DashboardIcon },
+  { link: "/volunteer-events", label: "Events", icon: DashboardIcon },
 ];
 
 export default function VolunteerSidebar({ children }) {
+  const { user } = useUser();
+  const [userData, setUserData] = useState(null);
+  const [error, setError] = useState(null);
+
+  const fetchUserData = useCallback(async () => {
+    try {
+      const { data: fetchedUserData, error: userError } = await supabase
+        .from("user_list")
+        .select("user_id")
+        .eq("user_uuid", user.id)
+        .single();
+
+      if (userError) throw userError;
+      setUserData(fetchedUserData);
+    } catch (error) {
+      setError("Error fetching user data. Please try again.");
+      console.error("Error in fetchUserData function:", error);
+    }
+  }, [user]);
+
+  // Fetch user data when component mounts
+  useEffect(() => {
+    if (user) {
+      fetchUserData();
+    }
+  }, [user, fetchUserData]);
+
   return (
     <div className="flex h-screen w-full">
       {/* Large screens */}
@@ -75,6 +106,8 @@ export default function VolunteerSidebar({ children }) {
           </div>
         </header>
         {children}
+
+        {error && <div className="error-message">{error}</div>}
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import FamilyPage from "./pages/user/FamilyPage";
 import EventInfo from "./pages/user/EventInfo";
 import VolunteersPage from "./pages/admin/VolunteersPage";
 import VolunteerDashboard from "./pages/volunteer/VolunteerDashboard";
+import VolunteerEvents from "./pages/volunteer/VolunteerEvents";
 
 function App() {
   return (
@@ -85,6 +86,14 @@ function App() {
           element={
             <ProtectedRoute>
               <VolunteerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer-events"
+          element={
+            <ProtectedRoute>
+              <VolunteerEvents />
             </ProtectedRoute>
           }
         />
