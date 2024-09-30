@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import supabase from "../../api/supabase";
 import AdminSidebar from "../../components/admin/AdminSidebar";
+// import AddManualAttendance from "../../components/admin/AddManualAttendance";
 import Table from "../../components/Table";
-import ExcelJS from "exceljs"; 
+import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { CalendarIcon, Clock, Filter } from "lucide-react";
 import { format } from "date-fns";
@@ -18,7 +19,17 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "../../shadcn/pagination";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../../shadcn/dropdown-menu";
 import downloadIcon from "../../assets/svg/download.svg";
+import DialogWalkInRegister from "../registration/DialogWalkInRegister";
+import ThreeDotsIcon from "../../assets/svg/threeDots.svg";
 
 // Headers for table
 const headers = [
@@ -34,16 +45,18 @@ export default function Attendance() {
   const [data, setData] = useState([]); // Data from the database
   const [loading, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedEvent, setSelectedEvent] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [availableTimes, setAvailableTimes] = useState([]);
+  const [uniqueEvent, setUniqueEvent] = useState([]);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const itemsPerPage = 7;
 
   const fetchData = useCallback(
-    async (date, status, time) => {
+    async (date, status, time, eventName) => {
       setLoading(true);
       setError(null);
       try {
@@ -67,8 +80,14 @@ export default function Attendance() {
           query = query.eq("has_attended", status === "attended");
         }
 
+        // fetch the event name
+        if (eventName && eventName !== "all") {
+          query = query.eq("selected_event", eventName);
+        }
+
         // fetching the data
         const { data: fetchedData, error, count } = await query;
+        console.log(fetchedData);
 
         if (error) throw error;
 
@@ -87,13 +106,20 @@ export default function Attendance() {
             },
           ),
         }));
+
         // extract the times
         const uniqueTimes = [
           ...new Set(fetchedData.map((item) => item.preferred_time)),
         ];
 
+        // extract the event name
+        const uniqueEvent = [
+          ...new Set(fetchedData.map((item) => item.selected_event)),
+        ];
+
         setData(formattedData); // formatted data
         setAvailableTimes(uniqueTimes); // format the available times
+        setUniqueEvent(uniqueEvent); // set the events
       } catch (error) {
         setError("Error fetching data. Please try again.");
         console.error("Error in fetchData function:", error);
@@ -104,14 +130,27 @@ export default function Attendance() {
     [currentPage, itemsPerPage],
   );
 
-  // Fetch data when selectedDate, selectedTime, statusFilter, or currentPage changes
+  // Fetch data when selectedDate, selectedTime, statusFilter, selectedEvent, or currentPage changes
   useEffect(() => {
-    fetchData(selectedDate, statusFilter, selectedTime);
-  }, [selectedDate, selectedTime, statusFilter, currentPage, fetchData]);
+    fetchData(selectedDate, statusFilter, selectedTime, selectedEvent);
+  }, [
+    selectedDate,
+    selectedTime,
+    statusFilter,
+    selectedEvent,
+    currentPage,
+    fetchData,
+  ]);
 
   // Set the selected date and reset to the first page
   const handleDateChange = (date) => {
     setSelectedDate(date ? new Date(date) : new Date());
+    setCurrentPage(1);
+  };
+
+  // Set the Event and reset to the first page
+  const handleEventName = (event) => {
+    setSelectedEvent(event.target.value);
     setCurrentPage(1);
   };
 
@@ -195,17 +234,37 @@ export default function Attendance() {
     `${item.guardian_first_name} ${item.guardian_last_name}`,
     item.guardian_telephone,
     item.has_attended ? "Attended" : "Pending",
+    <DropdownMenu key={item.id}>
+      <DropdownMenuTrigger>
+        <img src={ThreeDotsIcon} alt="Three Dots Icon" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem>Edit</DropdownMenuItem>
+        <DropdownMenuItem>Delete</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>,
   ]);
 
   return (
     <AdminSidebar>
       <main className="mx-auto max-w-7xl p-4 lg:p-8">
-        <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold">Attendance</h1>
-          <p className="text-muted-foreground">
-            Manage and track attendance records.
-          </p>
+        <div className="mb-2 md:flex md:justify-between">
+          <div className="mb-8">
+            <h1 className="mb-2 text-3xl font-bold">Attendance</h1>
+            <p className="text-muted-foreground">
+              Manage and track attendance records.
+            </p>
+          </div>
+          <div className="pl-8">
+            <DialogWalkInRegister
+              btnName="Add manually"
+              title="Add manually"
+              description="Add attendance manually"
+              btnSubmit="Submit"
+            />
+          </div>
         </div>
+
         <div className="mb-6 flex flex-col items-start space-y-4 sm:flex-row sm:items-center sm:space-x-4 sm:space-y-0">
           <div className="flex items-center space-x-2 sm:w-auto">
             <CalendarIcon className="mr-2 h-4 w-4" />
@@ -227,6 +286,21 @@ export default function Attendance() {
                 />
               </PopoverContent>
             </Popover>
+          </div>
+          <div className="flex w-full items-center space-x-2 sm:w-auto">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <select
+              value={selectedEvent || "all"}
+              onChange={handleEventName}
+              className="rounded-md border border-input bg-background p-2"
+            >
+              <option value="all">All</option>
+              {uniqueEvent.map((events, index) => (
+                <option key={index} value={events}>
+                  {events}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="flex w-full items-center space-x-2 sm:w-auto">
             <Clock className="h-4 w-4 text-muted-foreground" />

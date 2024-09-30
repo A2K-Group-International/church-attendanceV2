@@ -32,7 +32,7 @@ import FormLabel from "../../components/FormLabel";
 import supabase from "../../api/supabase";
 import { fetchAllEvents } from "../../api/userService";
 
-export default function DialogWalkInRegister() {
+export default function DialogWalkInRegister({btnName, title, description, btnSubmit}) {
   const [error, setError] = useState("");
   const [guardianFirstName, setGuardianFirstName] = useState("");
   const [guardianLastName, setGuardianLastName] = useState("");
@@ -198,14 +198,14 @@ export default function DialogWalkInRegister() {
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline" className="w-full">
-          Walk-In Register
+          {btnName}
         </Button>
       </DialogTrigger>
       <DialogContent className="no-scrollbar h-full max-w-screen-md overflow-y-auto lg:h-[44rem]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold">Register</DialogTitle>
+          <DialogTitle className="text-2xl font-semibold">{title}</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Fill up the forms for one-time registration
+            {description}
           </DialogDescription>
         </DialogHeader>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -225,10 +225,10 @@ export default function DialogWalkInRegister() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-xl font-semibold">
-                  Registration
+                  {title}
                 </CardTitle>
                 <CardDescription className="text-sm text-muted-foreground">
-                  Please provide your information and select your preferred time
+                  {description}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -435,7 +435,7 @@ export default function DialogWalkInRegister() {
             </Button>
           </DialogClose>
           {activeTab === "children" && (
-            <Button onClick={handleSubmit}>Submit Registration</Button>
+            <Button onClick={handleSubmit}>{btnSubmit}</Button>
           )}
         </DialogFooter>
       </DialogContent>
