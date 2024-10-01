@@ -13,6 +13,7 @@ const adminLinks = [
   { link: "/attendance", label: "Attendance", icon: CheckListIcon },
   { link: "/users", label: "Users", icon: PersonIcon },
   { link: "/schedule", label: "Schedule", icon: CalendarIcon },
+  { link: "/admin-calendar", label: "Calendar", icon: CalendarIcon },
 ];
 
 export default function AdminSidebar({ children }) {
