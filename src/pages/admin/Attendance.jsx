@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import supabase from "../../api/supabase";
+import { useForm } from "react-hook-form";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 // import AddManualAttendance from "../../components/admin/AddManualAttendance";
 import Table from "../../components/Table";
@@ -23,13 +24,24 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../shadcn/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../../shadcn/alert-dialog";
+import { Label } from "../../shadcn/label";
+import { Input } from "../../shadcn/input";
 import downloadIcon from "../../assets/svg/download.svg";
 import DialogWalkInRegister from "../registration/DialogWalkInRegister";
-import ThreeDotsIcon from "../../assets/svg/threeDots.svg";
+import { Icon } from "@iconify/react";
 
 // Headers for table
 const headers = [
@@ -55,26 +67,63 @@ export default function Attendance() {
   const [totalPages, setTotalPages] = useState(0);
   const itemsPerPage = 7;
 
+  //isEditing
+  const [editId, setEditId] = useState(null);
+
+  //hook form
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm();
+
+  // Handle Update using react hook form
+  const onSubmit = async (data) => {
+    try {
+      const { error } = await supabase
+        .from("attendance_pending")
+        .update(data)
+        .eq("id", editId);
+
+      if (error) throw error;
+
+      // update local state to reflect the changes without needing to refetch
+      setData((prevData) =>
+        prevData.map((item) =>
+          item.id === editId ? { ...item, ...data } : item,
+        ),
+      );
+    } catch (error) {
+      console.log("Error editing registration: ", error.message);
+    }
+  };
+
   const fetchData = useCallback(
     async (date, status, time, eventName) => {
       setLoading(true);
       setError(null);
       try {
-        const formattedDate = new Date(date).toISOString().split("T")[0]; // format the date
-        // Query setup
+        // Prepare query without date filter if no date is selected
         let query = supabase
           .from("attendance_pending")
           .select("*", { count: "exact" })
-          .eq("schedule_day", formattedDate)
           .range(
             (currentPage - 1) * itemsPerPage,
             currentPage * itemsPerPage - 1,
           ); // Pagination
 
+        // Apply date filter only if date is selected
+        if (date) {
+          const formattedDate = new Date(date).toISOString().split("T")[0]; // format the date
+          query = query.eq("schedule_day", formattedDate);
+        }
+
         // fetch or filter from preferred time
         if (time) {
           query = query.eq("preferred_time", time);
         }
+
         // fetch or filter from status
         if (status !== "all") {
           query = query.eq("has_attended", status === "attended");
@@ -87,7 +136,6 @@ export default function Attendance() {
 
         // fetching the data
         const { data: fetchedData, error, count } = await query;
-        console.log(fetchedData);
 
         if (error) throw error;
 
@@ -107,17 +155,20 @@ export default function Attendance() {
           ),
         }));
 
-        // extract the times
-        const uniqueTimes = [
-          ...new Set(fetchedData.map((item) => item.preferred_time)),
-        ];
+        // extract the times and events
+        const allData = await supabase
+          .from("attendance_pending")
+          .select("preferred_time, selected_event");
 
-        // extract the event name
+        const uniqueTimes = [
+          ...new Set(allData.data.map((item) => item.preferred_time)),
+        ];
         const uniqueEvent = [
-          ...new Set(fetchedData.map((item) => item.selected_event)),
+          ...new Set(allData.data.map((item) => item.selected_event)),
         ];
 
         setData(formattedData); // formatted data
+        console.log(data.map((item) => console.log(item.id)))
         setAvailableTimes(uniqueTimes); // format the available times
         setUniqueEvent(uniqueEvent); // set the events
       } catch (error) {
@@ -164,6 +215,40 @@ export default function Attendance() {
   const handleStatusChange = (event) => {
     setStatusFilter(event.target.value);
     setCurrentPage(1);
+  };
+
+  const handleUpdate = async (id) => {
+    try {
+      const itemToEdit = data.find((item) => item.id === id);
+      if (itemToEdit) {
+        setEditId(id);
+        setValue("guardian_first_name", itemToEdit.guardian_first_name);
+        setValue("guardian_last_name", itemToEdit.guardian_last_name);
+        setValue("guardian_telephone", itemToEdit.guardian_telephone);
+        // setValue("selectedEvent", itemToEdit.selected_event);
+        // setValue("preferredTime", itemToEdit.preferred_time);
+        setValue("children_first_name", itemToEdit.children_first_name);
+        setValue("children_last_name", itemToEdit.children_last_name);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const { error } = await supabase
+        .from("attendance_pending")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      //update local state to reflect the deletion
+      setData((prevData) => prevData.filter((item) => item.id !== id));
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleSwitchChange = async (itemId, checked) => {
@@ -235,12 +320,129 @@ export default function Attendance() {
     item.guardian_telephone,
     item.has_attended ? "Attended" : "Pending",
     <DropdownMenu key={item.id}>
-      <DropdownMenuTrigger>
-        <img src={ThreeDotsIcon} alt="Three Dots Icon" />
+      <DropdownMenuTrigger asChild>
+        <button aria-label="Options">
+          <Icon icon="tabler:dots" width="2em" height="2em" />
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem>Edit</DropdownMenuItem>
-        <DropdownMenuItem>Delete</DropdownMenuItem>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+          <AlertDialog>
+            <AlertDialogTrigger onClick={() => handleUpdate(item.id)}>
+              Edit
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Edit</AlertDialogTitle>
+              </AlertDialogHeader>
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="flex flex-col gap-2"
+              >
+                <div>
+                  <Label>Guardian First Name</Label>
+                  <Input
+                    {...register("guardian_first_name", {
+                      required: "First name is required",
+                    })}
+                    placeholder="Guardian First Name"
+                  />
+                  {errors.guardian_first_name && (
+                    <p className="text-red-500">
+                      {errors.guardian_first_name.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Label>Guardian Last Name</Label>
+                  <Input
+                    {...register("guardian_last_name", {
+                      required: "Last name is required",
+                    })}
+                    placeholder="Guardian Last Name"
+                  />
+                  {errors.guardian_last_name && (
+                    <p className="text-red-500">
+                      {errors.guardian_last_name.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Label>Telephone</Label>
+                  <Input
+                    {...register("guardian_telephone", {
+                      required: "Telephone is required",
+                    })}
+                    placeholder="Telephone"
+                  />
+                  {errors.guardian_telephone && (
+                    <p className="text-red-500">
+                      {errors.guardian_telephone.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Label>Children First Name</Label>
+                  <Input
+                    {...register("children_first_name", {
+                      required: "First name is required",
+                    })}
+                    placeholder="Children First Name"
+                  />
+                  {errors.children_first_name && (
+                    <p className="text-red-500">
+                      {errors.children_first_name.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Label>Children Last Name</Label>
+                  <Input
+                    {...register("children_last_name", {
+                      required: "Last name is required",
+                    })}
+                    placeholder="Children Last Name"
+                  />
+                  {errors.children_last_name && (
+                    <p className="text-red-500">
+                      {errors.children_last_name.message}
+                    </p>
+                  )}
+                </div>
+
+                <AlertDialogFooter className="mt-2">
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction type="submit">Continue</AlertDialogAction>
+                </AlertDialogFooter>
+              </form>
+              ;
+            </AlertDialogContent>
+          </AlertDialog>
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+          <AlertDialog>
+            <AlertDialogTrigger>Delete</AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete
+                  data.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => handleDelete(item.id)}>
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>,
   ]);
@@ -264,7 +466,6 @@ export default function Attendance() {
             />
           </div>
         </div>
-
         <div className="mb-6 flex flex-col items-start space-y-4 sm:flex-row sm:items-center sm:space-x-4 sm:space-y-0">
           <div className="flex items-center space-x-2 sm:w-auto">
             <CalendarIcon className="mr-2 h-4 w-4" />
