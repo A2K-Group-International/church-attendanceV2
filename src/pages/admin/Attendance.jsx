@@ -168,7 +168,6 @@ export default function Attendance() {
         ];
 
         setData(formattedData); // formatted data
-        console.log(data.map((item) => console.log(item.id)))
         setAvailableTimes(uniqueTimes); // format the available times
         setUniqueEvent(uniqueEvent); // set the events
       } catch (error) {
@@ -419,7 +418,6 @@ export default function Attendance() {
                   <AlertDialogAction type="submit">Continue</AlertDialogAction>
                 </AlertDialogFooter>
               </form>
-              ;
             </AlertDialogContent>
           </AlertDialog>
         </DropdownMenuItem>
