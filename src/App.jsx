@@ -11,7 +11,7 @@ import EventInfo from "./pages/user/EventInfo";
 import VolunteersPage from "./pages/admin/VolunteersPage";
 import VolunteerDashboard from "./pages/volunteer/VolunteerDashboard";
 import VolunteerEvents from "./pages/volunteer/VolunteerEvents";
-
+import VolunteerAnnouncements from "./pages/volunteer/VolunteerAnnouncements";
 function App() {
   return (
     <Router>
@@ -94,6 +94,14 @@ function App() {
           element={
             <ProtectedRoute>
               <VolunteerEvents />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer-announcements"
+          element={
+            <ProtectedRoute>
+              <VolunteerAnnouncements />
             </ProtectedRoute>
           }
         />

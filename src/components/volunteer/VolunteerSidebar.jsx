@@ -10,6 +10,11 @@ import supabase from "../../api/supabase"; // Ensure you have imported supabase
 
 const volunteerLinks = [
   { link: "/volunteer-dashboard", label: "Dashboard", icon: DashboardIcon },
+  {
+    link: "/volunteer-announcements",
+    label: "Announcements",
+    icon: DashboardIcon,
+  },
   { link: "/volunteer-events", label: "Events", icon: DashboardIcon },
 ];
 
