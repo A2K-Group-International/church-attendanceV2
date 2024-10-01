@@ -5,6 +5,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import Attendance from "./pages/admin/Attendance";
 import UsersPage from "./pages/admin/UserPage";
 import Schedule from "./pages/admin/Schedule";
+import AdminCalendar from "./pages/admin/AdminCalendar"
 import EventsPage from "./pages/user/EventsPage";
 import FamilyPage from "./pages/user/FamilyPage";
 import EventInfo from "./pages/user/EventInfo";
@@ -54,6 +55,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Schedule />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin-calendar"
+          element={
+            <ProtectedRoute>
+              <AdminCalendar />
             </ProtectedRoute>
           }
         />
