@@ -32,7 +32,13 @@ import FormLabel from "../../components/FormLabel";
 import supabase from "../../api/supabase";
 import { fetchAllEvents } from "../../api/userService";
 
-export default function DialogWalkInRegister({btnName, title, description, btnSubmit}) {
+export default function DialogWalkInRegister({
+  btnName,
+  title,
+  description,
+  btnSubmit,
+  btnVariant,
+}) {
   const [error, setError] = useState("");
   const [guardianFirstName, setGuardianFirstName] = useState("");
   const [guardianLastName, setGuardianLastName] = useState("");
@@ -197,7 +203,7 @@ export default function DialogWalkInRegister({btnName, title, description, btnSu
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full">
+        <Button variant={btnVariant} className="w-full">
           {btnName}
         </Button>
       </DialogTrigger>
@@ -224,9 +230,7 @@ export default function DialogWalkInRegister({btnName, title, description, btnSu
           <TabsContent value="guardian">
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl font-semibold">
-                  {title}
-                </CardTitle>
+                <CardTitle className="text-xl font-semibold">{title}</CardTitle>
                 <CardDescription className="text-sm text-muted-foreground">
                   {description}
                 </CardDescription>
