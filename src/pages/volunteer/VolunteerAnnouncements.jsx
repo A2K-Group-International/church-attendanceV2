@@ -22,6 +22,8 @@ const headers = ["User Name", "Content", "Date Created"];
 
 export default function VolunteerAnnouncements() {
   const [groupId, setGroupId] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [groupData, setGroupData] = useState(null);
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -39,18 +41,37 @@ export default function VolunteerAnnouncements() {
     if (!user) return; // Exit if user is not authenticated
 
     try {
-      const { data, error } = await supabase
+      const { data: userData, error: userError } = await supabase
         .from("user_list")
-        .select("group_id") // Removed "group_name"
+        .select("*")
         .eq("user_uuid", user.id) // Assuming 'user_uuid' corresponds to 'user.id'
         .single();
 
-      if (error) throw error;
+      if (userError) throw userError;
 
-      setGroupId(data.group_id);
+      // Set user data and group ID
+      setUserData(userData);
+      setGroupId(userData.group_id);
+
+      // Now fetch group information using the group_id
+      try {
+        const { data: groupData, error: groupError } = await supabase
+          .from("group_list")
+          .select("*")
+          .eq("group_id", userData.group_id); // Use userData.group_id directly
+
+        if (groupError) throw groupError;
+
+        console.log("Group data:", groupData);
+        setGroupData(groupData);
+      } catch (groupError) {
+        console.error("Error fetching group data:", groupError);
+      }
+
+      console.log("User and group data fetched successfully");
     } catch (err) {
       setError("Error fetching group information. Please try again.");
-      console.error("Error fetching group info:", err);
+      console.error("Error fetching user data:", err);
     }
   }, [user]);
 
@@ -94,14 +115,18 @@ export default function VolunteerAnnouncements() {
     }
 
     try {
+      // Ensure groupData[0] exists before using group_name
+      const groupName =
+        groupData && groupData[0] ? groupData[0].group_name : "";
+
       const { error } = await supabase.from("post_data").insert([
         {
           post_content: newAnnouncement.post_content,
-          created_at: new Date().toISOString(), // Current timestamp
-          post_user_id: user.id,
+          created_at: new Date().toISOString(),
+          post_user_id: userData.user_id,
           post_group_id: groupId,
-          user_name: user.name || "Volunteer", // Fallback to "Volunteer" if name is not available
-          // group_name: groupName, // Removed as group_name isn't fetched
+          group_name: groupName, // Correctly use group_name from groupData[0]
+          user_name: `${userData.user_name} ${userData.user_last_name}`, // Concatenate with space between names
         },
       ]);
 
@@ -148,7 +173,12 @@ export default function VolunteerAnnouncements() {
         {/* Container for centered content */}
         <div className="w-full max-w-2xl space-y-6 p-4 lg:p-8">
           <header className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Volunteer Announcements</h1>
+            {/* If groupData is available, display the group name in the title */}
+            <h1 className="text-2xl font-bold">
+              {groupData && groupData[0] && groupData[0].group_name
+                ? `${groupData[0].group_name} Announcements`
+                : "Volunteer Announcements"}
+            </h1>
             {/* Create Announcement Button */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
@@ -179,9 +209,6 @@ export default function VolunteerAnnouncements() {
                       className="w-full"
                     />
                   </div>
-
-                  {/* Optionally, allow selecting a date */}
-                  {/* If you want to allow users to set a specific date, you can add a date picker here */}
 
                   <DialogFooter>
                     <DialogClose asChild>

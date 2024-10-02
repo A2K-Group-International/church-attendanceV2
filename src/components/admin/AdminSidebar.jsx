@@ -13,6 +13,7 @@ const adminLinks = [
   { link: "/attendance", label: "Attendance", icon: CheckListIcon },
   { link: "/users", label: "Users", icon: PersonIcon },
   { link: "/volunteers", label: "Volunteers", icon: PersonIcon },
+  { link: "/groups", label: "Groups", icon: PersonIcon },
   { link: "/schedule", label: "Schedule", icon: CalendarIcon },
 ];
 
