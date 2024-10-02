@@ -290,23 +290,23 @@ export default function GroupsPage() {
     <AdminSidebar>
       <main className="mx-auto max-w-7xl p-4 lg:p-8">
         {/* Header Section */}
-        <div className="mb-4">
-          <h1 className="text-2xl font-bold">Group Management</h1>
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">Group Management</h1>
         </div>
 
         {/* Create Group Button */}
-        <div className="mb-4">
+        <div className="mb-8">
           <Button
             variant="primary"
             onClick={() => setIsCreateModalOpen(true)}
-            className="w-full bg-blue-600 font-semibold text-white hover:bg-blue-700 sm:w-auto"
+            className="w-full bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 sm:w-auto"
           >
             Create Group
           </Button>
         </div>
 
         {/* Group Cards Layout */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {loading ? (
             <div className="p-8 text-center">
               <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
@@ -317,30 +317,33 @@ export default function GroupsPage() {
               <p className="text-destructive">{error}</p>
             </div>
           ) : data.length > 0 ? (
-            data.map((item, index) => (
-              <div key={item.group_id} className="rounded-lg border p-4 shadow">
-                <h2 className="text-xl font-bold">{item.group_name}</h2>
-                <p className="text-gray-600">{item.group_description}</p>
-                <p className="text-sm text-gray-500">
+            data.map((item) => (
+              <div
+                key={item.group_id}
+                className="rounded-lg border p-6 shadow transition-shadow duration-300 hover:shadow-lg"
+              >
+                <h2 className="mb-2 text-2xl font-bold">{item.group_name}</h2>
+                <p className="mb-1 text-gray-700">{item.group_description}</p>
+                <p className="mb-4 text-sm text-gray-500">
                   Created At: {new Date(item.created_at).toLocaleString()}
                 </p>
 
                 {/* Displaying Members */}
-                <div className="mt-2">
-                  <h3 className="text-lg font-semibold">Members:</h3>
+                <div className="mb-6">
+                  <h3 className="mb-2 text-lg font-semibold">Members:</h3>
                   {item.members && item.members.length > 0 ? (
-                    <ul className="list-disc pl-5">
+                    <ul className="list-disc space-y-2 pl-5">
                       {item.members.map((member) => (
                         <li
                           key={member.user_id}
                           className="flex items-center justify-between space-x-4"
                         >
-                          <span>
+                          <span className="text-gray-800">
                             {member.user_name} {member.user_last_name}
                           </span>
                           <button
                             onClick={() => initiateRemoveMember(member)} // Open confirmation dialog
-                            className="text-red-500 hover:text-red-700"
+                            className="font-medium text-red-500 hover:text-red-700"
                           >
                             Remove
                           </button>
@@ -348,27 +351,30 @@ export default function GroupsPage() {
                       ))}
                     </ul>
                   ) : (
-                    <p>No members found.</p>
+                    <p className="text-gray-500">No members found.</p>
                   )}
                 </div>
 
                 {/* Action Buttons */}
-                <div className="mt-4 flex space-x-2">
+                <div className="flex space-x-4">
                   <Button
                     onClick={() => handleEditGroup(item)}
                     variant="secondary"
+                    className="px-4 py-2"
                   >
                     Edit
                   </Button>
                   <Button
                     onClick={() => handleActionClick(item)}
                     variant="destructive"
+                    className="px-4 py-2"
                   >
                     Delete
                   </Button>
                   <Button
                     onClick={() => handleOpenAssignModal(item)}
                     variant="primary"
+                    className="px-4 py-2"
                   >
                     Assign Members
                   </Button>
@@ -383,15 +389,16 @@ export default function GroupsPage() {
         </div>
 
         {/* Pagination */}
-        <div className="mt-4 flex justify-center">
+        <div className="mt-8 flex items-center justify-center space-x-4">
           <Button
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             variant="secondary"
+            className="px-4 py-2"
           >
             Previous
           </Button>
-          <span className="mx-4">
+          <span className="text-gray-700">
             Page {currentPage} of {totalPages}
           </span>
           <Button
@@ -400,6 +407,7 @@ export default function GroupsPage() {
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
             variant="secondary"
+            className="px-4 py-2"
           >
             Next
           </Button>
@@ -408,44 +416,55 @@ export default function GroupsPage() {
         {/* Create Group Modal */}
         {isCreateModalOpen && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="w-96 rounded-lg bg-white p-4 shadow-lg">
-              <h2 className="mb-2 text-lg font-bold">Create Group</h2>
-              {createError && <p className="text-red-600">{createError}</p>}
+            <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+              <h2 className="mb-4 text-xl font-bold">Create Group</h2>
+              {createError && (
+                <p className="mb-4 text-red-600">{createError}</p>
+              )}
               <form onSubmit={handleSubmit(handleCreateGroup)}>
-                <div className="mb-2">
-                  <Label htmlFor="groupName">Group Name</Label>
+                <div className="mb-4">
+                  <Label htmlFor="groupName" className="mb-1 block">
+                    Group Name
+                  </Label>
                   <Input
                     id="groupName"
                     {...register("groupName", { required: true })}
                     placeholder="Enter group name"
+                    className="w-full"
                   />
                   {errors.groupName && (
-                    <p className="text-destructive">Group name is required.</p>
+                    <p className="mt-1 text-red-600">Group name is required.</p>
                   )}
                 </div>
-                <div className="mb-2">
-                  <Label htmlFor="groupDescription">Group Description</Label>
+                <div className="mb-4">
+                  <Label htmlFor="groupDescription" className="mb-1 block">
+                    Group Description
+                  </Label>
                   <Input
                     id="groupDescription"
                     {...register("groupDescription", { required: true })}
                     placeholder="Enter group description"
+                    className="w-full"
                   />
                   {errors.groupDescription && (
-                    <p className="text-destructive">Description is required.</p>
+                    <p className="mt-1 text-red-600">
+                      Description is required.
+                    </p>
                   )}
                 </div>
-                <div className="flex justify-end">
+                <div className="flex justify-end space-x-2">
                   <Button
                     type="button"
                     variant="secondary"
                     onClick={() => setIsCreateModalOpen(false)}
+                    className="px-4 py-2"
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
                     variant="primary"
-                    className="ml-2"
+                    className="px-4 py-2"
                     disabled={createLoading}
                   >
                     {createLoading ? "Creating..." : "Create"}
@@ -459,44 +478,53 @@ export default function GroupsPage() {
         {/* Edit Group Modal */}
         {isEditModalOpen && selectedGroup && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="w-96 rounded-lg bg-white p-4 shadow-lg">
-              <h2 className="mb-2 text-lg font-bold">Edit Group</h2>
-              {editError && <p className="text-red-600">{editError}</p>}
+            <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+              <h2 className="mb-4 text-xl font-bold">Edit Group</h2>
+              {editError && <p className="mb-4 text-red-600">{editError}</p>}
               <form onSubmit={handleSubmit(handleUpdateGroup)}>
-                <div className="mb-2">
-                  <Label htmlFor="groupName">Group Name</Label>
+                <div className="mb-4">
+                  <Label htmlFor="groupName" className="mb-1 block">
+                    Group Name
+                  </Label>
                   <Input
                     id="groupName"
                     {...register("groupName", { required: true })}
                     placeholder="Enter group name"
+                    className="w-full"
                   />
                   {errors.groupName && (
-                    <p className="text-destructive">Group name is required.</p>
+                    <p className="mt-1 text-red-600">Group name is required.</p>
                   )}
                 </div>
-                <div className="mb-2">
-                  <Label htmlFor="groupDescription">Group Description</Label>
+                <div className="mb-4">
+                  <Label htmlFor="groupDescription" className="mb-1 block">
+                    Group Description
+                  </Label>
                   <Input
                     id="groupDescription"
                     {...register("groupDescription", { required: true })}
                     placeholder="Enter group description"
+                    className="w-full"
                   />
                   {errors.groupDescription && (
-                    <p className="text-destructive">Description is required.</p>
+                    <p className="mt-1 text-red-600">
+                      Description is required.
+                    </p>
                   )}
                 </div>
-                <div className="flex justify-end">
+                <div className="flex justify-end space-x-2">
                   <Button
                     type="button"
                     variant="secondary"
                     onClick={() => setIsEditModalOpen(false)}
+                    className="px-4 py-2"
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
                     variant="primary"
-                    className="ml-2"
+                    className="px-4 py-2"
                     disabled={editLoading}
                   >
                     {editLoading ? "Updating..." : "Update"}
@@ -510,25 +538,27 @@ export default function GroupsPage() {
         {/* Assign Members Modal */}
         {isAssignModalOpen && selectedGroup && (
           <div className="fixed inset-0 flex items-center justify-center overflow-auto bg-black bg-opacity-50">
-            <div className="max-h-full w-96 overflow-y-auto rounded-lg bg-white p-4 shadow-lg">
-              <h2 className="mb-2 text-lg font-bold">
+            <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+              <h2 className="mb-4 text-xl font-bold">
                 Assign Members to "{selectedGroup.group_name}"
               </h2>
-              {assignError && <p className="text-red-600">{assignError}</p>}
+              {assignError && (
+                <p className="mb-4 text-red-600">{assignError}</p>
+              )}
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleAssignMembers();
                 }}
               >
-                <div className="mb-4">
+                <div className="mb-6">
                   <Label className="mb-2 block">Select Volunteers</Label>
-                  <div className="max-h-64 overflow-y-auto rounded border p-2">
+                  <div className="max-h-64 space-y-2 overflow-y-auto rounded border p-4">
                     {allVolunteers.length > 0 ? (
                       allVolunteers.map((volunteer) => (
                         <div
                           key={volunteer.user_id}
-                          className="mb-2 flex items-center"
+                          className="flex items-center space-x-2"
                         >
                           <input
                             type="checkbox"
@@ -539,30 +569,34 @@ export default function GroupsPage() {
                             onChange={() =>
                               handleCheckboxChange(volunteer.user_id)
                             }
-                            className="mr-2"
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                           />
-                          <label htmlFor={`volunteer-${volunteer.user_id}`}>
+                          <label
+                            htmlFor={`volunteer-${volunteer.user_id}`}
+                            className="text-gray-700"
+                          >
                             {volunteer.user_name} {volunteer.user_last_name}
                           </label>
                         </div>
                       ))
                     ) : (
-                      <p>No volunteers available.</p>
+                      <p className="text-gray-500">No volunteers available.</p>
                     )}
                   </div>
                 </div>
-                <div className="flex justify-end">
+                <div className="flex justify-end space-x-2">
                   <Button
                     type="button"
                     variant="secondary"
                     onClick={() => setIsAssignModalOpen(false)}
+                    className="px-4 py-2"
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
                     variant="primary"
-                    className="ml-2"
+                    className="px-4 py-2"
                     disabled={assignLoading}
                   >
                     {assignLoading ? "Assigning..." : "Assign"}
@@ -576,20 +610,21 @@ export default function GroupsPage() {
         {/* Remove Member Confirmation Dialog */}
         {isRemoveDialogOpen && memberToRemove && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="w-96 rounded-lg bg-white p-4 shadow-lg">
-              <h2 className="mb-2 text-lg font-bold">Confirm Removal</h2>
-              <p>
+            <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+              <h2 className="mb-4 text-xl font-bold">Confirm Removal</h2>
+              <p className="mb-6">
                 Are you sure you want to remove{" "}
                 <strong>
                   {memberToRemove.user_name} {memberToRemove.user_last_name}
                 </strong>{" "}
                 from the group?
               </p>
-              <div className="mt-4 flex justify-end">
+              <div className="flex justify-end space-x-2">
                 <Button
                   type="button"
                   variant="secondary"
                   onClick={() => setIsRemoveDialogOpen(false)}
+                  className="px-4 py-2"
                 >
                   Cancel
                 </Button>
@@ -599,7 +634,7 @@ export default function GroupsPage() {
                     setIsRemoveDialogOpen(false);
                   }}
                   variant="destructive"
-                  className="ml-2"
+                  className="px-4 py-2"
                 >
                   Remove
                 </Button>
@@ -611,24 +646,25 @@ export default function GroupsPage() {
         {/* Delete Confirmation Dialog */}
         {isDialogOpen && selectedGroup && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="w-96 rounded-lg bg-white p-4 shadow-lg">
-              <h2 className="mb-2 text-lg font-bold">Confirm Delete</h2>
-              <p>
+            <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+              <h2 className="mb-4 text-xl font-bold">Confirm Delete</h2>
+              <p className="mb-6">
                 Are you sure you want to delete the group "
                 {selectedGroup.group_name}"?
               </p>
-              <div className="mt-4 flex justify-end">
+              <div className="flex justify-end space-x-2">
                 <Button
                   type="button"
                   onClick={() => setIsDialogOpen(false)}
                   variant="secondary"
+                  className="px-4 py-2"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={confirmDeleteGroup}
                   variant="destructive"
-                  className="ml-2"
+                  className="px-4 py-2"
                 >
                   Delete
                 </Button>
