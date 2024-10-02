@@ -5,16 +5,15 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import { fetchAllEvents } from "../../api/userService";
-import dayjs from "dayjs"; // Import dayjs
-import utc from "dayjs/plugin/utc"; // Import UTC plugin
-import timezone from "dayjs/plugin/timezone"; // Import timezone plugin
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "../../shadcn/dialog";
 import {
   Sheet,
@@ -22,7 +21,6 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "../../shadcn/sheet";
 
 dayjs.extend(utc);
@@ -38,7 +36,7 @@ const AdminCalendar = () => {
   const [eventTime, setEventTime] = useState("");
   const [eventDescription, setEventDescription] = useState("");
 
-  //Sheet states
+  // Sheet states
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [sheetEventList, setSheetEventList] = useState([]);
 
@@ -48,26 +46,19 @@ const AdminCalendar = () => {
         const fetchEvents = await fetchAllEvents();
 
         const transformedEvents = fetchEvents.flatMap((event) => {
-          // Use local timezone for the transformation
-          const localTimezone = dayjs.tz.guess(); // Get user's local timezone
+          const localTimezone = dayjs.tz.guess(); // User's local timezone
 
-          // Parse the schedule time
-          const eventDate = dayjs(event.schedule); // Assume schedule is in UTC
+          const eventDate = dayjs(event.schedule).tz(localTimezone); // Adjust schedule to local timezone
 
           return event.time.map((time) => {
-            // Extract the hour and minute from time
             const [hours, minutes] = time.split(":").slice(0, 2);
 
-            // Create a local datetime object for the event
             const eventDateTime = eventDate
               .set("hour", parseInt(hours, 10))
               .set("minute", parseInt(minutes, 10));
 
-            // Convert to UTC for storage in FullCalendar
-            const startUtc = eventDateTime
-              .tz(localTimezone)
-              .utc()
-              .toISOString();
+            // Convert to UTC for consistent storage/display
+            const startUtc = eventDateTime.utc().toISOString();
 
             return {
               title: event.name,
@@ -86,12 +77,11 @@ const AdminCalendar = () => {
     fetchSchedule();
   }, []);
 
-  // Event click handler
+  // Event click handler for Modal
   const handleEventClick = (info) => {
     const { title, extendedProps, start } = info.event;
     const { description } = extendedProps;
 
-    // Format the event time for display
     const formattedTime = dayjs(start).format("YYYY-MM-DD HH:mm");
     setEventTitle(title);
     setEventTime(formattedTime);
@@ -99,27 +89,19 @@ const AdminCalendar = () => {
     setEventDialogOpen(true);
   };
 
-  // Date click handler
+  // Date click handler for Sheet
   const handleDateClick = (info) => {
-    const clickedDate = dayjs(info.dateStr).format("YYYY-MM-DD"); // Format clicked date
+    const clickedDate = dayjs(info.dateStr).format("YYYY-MM-DD");
 
-    // Filter events that match the clicked date
     const matchedEvents = events.filter((item) => {
-      const eventDate = dayjs(item.start).format("YYYY-MM-DD"); // Format event start date
+      const eventDate = dayjs(item.start).format("YYYY-MM-DD");
       return eventDate === clickedDate;
     });
 
-    // Log or display the matched events
     if (matchedEvents.length > 0) {
-      matchedEvents.forEach((event) => {
-        console.log(`Event: ${event.title}`);
-        console.log(`Description: ${event.description}`);
-        console.log(`Time: ${dayjs(event.start).format("HH:mm")}`);
-      });
-      setSheetEventList(matchedEvents);
+      setSheetEventList(matchedEvents); // Set events for the sheet
     } else {
-      setSheetEventList();
-      console.log("No events found on this date.");
+      setSheetEventList([]); // Clear if no events found
     }
 
     setIsSheetOpen(true);
@@ -141,6 +123,11 @@ const AdminCalendar = () => {
           eventClick={handleEventClick}
           editable={true}
           height={850}
+          eventTimeFormat={{ // Ensure 24-hour format
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          }}
         />
       </div>
 
@@ -162,15 +149,19 @@ const AdminCalendar = () => {
         <SheetContent>
           <SheetHeader>
             <SheetTitle>Event List</SheetTitle>
-            <SheetDescription className="sr-only"></SheetDescription>
-            {sheetEventList.map((item, index) => (
-              <div key={index}>
-                <h2 className="font-bold">{item.title}</h2>
-                <p>{item.description}</p>
-                <p>{item.start}</p>
-              </div>
-            ))}
-            {console.log(sheetEventList)}
+            <SheetDescription>
+              {sheetEventList.length > 0 ? (
+                sheetEventList.map((item, index) => (
+                  <div key={index}>
+                    <h2 className="font-bold">{item.title}</h2>
+                    <p>{item.description}</p>
+                    <p>{dayjs(item.start).tz(dayjs.tz.guess()).format("HH:mm")}</p> {/* Localized 24-hour format */}
+                  </div>
+                ))
+              ) : (
+                <p>No events found.</p>
+              )}
+            </SheetDescription>
           </SheetHeader>
         </SheetContent>
       </Sheet>
