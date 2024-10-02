@@ -159,13 +159,17 @@ export default function VolunteerAnnouncements() {
   }, [fetchAnnouncements]);
 
   /**
-   * Prepare table rows from announcements data
+   * Function to get initials from user name
    */
-  const rows = announcements.map((announcement) => [
-    announcement.user_name || "Volunteer",
-    announcement.post_content,
-    format(new Date(announcement.created_at), "PPpp"), // Example: Oct 1, 2024, 5:49 PM
-  ]);
+  const getInitials = (fullName) => {
+    if (!fullName) return "V"; // Default initial if name is missing
+    const names = fullName.split(" ");
+    const initials =
+      names.length >= 2
+        ? `${names[0][0]}${names[names.length - 1][0]}`
+        : names[0][0];
+    return initials.toUpperCase();
+  };
 
   return (
     <VolunteerSidebar>
@@ -180,44 +184,46 @@ export default function VolunteerAnnouncements() {
                 : "Volunteer Announcements"}
             </h1>
             {/* Create Announcement Button */}
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="ml-4">Create Announcement</Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                  <DialogTitle>Create New Announcement</DialogTitle>
-                  <DialogDescription>
-                    Post a new announcement for your group.
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="post_content">Announcement Content</Label>
-                    <Input
-                      id="post_content"
-                      type="text"
-                      value={newAnnouncement.post_content}
-                      onChange={(e) =>
-                        setNewAnnouncement({
-                          ...newAnnouncement,
-                          post_content: e.target.value,
-                        })
-                      }
-                      required
-                      placeholder="Enter your announcement here..."
-                      className="w-full"
-                    />
-                  </div>
+            {groupId ? (
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="ml-4">Create Announcement</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle>Create New Announcement</DialogTitle>
+                    <DialogDescription>
+                      Post a new announcement for your group.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="post_content">Announcement Content</Label>
+                      <Input
+                        id="post_content"
+                        type="text"
+                        value={newAnnouncement.post_content}
+                        onChange={(e) =>
+                          setNewAnnouncement({
+                            ...newAnnouncement,
+                            post_content: e.target.value,
+                          })
+                        }
+                        required
+                        placeholder="Enter your announcement here..."
+                        className="w-full"
+                      />
+                    </div>
 
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button type="submit">Post Announcement</Button>
-                    </DialogClose>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button type="submit">Post Announcement</Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            ) : null}
           </header>
 
           {/* Display Loading, Error, or Announcements */}
@@ -225,29 +231,42 @@ export default function VolunteerAnnouncements() {
             <Spinner />
           ) : error ? (
             <p className="text-red-500">{error}</p>
+          ) : groupId === null ? ( // Check if groupId is null and display a message
+            <p className="text-red-500">
+              You are not assigned to any group. Please contact the admin.
+            </p>
           ) : announcements.length > 0 ? (
             <ul className="space-y-4">
               {announcements.map((post) => (
                 <li
                   key={post.post_id}
-                  className="rounded-lg bg-white p-4 shadow-md dark:bg-gray-800"
+                  className="flex items-start rounded-lg bg-white p-4 shadow-md dark:bg-gray-800"
                 >
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="font-semibold">
-                      {post.user_name || "Volunteer"}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {format(new Date(post.created_at), "PPpp")}
-                    </span>
+                  {/* Avatar/Icon */}
+                  <div className="mr-4 flex-shrink-0">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500 text-lg font-semibold text-white">
+                      {getInitials(post.user_name)}
+                    </div>
                   </div>
-                  <p className="text-gray-700 dark:text-gray-300">
-                    {post.post_content}
-                  </p>
+                  {/* Announcement Content */}
+                  <div className="flex-1">
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="font-semibold text-gray-900 dark:text-gray-100">
+                        {post.user_name}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {format(new Date(post.created_at), "MMM dd, yyyy")}
+                      </span>
+                    </div>
+                    <p className="text-gray-800 dark:text-gray-300">
+                      {post.post_content}
+                    </p>
+                  </div>
                 </li>
               ))}
             </ul>
           ) : (
-            <p>No announcements available.</p>
+            <p className="text-gray-500">No announcements available.</p>
           )}
         </div>
       </main>
