@@ -7,13 +7,14 @@ import PersonIcon from "../../assets/svg/person.svg";
 import CheckListIcon from "../../assets/svg/checklist.svg";
 import DashboardIcon from "../../assets/svg/dashboard.svg";
 import HamburgerIcon from "../../assets/svg/hamburgerIcon.svg";
+import ClockIcon from "../../assets/svg/clockIcon.svg"
 
 const adminLinks = [
   { link: "/admin-dashboard", label: "Dashboard", icon: DashboardIcon },
   { link: "/attendance", label: "Attendance", icon: CheckListIcon },
   { link: "/users", label: "Users", icon: PersonIcon },
   { link: "/volunteers", label: "Volunteers", icon: PersonIcon },
-  { link: "/schedule", label: "Schedule", icon: CalendarIcon },
+  { link: "/schedule", label: "Schedule", icon: ClockIcon },
   { link: "/admin-calendar", label: "Calendar", icon: CalendarIcon },
 ];
 

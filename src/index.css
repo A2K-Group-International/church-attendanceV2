@@ -84,3 +84,25 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Full Calendar */
+.fc-event{
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+}
+.fc-button-group{
+  gap: 5px;
+}
+.fc-direction-ltr .fc-toolbar > * > :not(:first-child) {
+  margin-left: 0.75em;
+}
+.fc .fc-button-primary {
+  background-color: hsl(var(--primary));
+  border-radius: 10px;
+}
+.fc .fc-button-primary:disabled {
+  background-color: hsl(var(--accent-foreground));
+}
+.fc-daygrid-event-dot {
+  border-color: hsl(var(--primary))
+}

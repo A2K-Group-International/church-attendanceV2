@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import supabase from "../../api/supabase";
+import moment from "moment";
 import { useForm } from "react-hook-form";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 // import AddManualAttendance from "../../components/admin/AddManualAttendance";
@@ -104,72 +105,102 @@ export default function Attendance() {
       setLoading(true);
       setError(null);
       try {
-        // Prepare query without date filter if no date is selected
+        // Prepare a query to fetch all unique event dates
+        const { data: uniqueDatesData, error: uniqueDatesError } =
+          await supabase
+            .from("attendance_pending")
+            .select("schedule_date", { count: "exact" });
+
+        if (uniqueDatesError) throw uniqueDatesError;
+
+        // Extract unique dates with events
+        const uniqueDates = [
+          ...new Set(uniqueDatesData.map((item) => item.schedule_date)),
+        ];
+
+        // If the selected date is not in the unique dates, do not proceed
+        const formattedSelectedDate = moment(date).format("YYYY-MM-DD");
+        if (!uniqueDates.includes(formattedSelectedDate)) {
+          setData([]); // Clear data if the selected date has no events
+          setAvailableTimes([]); // Clear available times
+          setUniqueEvent([]); // Clear unique events
+          return; // Exit the function
+        }
+
+        // Prepare the main query to fetch data for the selected date
         let query = supabase
           .from("attendance_pending")
           .select("*", { count: "exact" })
+          .eq("schedule_date", formattedSelectedDate) // Filter by selected date
+          .order("id", { ascending: false }) // Order by ID in descending order
           .range(
             (currentPage - 1) * itemsPerPage,
             currentPage * itemsPerPage - 1,
           ); // Pagination
 
-        // Apply date filter only if date is selected
-        if (date) {
-          const formattedDate = new Date(date).toISOString().split("T")[0]; // format the date
-          query = query.eq("schedule_day", formattedDate);
-        }
-
-        // fetch or filter from preferred time
+        // Fetch or filter by preferred time
         if (time) {
           query = query.eq("preferred_time", time);
         }
 
-        // fetch or filter from status
+        // Fetch or filter by status
         if (status !== "all") {
           query = query.eq("has_attended", status === "attended");
         }
 
-        // fetch the event name
+        // Fetch the event name
         if (eventName && eventName !== "all") {
           query = query.eq("selected_event", eventName);
         }
 
-        // fetching the data
+        // Fetching the data
         const { data: fetchedData, error, count } = await query;
 
         if (error) throw error;
 
-        // calculate the pages
+        // Calculate the pages
         setTotalPages(Math.ceil(count / itemsPerPage));
 
-        // formatting the date
+        // Format the fetched data
         const formattedData = fetchedData.map((item) => ({
           ...item,
-          formattedDate: new Date(item.schedule_day).toLocaleDateString(
-            "en-GB",
-            {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            },
-          ),
+          formattedDate: moment(item.schedule_date).format("DD MMMM YYYY"), // Format the date using Moment.js
         }));
 
-        // extract the times and events
-        const allData = await supabase
+        // Fetch all times and events, grouping by event
+        const { data: allData, error: allDataError } = await supabase
           .from("attendance_pending")
-          .select("preferred_time, selected_event");
+          .select("preferred_time, selected_event")
+          .eq("schedule_date", formattedSelectedDate) // Filter by the specific date
+          .order("id", { ascending: false }); // Ensure you're fetching data for the selected date
 
-        const uniqueTimes = [
-          ...new Set(allData.data.map((item) => item.preferred_time)),
-        ];
+        if (allDataError) throw allDataError;
+
+        // Extract unique times for each event
+        const eventTimesMap = allData.reduce((acc, curr) => {
+          const { selected_event, preferred_time } = curr;
+          if (!acc[selected_event]) {
+            acc[selected_event] = new Set();
+          }
+          acc[selected_event].add(preferred_time);
+          return acc;
+        }, {});
+
+        // Extract unique times based on selected_event and store them in an array
+        const uniqueTimes =
+          eventName && eventTimesMap[eventName]
+            ? [...eventTimesMap[eventName]]
+            : [...new Set(allData.map((item) => item.preferred_time))];
+
+        // Extract unique events
         const uniqueEvent = [
-          ...new Set(allData.data.map((item) => item.selected_event)),
+          ...new Set(allData.map((item) => item.selected_event)),
         ];
 
-        setData(formattedData); // formatted data
-        setAvailableTimes(uniqueTimes); // format the available times
-        setUniqueEvent(uniqueEvent); // set the events
+        // Set the formatted data
+        setData(formattedData);
+        setAvailableTimes(uniqueTimes); // Set only the times for the selected event
+        setUniqueEvent(uniqueEvent); // Set unique events
       } catch (error) {
         setError("Error fetching data. Please try again.");
         console.error("Error in fetchData function:", error);
@@ -192,8 +223,15 @@ export default function Attendance() {
     fetchData,
   ]);
 
+  const resetState = () => {
+    setStatusFilter("all");
+    setSelectedEvent("");
+    setSelectedTime("");
+  };
+
   // Set the selected date and reset to the first page
   const handleDateChange = (date) => {
+    resetState();
     setSelectedDate(date ? new Date(date) : new Date());
     setCurrentPage(1);
   };
@@ -493,7 +531,7 @@ export default function Attendance() {
               onChange={handleEventName}
               className="rounded-md border border-input bg-background p-2"
             >
-              <option value="all">All</option>
+              <option value="all">All Events</option>
               {uniqueEvent.map((events, index) => (
                 <option key={index} value={events}>
                   {events}
@@ -509,9 +547,7 @@ export default function Attendance() {
               className="rounded-md border border-input bg-background p-2"
             >
               <option value="" disabled={availableTimes.length === 0}>
-                {availableTimes.length > 0
-                  ? "Select Time"
-                  : "No time available"}
+                {availableTimes.length > 0 ? "All time" : "No time available"}
               </option>
               {availableTimes.map((time) => (
                 <option key={time} value={time}>
@@ -528,7 +564,7 @@ export default function Attendance() {
               onChange={handleStatusChange}
               className="rounded-md border border-input bg-background p-2"
             >
-              <option value="all">All</option>
+              <option value="all">All Status</option>
               <option value="attended">Attended</option>
               <option value="pending">Pending</option>
             </select>
