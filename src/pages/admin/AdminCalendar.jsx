@@ -107,6 +107,18 @@ const AdminCalendar = () => {
     setIsSheetOpen(true);
   };
 
+  const handleEventMount = (info) => {
+    const currentDate = new Date();
+    const eventEndDate = info.event.end
+      ? new Date(info.event.end)
+      : new Date(info.event.start);
+    // Event ended
+    if (eventEndDate < currentDate) {
+      // set the text decoration
+      info.el.style.textDecoration = "line-through";
+    }
+  };
+
   return (
     <AdminSidebar>
       <div className="p-5">
@@ -121,11 +133,13 @@ const AdminCalendar = () => {
           events={events}
           dateClick={handleDateClick}
           eventClick={handleEventClick}
+          eventDidMount={handleEventMount}
           editable={true}
           height={850}
-          eventTimeFormat={{ // Ensure 24-hour format
-            hour: '2-digit',
-            minute: '2-digit',
+          eventTimeFormat={{
+            // Ensure 24-hour format
+            hour: "2-digit",
+            minute: "2-digit",
             hour12: false,
           }}
         />
@@ -155,7 +169,10 @@ const AdminCalendar = () => {
                   <div key={index}>
                     <h2 className="font-bold">{item.title}</h2>
                     <p>{item.description}</p>
-                    <p>{dayjs(item.start).tz(dayjs.tz.guess()).format("HH:mm")}</p> {/* Localized 24-hour format */}
+                    <p>
+                      {dayjs(item.start).tz(dayjs.tz.guess()).format("HH:mm")}
+                    </p>
+                    {/* Localized 24-hour format */}
                   </div>
                 ))
               ) : (

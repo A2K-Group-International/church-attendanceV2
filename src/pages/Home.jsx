@@ -28,9 +28,6 @@ export default function Home() {
             <h2 className="text-3xl font-bold md:text-4xl lg:text-5xl xl:text-7xl">
               Growing in Faith Together
             </h2>
-            <p className="font-medium md:text-3xl lg:text-4xl xl:text-6xl">
-              Engaging Children in the Joy of Gospel
-            </p>
           </div>
           <div className="order-3 flex items-end justify-center">
             <div className="mx-auto w-52 lg:w-auto">
