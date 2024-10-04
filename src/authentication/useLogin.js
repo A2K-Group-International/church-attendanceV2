@@ -39,7 +39,7 @@ export function useLogin() {
       } else if (userData.user_role === "user") {
         navigate("/events-page", { replace: true });
       } else if (userData.user_role === "volunteer") {
-        navigate("/volunteer-dashboard", { replace: true });
+        navigate("/volunteer-announcements", { replace: true });
       }
     },
     onError: (err) => {

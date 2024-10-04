@@ -5,12 +5,22 @@ import { Button } from "../../shadcn/button";
 import NavigationItem from "../NavigationItem";
 import DashboardIcon from "../../assets/svg/dashboard.svg";
 import HamburgerIcon from "../../assets/svg/hamburgerIcon.svg";
+import CalendarIcon from "../../assets/svg/calendarIcon.svg";
+import ChurchIcon from "../../assets/svg/churchIcon.svg";
+import PersonIcon from "../../assets/svg/person.svg";
 import { useUser } from "../../authentication/useUser";
 import supabase from "../../api/supabase"; // Ensure you have imported supabase
 
 const volunteerLinks = [
+  {
+    link: "/volunteer-announcements",
+    label: "Announcements",
+    icon: ChurchIcon,
+  },
   { link: "/volunteer-dashboard", label: "Dashboard", icon: DashboardIcon },
-  { link: "/volunteer-events", label: "Events", icon: DashboardIcon },
+
+  { link: "/volunteer-events", label: "Events", icon: CalendarIcon },
+  { link: "/volunteer-profile", label: "Profile", icon: PersonIcon },
 ];
 
 export default function VolunteerSidebar({ children }) {

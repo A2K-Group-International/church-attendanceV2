@@ -5,13 +5,17 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import Attendance from "./pages/admin/Attendance";
 import UsersPage from "./pages/admin/UserPage";
 import Schedule from "./pages/admin/Schedule";
-import AdminCalendar from "./pages/admin/AdminCalendar"
+import AdminCalendar from "./pages/admin/AdminCalendar";
 import EventsPage from "./pages/user/EventsPage";
 import FamilyPage from "./pages/user/FamilyPage";
 import EventInfo from "./pages/user/EventInfo";
 import VolunteersPage from "./pages/admin/VolunteersPage";
+import GroupsPage from "./pages/admin/GroupsPage";
 import VolunteerDashboard from "./pages/volunteer/VolunteerDashboard";
 import VolunteerEvents from "./pages/volunteer/VolunteerEvents";
+import VolunteerAnnouncements from "./pages/volunteer/VolunteerAnnouncements";
+import VolunteerAnnouncementsInfo from "./pages/volunteer/VolunteerAnnoucementsInfo";
+import VolunteerProfile from "./pages/volunteer/VolunteerProfile";
 
 function App() {
   return (
@@ -47,6 +51,14 @@ function App() {
           element={
             <ProtectedRoute>
               <VolunteersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/groups"
+          element={
+            <ProtectedRoute>
+              <GroupsPage />
             </ProtectedRoute>
           }
         />
@@ -103,6 +115,31 @@ function App() {
           element={
             <ProtectedRoute>
               <VolunteerEvents />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer-announcements"
+          element={
+            <ProtectedRoute>
+              <VolunteerAnnouncements />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer-announcements-info/:postId"
+          element={
+            <ProtectedRoute>
+              <VolunteerAnnouncementsInfo />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/volunteer-profile"
+          element={
+            <ProtectedRoute>
+              <VolunteerProfile />
             </ProtectedRoute>
           }
         />
