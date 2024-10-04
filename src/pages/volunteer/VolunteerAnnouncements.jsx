@@ -1,5 +1,3 @@
-// src/pages/VolunteerAnnouncements.jsx
-
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import supabase from "../../api/supabase";
@@ -18,11 +16,10 @@ import {
   DialogClose,
 } from "../../shadcn/dialog";
 import { Input } from "../../shadcn/input";
+import { Textarea } from "../../shadcn/textarea";
 import { Label } from "../../shadcn/label";
 import { format } from "date-fns";
-import useUserData from "../../api/userUserData"; // Import your custom hook
-
-const headers = ["User Name", "Content", "Date Created"];
+import useUserData from "../../api/userUserData";
 
 export default function VolunteerAnnouncements() {
   const [groupId, setGroupId] = useState(null);
@@ -33,21 +30,21 @@ export default function VolunteerAnnouncements() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newAnnouncement, setNewAnnouncement] = useState({
     post_content: "",
+    post_header: "",
   });
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const { user } = useUser(); // Get the current user
-  const { userData, loading: userLoading, error: userError } = useUserData(); // Use custom hook for user data
+  // New state for managing displayed announcements
+  const [visibleCount, setVisibleCount] = useState(10); // Initial number of announcements to show
 
-  /**
-   * Fetch the group_id for the current user from user_list table
-   */
+  const { user } = useUser();
+  const { userData, loading: userLoading, error: userError } = useUserData();
+
   const fetchGroupInfo = useCallback(async () => {
-    if (!userData) return; // Exit if userData is not available
-
+    if (!userData) return;
     try {
-      setGroupId(userData.group_id); // Set groupId directly from userData
+      setGroupId(userData.group_id);
 
-      // Now fetch group information using the group_id
       const { data: groupData, error: groupError } = await supabase
         .from("group_list")
         .select("*")
@@ -60,17 +57,14 @@ export default function VolunteerAnnouncements() {
       setError("Error fetching group information. Please try again.");
       console.error("Error fetching group information:", err);
     } finally {
-      setLoading(false); // Set loading to false after fetching the data
+      setLoading(false);
     }
   }, [userData]);
 
-  /**
-   * Fetch announcements from post_data where post_group_id matches user's group_id
-   */
   const fetchAnnouncements = useCallback(async () => {
-    if (!groupId) return; // Exit if groupId is not available
+    if (!groupId) return;
 
-    setLoading(true); // Set loading to true when fetching announcements
+    setLoading(true);
     setError(null);
 
     try {
@@ -87,19 +81,18 @@ export default function VolunteerAnnouncements() {
       setError("Error fetching announcements. Please try again.");
       console.error("Error fetching announcements:", err);
     } finally {
-      setLoading(false); // Set loading to false after fetching the data
+      setLoading(false);
     }
   }, [groupId]);
 
-  /**
-   * Handle the submission of a new announcement
-   */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic validation
-    if (!newAnnouncement.post_content.trim()) {
-      setError("Please enter the announcement content.");
+    if (
+      !newAnnouncement.post_content.trim() ||
+      !newAnnouncement.post_header.trim()
+    ) {
+      setError("Please enter both announcement content and header.");
       return;
     }
 
@@ -110,11 +103,12 @@ export default function VolunteerAnnouncements() {
       const { error } = await supabase.from("post_data").insert([
         {
           post_content: newAnnouncement.post_content,
+          post_header: newAnnouncement.post_header,
           created_at: new Date().toISOString(),
-          post_user_id: userData.user_id, // Use userData from the hook
+          post_user_id: userData.user_id,
           post_group_id: groupId,
           group_name: groupName,
-          user_name: `${userData.user_name} ${userData.user_last_name}`, // Use userData from the hook
+          user_name: `${userData.user_name} ${userData.user_last_name}`,
         },
       ]);
 
@@ -123,7 +117,7 @@ export default function VolunteerAnnouncements() {
       fetchAnnouncements();
 
       setIsDialogOpen(false);
-      setNewAnnouncement({ post_content: "" });
+      setNewAnnouncement({ post_content: "", post_header: "" });
     } catch (err) {
       setError("Error creating announcement. Please try again.");
       console.error("Error creating announcement:", err);
@@ -148,20 +142,40 @@ export default function VolunteerAnnouncements() {
     return initials.toUpperCase();
   };
 
+  const filteredAnnouncements = announcements.filter(
+    (post) =>
+      post.post_content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.post_header.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
+  const loadMoreAnnouncements = () => {
+    setVisibleCount((prevCount) => prevCount + 10); // Load 10 more announcements
+  };
+
   return (
     <VolunteerSidebar>
-      <main className="flex justify-center">
-        <div className="w-full max-w-2xl space-y-6 p-4 lg:p-8">
-          {loading || userLoading ? ( // Check for loading state from user data
+      <main className="flex h-screen justify-center">
+        <div
+          className="w-full max-w-2xl space-y-6 overflow-y-auto p-4 lg:p-8"
+          style={{ maxHeight: "calc(100vh - 2rem)" }}
+        >
+          {loading || userLoading ? (
             <Spinner />
           ) : (
             <>
-              <header className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold">
-                  {groupData && groupData[0] && groupData[0].group_name
-                    ? `${groupData[0].group_name} Announcements`
-                    : "Volunteer Announcements"}
-                </h1>
+              <header className="mb-4 flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold">
+                    {groupData && groupData[0] && groupData[0].group_name
+                      ? `${groupData[0].group_name} Announcements`
+                      : "Volunteer Announcements"}
+                  </h1>
+                  {userData && (
+                    <p className="text-gray-600">
+                      Welcome, {userData.user_name} {userData.user_last_name}
+                    </p>
+                  )}
+                </div>
                 {groupId ? (
                   <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
@@ -176,12 +190,30 @@ export default function VolunteerAnnouncements() {
                       </DialogHeader>
                       <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
+                          <Label htmlFor="post_header">
+                            Announcement Header
+                          </Label>
+                          <Input
+                            id="post_header"
+                            type="text"
+                            value={newAnnouncement.post_header}
+                            onChange={(e) =>
+                              setNewAnnouncement({
+                                ...newAnnouncement,
+                                post_header: e.target.value,
+                              })
+                            }
+                            required
+                            placeholder="Enter the announcement header..."
+                            className="w-full"
+                          />
+                        </div>
+                        <div className="space-y-2">
                           <Label htmlFor="post_content">
                             Announcement Content
                           </Label>
-                          <Input
+                          <Textarea
                             id="post_content"
-                            type="text"
                             value={newAnnouncement.post_content}
                             onChange={(e) =>
                               setNewAnnouncement({
@@ -191,7 +223,7 @@ export default function VolunteerAnnouncements() {
                             }
                             required
                             placeholder="Enter your announcement here..."
-                            className="w-full"
+                            className="h-40 w-full"
                           />
                         </div>
 
@@ -206,45 +238,67 @@ export default function VolunteerAnnouncements() {
                 ) : null}
               </header>
 
+              <div className="mt-4">
+                <Input
+                  type="text"
+                  placeholder="Search announcements..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="mb-4"
+                />
+              </div>
+
               {error ? (
                 <p className="text-red-500">{error}</p>
-              ) : announcements.length > 0 ? (
-                <ul className="space-y-4">
-                  {announcements.map((post) => (
-                    <li
+              ) : filteredAnnouncements.length > 0 ? (
+                <div className="space-y-4">
+                  {filteredAnnouncements.slice(0, visibleCount).map((post) => (
+                    <div
                       key={post.post_id}
-                      className="flex items-start rounded-lg bg-white p-4 shadow-md dark:bg-gray-800"
+                      className="flex flex-col rounded-lg bg-white p-6 shadow-md dark:bg-gray-800"
                     >
-                      <div className="mr-4 flex-shrink-0">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500 text-lg font-semibold text-white">
-                          {getInitials(post.user_name)}
+                      <div className="mb-4 flex flex-col">
+                        <div className="flex items-center">
+                          <div className="mr-4 flex-shrink-0">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500 text-lg font-semibold text-white">
+                              {getInitials(`${post.user_name}`)}
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-gray-900 dark:text-gray-100">
+                                {post.user_name}
+                              </span>
+                              <span className="text-sm text-gray-500">
+                                {format(new Date(post.created_at), "PP")}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex-1">
-                        <div className="mb-2 flex items-center justify-between">
-                          <span className="font-semibold text-gray-900 dark:text-gray-100">
-                            {post.user_name}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            {format(new Date(post.created_at), "MMM dd, yyyy")}
-                          </span>
-                        </div>
-                        <p className="text-gray-800 dark:text-gray-300">
+                        <h2 className="mt-2 text-lg font-bold text-gray-900 dark:text-gray-100">
+                          {post.post_header}
+                        </h2>
+                        <p className="mt-2 text-gray-700 dark:text-gray-300">
                           {post.post_content}
                         </p>
-                        <Link
-                          to={`/volunteer-announcements-info/${post.post_id}`}
-                        >
-                          <Button variant="link" className="mt-2 text-blue-500">
-                            View Details
-                          </Button>
-                        </Link>
                       </div>
-                    </li>
+                      <Link
+                        to={`/volunteer-announcements-info/${post.post_id}`}
+                        className="text-blue-500 hover:underline"
+                      >
+                        Read more
+                      </Link>
+                    </div>
                   ))}
-                </ul>
+                </div>
               ) : (
-                <p className="text-gray-500">No announcements available.</p>
+                <p>No announcements found.</p>
+              )}
+
+              {visibleCount < filteredAnnouncements.length && (
+                <Button onClick={loadMoreAnnouncements} className="mt-4">
+                  Load More
+                </Button>
               )}
             </>
           )}

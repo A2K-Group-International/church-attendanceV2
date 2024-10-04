@@ -8,7 +8,7 @@ import { Button } from "../../shadcn/button";
 import Spinner from "../../components/Spinner";
 import { format } from "date-fns";
 import { useUser } from "../../authentication/useUser";
-import useUserData from "../../api/userUserData"; // Import your custom hook
+import useUserData from "../../api/userUserData";
 
 export default function VolunteerAnnouncementsInfo() {
   const { postId } = useParams();
@@ -17,17 +17,17 @@ export default function VolunteerAnnouncementsInfo() {
 
   const [post, setPost] = useState(null);
   const [groupData, setGroupData] = useState(null);
-  const { userData, loading: userLoading, error: userError } = useUserData(); // Use custom hook for user data
+  const { userData, loading: userLoading } = useUserData();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [commentError, setCommentError] = useState(""); // Error state for comment input
-  const [successMessage, setSuccessMessage] = useState(""); // Success message state
+  const [commentError, setCommentError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const fetchPostDetails = useCallback(async () => {
-    if (!userData) return; // Exit if userData is not available
+    if (!userData) return;
 
     try {
       const { data: postData, error: postError } = await supabase
@@ -73,7 +73,7 @@ export default function VolunteerAnnouncementsInfo() {
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     setCommentError("");
-    setSuccessMessage(""); // Reset success message
+    setSuccessMessage("");
 
     if (!newComment.trim()) {
       setCommentError("Comment cannot be blank.");
@@ -87,7 +87,7 @@ export default function VolunteerAnnouncementsInfo() {
         .from("comment_data")
         .insert([
           {
-            user_id: userData.user_id, // Use userData from the hook
+            user_id: userData.user_id,
             post_id: postId,
             comment_content: newComment,
           },
@@ -95,7 +95,6 @@ export default function VolunteerAnnouncementsInfo() {
 
       if (commentError) throw commentError;
 
-      // Set success message after successful submission
       setSuccessMessage("Comment added successfully!");
 
       fetchPostDetails();
@@ -151,30 +150,40 @@ export default function VolunteerAnnouncementsInfo() {
           </Button>
 
           <div className="flex flex-col rounded-lg bg-white p-6 shadow-md dark:bg-gray-800">
-            <div className="mb-4 flex items-start">
-              <div className="mr-4 flex-shrink-0">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500 text-lg font-semibold text-white">
-                  {getInitials(
-                    `${userData?.user_name} ${userData?.user_last_name}`,
-                  )}
+            <div className="mb-4 flex flex-col">
+              <div className="flex items-center">
+                <div className="mr-4 flex-shrink-0">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500 text-lg font-semibold text-white">
+                    {getInitials(
+                      `${userData?.user_name} ${userData?.user_last_name}`,
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="flex-1">
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="font-semibold text-gray-900 dark:text-gray-100">
-                    {userData
-                      ? `${userData.user_name} ${userData.user_last_name}`
-                      : "Unknown User"}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    {format(new Date(post.created_at), "MMM dd, yyyy")}
-                  </span>
+                <div className="flex-1">
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">
+                      {userData
+                        ? `${userData.user_name} ${userData.user_last_name}`
+                        : "Unknown User"}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {format(
+                        new Date(post.created_at),
+                        "MMM dd, yyyy hh:mm a",
+                      )}
+                    </span>
+                  </div>
                 </div>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {post.post_content}
-                </p>
               </div>
             </div>
+
+            <div className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
+              {post.post_header}
+            </div>
+
+            <p className="text-gray-700 dark:text-gray-300">
+              {post.post_content}
+            </p>
 
             <div className="mt-4">
               <h3 className="mb-2 font-semibold">Comments:</h3>
@@ -191,12 +200,14 @@ export default function VolunteerAnnouncementsInfo() {
                           </div>
                         </div>
                         <div className="flex-1">
-                          <span className="font-semibold">
-                            {`${comment.user_list.user_name} ${comment.user_list.user_last_name}`}
-                          </span>
-                          <p className="text-gray-500">
-                            {comment.comment_content}
-                          </p>
+                          <div className="flex flex-col">
+                            <span className="font-semibold">
+                              {`${comment.user_list.user_name} ${comment.user_list.user_last_name}`}
+                            </span>
+                            <p className="text-gray-500">
+                              {comment.comment_content}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -216,7 +227,7 @@ export default function VolunteerAnnouncementsInfo() {
                 />
                 {commentError && <p className="text-red-500">{commentError}</p>}
                 {successMessage && (
-                  <p className="text-green-500">{successMessage}</p> // Display success message
+                  <p className="text-green-500">{successMessage}</p>
                 )}
                 <Button
                   type="submit"
