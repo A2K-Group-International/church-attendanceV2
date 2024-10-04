@@ -1,47 +1,17 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
+import { format } from "date-fns"; // For date formatting
 import supabase from "../../api/supabase"; // Ensure this path is correct
 import VolunteerSidebar from "../../components/volunteer/VolunteerSidebar"; // Ensure this path is correct
 import { useUser } from "../../authentication/useUser"; // Ensure this path is correct
 import Spinner from "../../components/Spinner"; // Ensure this path is correct
-import { format } from "date-fns"; // For date formatting
+import useUserData from "../../api/userUserData"; // Ensure this path is correct
 
 export default function VolunteerProfile() {
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [availability, setAvailability] = useState(null); // New state for availability
+  const [availability, setAvailability] = useState(null); // State for availability
 
-  const { user } = useUser(); // Assuming useUser provides { user: { id, name, email } }
-
-  // Fetch the current user's data from user_list table
-  const fetchUserData = useCallback(async () => {
-    if (!user) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data, error } = await supabase
-        .from("user_list")
-        .select("*")
-        .eq("user_uuid", user.id)
-        .single();
-
-      if (error) throw error;
-
-      setUserData(data);
-    } catch (err) {
-      setError("Error fetching user data. Please try again.");
-      console.error("Error fetching user data:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
-
-  // Fetch user data when component mounts or user changes
-  useEffect(() => {
-    fetchUserData();
-  }, [fetchUserData]);
+  // Use the custom hook to fetch user data
+  const { userData, loading, error } = useUserData();
+  console.log(userData);
 
   // Function to get initials from user name
   const getInitials = (fullName) => {
@@ -63,7 +33,6 @@ export default function VolunteerProfile() {
   return (
     <VolunteerSidebar>
       <main className="flex justify-center p-4 lg:p-8">
-        {/* Container for centered content */}
         <div className="w-full max-w-xl space-y-6 rounded-md bg-white p-4 shadow-md">
           <header className="flex items-center justify-between">
             <h1 className="text-2xl font-bold">My Profile</h1>

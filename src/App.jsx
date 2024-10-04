@@ -14,6 +14,7 @@ import GroupsPage from "./pages/admin/GroupsPage";
 import VolunteerDashboard from "./pages/volunteer/VolunteerDashboard";
 import VolunteerEvents from "./pages/volunteer/VolunteerEvents";
 import VolunteerAnnouncements from "./pages/volunteer/VolunteerAnnouncements";
+import VolunteerAnnouncementsInfo from "./pages/volunteer/VolunteerAnnoucementsInfo";
 import VolunteerProfile from "./pages/volunteer/VolunteerProfile";
 
 function App() {
@@ -125,6 +126,15 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/volunteer-announcements-info/:postId"
+          element={
+            <ProtectedRoute>
+              <VolunteerAnnouncementsInfo />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/volunteer-profile"
           element={
