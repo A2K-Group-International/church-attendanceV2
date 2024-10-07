@@ -1,13 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import { fetchAllEvents } from "../../api/userService";
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
+import moment from "moment-timezone"; // moment with timezone support
 import {
   Dialog,
   DialogContent,
@@ -23,101 +21,91 @@ import {
   SheetTitle,
 } from "../../shadcn/sheet";
 
-dayjs.extend(utc);
-dayjs.extend(timezone);
-
 const AdminCalendar = () => {
   const [events, setEvents] = useState([]);
   const [error, setError] = useState("");
 
   // Dialog states
-  const [eventDialogOpen, setEventDialogOpen] = useState(false);
-  const [eventTitle, setEventTitle] = useState("");
-  const [eventTime, setEventTime] = useState("");
-  const [eventDescription, setEventDescription] = useState("");
+  const [eventDialog, setEventDialog] = useState({
+    open: false,
+    title: "",
+    time: "",
+    description: "",
+  });
 
   // Sheet states
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [sheetEventList, setSheetEventList] = useState([]);
 
+  // Fetch events and transform into FullCalendar format
   useEffect(() => {
     const fetchSchedule = async () => {
       try {
-        const fetchEvents = await fetchAllEvents();
-
-        const transformedEvents = fetchEvents.flatMap((event) => {
-          const localTimezone = dayjs.tz.guess(); // User's local timezone
-
-          const eventDate = dayjs(event.schedule).tz(localTimezone); // Adjust schedule to local timezone
-
-          return event.time.map((time) => {
-            const [hours, minutes] = time.split(":").slice(0, 2);
-
-            const eventDateTime = eventDate
-              .set("hour", parseInt(hours, 10))
-              .set("minute", parseInt(minutes, 10));
-
-            // Convert to UTC for consistent storage/display
-            const startUtc = eventDateTime.utc().toISOString();
-
-            return {
-              title: event.name,
-              start: startUtc,
-              description: event.description,
-            };
-          });
-        });
-
+        const fetchedEvents = await fetchAllEvents();
+        const transformedEvents = transformEvents(fetchedEvents);
         setEvents(transformedEvents);
       } catch (error) {
-        setError("Failed to load schedule.", error);
+        console.error("Error fetching schedule:", error);
+        setError("Failed to load schedule.");
       }
     };
 
     fetchSchedule();
   }, []);
 
-  // Event click handler for Modal
-  const handleEventClick = (info) => {
-    const { title, extendedProps, start } = info.event;
-    const { description } = extendedProps;
+  // Transform the events data for FullCalendar
+  const transformEvents = (events) => {
+    return events.flatMap((event) => {
+      const eventDate = moment(event.schedule_date);
 
-    const formattedTime = dayjs(start).format("YYYY-MM-DD HH:mm");
-    setEventTitle(title);
-    setEventTime(formattedTime);
-    setEventDescription(description);
-    setEventDialogOpen(true);
+      return event.time.map((time) => {
+        const [hours, minutes] = time.split(":").slice(0, 2);
+        const eventDateTime = eventDate.clone().set("hour", parseInt(hours, 10)).set("minute", parseInt(minutes, 10));
+        const startUtc = eventDateTime.utc().toISOString();
+
+        return {
+          title: event.name,
+          start: startUtc,
+          description: event.description,
+        };
+      });
+    });
   };
 
-  // Date click handler for Sheet
-  const handleDateClick = (info) => {
-    const clickedDate = dayjs(info.dateStr).format("YYYY-MM-DD");
+  // Event click handler for modal
+  const handleEventClick = useCallback((info) => {
+    const { title, extendedProps, start } = info.event;
+    const formattedTime = moment(start).format("YYYY-MM-DD HH:mm");
 
+    setEventDialog({
+      open: true,
+      title,
+      time: formattedTime,
+      description: extendedProps.description,
+    });
+  }, []);
+
+  // Date click handler for sheet
+  const handleDateClick = useCallback((info) => {
+    const clickedDate = moment(info.dateStr).format("YYYY-MM-DD");
     const matchedEvents = events.filter((item) => {
-      const eventDate = dayjs(item.start).format("YYYY-MM-DD");
+      const eventDate = moment(item.start).format("YYYY-MM-DD");
       return eventDate === clickedDate;
     });
 
-    if (matchedEvents.length > 0) {
-      setSheetEventList(matchedEvents); // Set events for the sheet
-    } else {
-      setSheetEventList([]); // Clear if no events found
-    }
-
+    setSheetEventList(matchedEvents.length > 0 ? matchedEvents : []);
     setIsSheetOpen(true);
-  };
+  }, [events]);
 
-  const handleEventMount = (info) => {
+  // Mark events that have ended
+  const handleEventMount = useCallback((info) => {
     const currentDate = new Date();
-    const eventEndDate = info.event.end
-      ? new Date(info.event.end)
-      : new Date(info.event.start);
-    // Event ended
+    const eventEndDate = info.event.end ? new Date(info.event.end) : new Date(info.event.start);
+
     if (eventEndDate < currentDate) {
-      // set the text decoration
       info.el.style.textDecoration = "line-through";
     }
-  };
+  }, []);
 
   return (
     <AdminSidebar>
@@ -137,7 +125,6 @@ const AdminCalendar = () => {
           editable={true}
           height={850}
           eventTimeFormat={{
-            // Ensure 24-hour format
             hour: "2-digit",
             minute: "2-digit",
             hour12: false,
@@ -146,13 +133,13 @@ const AdminCalendar = () => {
       </div>
 
       {/* Event Modal */}
-      <Dialog open={eventDialogOpen} onOpenChange={setEventDialogOpen}>
+      <Dialog open={eventDialog.open} onOpenChange={() => setEventDialog({ ...eventDialog, open: false })}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{eventTitle}</DialogTitle>
+            <DialogTitle>{eventDialog.title}</DialogTitle>
             <DialogDescription>
-              {eventDescription}
-              <p>{eventTime}</p>
+              {eventDialog.description}
+              <p>{`${moment(eventDialog.time).format('dddd')}, ${moment(eventDialog.time).format('MMMM Do h:mm')}`}</p>
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
@@ -169,10 +156,7 @@ const AdminCalendar = () => {
                   <div key={index}>
                     <h2 className="font-bold">{item.title}</h2>
                     <p>{item.description}</p>
-                    <p>
-                      {dayjs(item.start).tz(dayjs.tz.guess()).format("HH:mm")}
-                    </p>
-                    {/* Localized 24-hour format */}
+                    <p>{moment(item.start).tz(moment.tz.guess()).format("HH:mm")}</p>
                   </div>
                 ))
               ) : (
