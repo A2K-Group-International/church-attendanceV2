@@ -2,6 +2,7 @@ import Login from "../authentication/Login";
 import RegisterUser from "./registration/RegisterUser";
 import EditWalkInRegister from "./registration/EditWalkInRegister";
 import DialogWalkInRegister from "./registration/DialogWalkInRegister";
+import PublicCalendar from "./PublicCalendar";
 import churchBg from "../assets/images/church-background.webp";
 import churchIcon from "../assets/svg/churchIcon.svg";
 import CarouselEvents from "../components/CarouselEvents";
@@ -33,7 +34,7 @@ export default function Home() {
             <div className="mx-auto w-52 lg:w-auto">
               <CarouselEvents />
               <div className="flex justify-center">
-                <Button className="">See all events</Button>
+                <PublicCalendar />
               </div>
             </div>
           </div>
