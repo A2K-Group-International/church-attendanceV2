@@ -493,16 +493,8 @@ export default function Attendance() {
               Manage and track attendance records.
             </p>
           </div>
-          <div className="pl-8">
-            <DialogWalkInRegister
-              btnName="Add manually"
-              title="Add manually"
-              description="Add attendance manually"
-              btnSubmit="Submit"
-            />
-          </div>
         </div>
-        <div className="mb-6 flex flex-col items-start space-y-4 sm:flex-row sm:items-center sm:space-x-4 sm:space-y-0">
+        <div className="mb-6 flex flex-col flex-wrap items-start gap-y-2 space-y-4 sm:flex-row sm:items-center sm:space-x-4 sm:space-y-0">
           <div className="flex items-center space-x-2 sm:w-auto">
             <CalendarIcon className="mr-2 h-4 w-4" />
             <Popover>
@@ -572,10 +564,18 @@ export default function Attendance() {
           <Button
             onClick={handleExportExcel}
             variant="outline"
-            className="w-full sm:w-auto"
+            className="w-20"
           >
             <img src={downloadIcon} alt="Download Icon" />
           </Button>
+        </div>
+        <div className="sm:mb-2 sm:ml-8 sm:w-44">
+          <DialogWalkInRegister
+            btnName="Add"
+            title="Add manually"
+            description="Add attendance manually"
+            btnSubmit="Submit"
+          />
         </div>
         <div className="rounded-lg bg-card shadow">
           {loading ? (

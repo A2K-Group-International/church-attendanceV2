@@ -90,6 +90,9 @@ body {
   border: 1px solid hsl(var(--border));
   border-radius: var(--radius);
 }
+.fc-event-title{
+  cursor: pointer;
+}
 .fc-button-group{
   gap: 5px;
 }

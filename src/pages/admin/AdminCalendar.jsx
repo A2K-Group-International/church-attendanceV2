@@ -5,7 +5,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import { fetchAllEvents } from "../../api/userService";
-import moment from "moment-timezone"; // moment with timezone support
+import moment from "moment-timezone";
 import {
   Dialog,
   DialogContent,
@@ -60,7 +60,10 @@ const AdminCalendar = () => {
 
       return event.time.map((time) => {
         const [hours, minutes] = time.split(":").slice(0, 2);
-        const eventDateTime = eventDate.clone().set("hour", parseInt(hours, 10)).set("minute", parseInt(minutes, 10));
+        const eventDateTime = eventDate
+          .clone()
+          .set("hour", parseInt(hours, 10))
+          .set("minute", parseInt(minutes, 10));
         const startUtc = eventDateTime.utc().toISOString();
 
         return {
@@ -86,21 +89,26 @@ const AdminCalendar = () => {
   }, []);
 
   // Date click handler for sheet
-  const handleDateClick = useCallback((info) => {
-    const clickedDate = moment(info.dateStr).format("YYYY-MM-DD");
-    const matchedEvents = events.filter((item) => {
-      const eventDate = moment(item.start).format("YYYY-MM-DD");
-      return eventDate === clickedDate;
-    });
+  const handleDateClick = useCallback(
+    (info) => {
+      const clickedDate = moment(info.dateStr).format("YYYY-MM-DD");
+      const matchedEvents = events.filter((item) => {
+        const eventDate = moment(item.start).format("YYYY-MM-DD");
+        return eventDate === clickedDate;
+      });
 
-    setSheetEventList(matchedEvents.length > 0 ? matchedEvents : []);
-    setIsSheetOpen(true);
-  }, [events]);
+      setSheetEventList(matchedEvents.length > 0 ? matchedEvents : []);
+      setIsSheetOpen(true);
+    },
+    [events],
+  );
 
   // Mark events that have ended
   const handleEventMount = useCallback((info) => {
     const currentDate = new Date();
-    const eventEndDate = info.event.end ? new Date(info.event.end) : new Date(info.event.start);
+    const eventEndDate = info.event.end
+      ? new Date(info.event.end)
+      : new Date(info.event.start);
 
     if (eventEndDate < currentDate) {
       info.el.style.textDecoration = "line-through";
@@ -127,19 +135,22 @@ const AdminCalendar = () => {
           eventTimeFormat={{
             hour: "2-digit",
             minute: "2-digit",
-            hour12: false,
+            hour12: true,
           }}
         />
       </div>
 
       {/* Event Modal */}
-      <Dialog open={eventDialog.open} onOpenChange={() => setEventDialog({ ...eventDialog, open: false })}>
+      <Dialog
+        open={eventDialog.open}
+        onOpenChange={() => setEventDialog({ ...eventDialog, open: false })}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{eventDialog.title}</DialogTitle>
             <DialogDescription>
               {eventDialog.description}
-              <p>{`${moment(eventDialog.time).format('dddd')}, ${moment(eventDialog.time).format('MMMM Do h:mm')}`}</p>
+              <p>{`${moment(eventDialog.time).format("dddd")}, ${moment(eventDialog.time).format("MMMM Do h:mm")}`}</p>
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
@@ -156,7 +167,9 @@ const AdminCalendar = () => {
                   <div key={index}>
                     <h2 className="font-bold">{item.title}</h2>
                     <p>{item.description}</p>
-                    <p>{moment(item.start).tz(moment.tz.guess()).format("HH:mm")}</p>
+                    <p>
+                      {moment(item.start).tz(moment.tz.guess()).format("HH:mm")}
+                    </p>
                   </div>
                 ))
               ) : (

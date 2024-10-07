@@ -65,6 +65,23 @@ export async function fetchAllEvents() {
   }
 }
 
+// Get private events
+
+export async function fetchPrivateEvents() {
+  try {
+    const { data, error } = await supabase
+      .from("schedule")
+      .select("*")
+      .eq("schedule_privacy", "public");
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error fetching private events: ", error.message);
+    throw new Error("Failed to load private events.");
+  }
+}
+
 // Insert new schedule
 export async function insertNewSchedule(schedule, time) {
   try {
