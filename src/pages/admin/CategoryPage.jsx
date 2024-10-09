@@ -33,10 +33,9 @@ export default function CategoryPage() {
     <RequestPage>
       <AddNewCategory />
       <div className="flex flex-col gap-y-2">
-      <CategoryData categories={categories} />
-      <RequestCategory />
+        <CategoryData categories={categories} />
+        <RequestCategory />
       </div>
-      
     </RequestPage>
   );
 }

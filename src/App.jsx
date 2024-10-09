@@ -16,8 +16,7 @@ import VolunteerEvents from "./pages/volunteer/VolunteerEvents";
 import VolunteerAnnouncements from "./pages/volunteer/VolunteerAnnouncements";
 import VolunteerAnnouncementsInfo from "./pages/volunteer/VolunteerAnnoucementsInfo";
 import VolunteerProfile from "./pages/volunteer/VolunteerProfile";
-import RequestPage from "./pages/admin/RequestPage";
-import CategoryPage from "./pages/admin/categorypage";
+import CategoryPage from "./pages/admin/CategoryPage";
 
 function App() {
   return (
