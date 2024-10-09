@@ -143,11 +143,6 @@ export default function UsersPage() {
     }
   };
 
-  // Function to get row class name based on confirmation status
-  const getRowClassName = (isConfirmed) => {
-    return isConfirmed ? "bg-green-100" : "bg-red-100";
-  };
-
   // Rows Mapping
   const rows = data.map((item, index) => {
     const isConfirmed = item.is_confirmed;
@@ -162,16 +157,23 @@ export default function UsersPage() {
       ) : (
         <span className="text-red-600">No</span> // Highlighted for non-confirmed users
       ),
-      <div className="flex space-x-2">
+      // Action Buttons with Proper Alignment
+      <div className="flex items-center justify-end space-x-2">
+        {/* Approve Account Button */}
         <Button
           key={item.user_uuid}
           onClick={() => handleApproveClick(item)}
           variant="primary"
           disabled={isConfirmed}
-          className={isConfirmed ? "cursor-not-allowed opacity-50" : ""} // Style for confirmed users
+          className={`${
+            isConfirmed
+              ? "cursor-not-allowed opacity-50"
+              : "hover:bg-primary-600"
+          }`}
         >
           {isConfirmed ? "Confirmed" : "Approve Account"}
         </Button>
+        {/* Change Role Button */}
         <Button onClick={() => handleChangeRoleClick(item)} variant="secondary">
           Change Role
         </Button>
