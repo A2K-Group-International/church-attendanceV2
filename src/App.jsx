@@ -16,6 +16,8 @@ import VolunteerEvents from "./pages/volunteer/VolunteerEvents";
 import VolunteerAnnouncements from "./pages/volunteer/VolunteerAnnouncements";
 import VolunteerAnnouncementsInfo from "./pages/volunteer/VolunteerAnnoucementsInfo";
 import VolunteerProfile from "./pages/volunteer/VolunteerProfile";
+import RequestPage from "./pages/admin/RequestPage";
+import CategoryPage from "./pages/admin/categorypage";
 
 function App() {
   return (
@@ -75,6 +77,14 @@ function App() {
           element={
             <ProtectedRoute>
               <AdminCalendar />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/category"
+          element={
+            <ProtectedRoute>
+              <CategoryPage />
             </ProtectedRoute>
           }
         />
