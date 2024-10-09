@@ -11,6 +11,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "../../shadcn/pagination";
+import RequestPage from "./RequestPage";
 
 const headers = ["#", "Email", "Name", "Role", "Confirmed", "Action"];
 
@@ -182,10 +183,7 @@ export default function UsersPage() {
   });
 
   return (
-    <AdminSidebar>
-      <main className="mx-auto max-w-7xl p-4 lg:p-8">
-        <h1 className="text-2xl font-bold">Users</h1>
-
+    <RequestPage>
         {/* Feedback Message */}
         {feedbackMessage && (
           <div className="mt-4 rounded bg-blue-100 p-4 text-blue-800">
@@ -389,8 +387,6 @@ export default function UsersPage() {
             </div>
           )}
         </div>
-      </main>
-
       {/* Approve Account Dialog */}
       {isApproveDialogOpen && (
         <div
@@ -467,6 +463,6 @@ export default function UsersPage() {
           </div>
         </div>
       )}
-    </AdminSidebar>
+    </RequestPage>
   );
 }

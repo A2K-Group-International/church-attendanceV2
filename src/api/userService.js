@@ -66,7 +66,6 @@ export async function fetchAllEvents() {
 }
 
 // Get private events
-
 export async function fetchPrivateEvents() {
   try {
     const { data, error } = await supabase
@@ -140,3 +139,20 @@ const signUp = async (email, password, userData) => {
     setSignUpLoading(false);
   }
 };
+
+// Fetch Approved category
+export async function fetchApprovedCategory() {
+  try {
+    const { data, error } = await supabase
+      .from("category_list")
+      .select("*")
+      .eq("is_approved", true)
+      .order("id", { ascending: false });
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error fetching category list: ", error.message);
+    throw new Error("Failed to load category list.");
+  }
+}

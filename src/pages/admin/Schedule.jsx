@@ -92,7 +92,6 @@ export default function AdminNewSchedule() {
     }
 
     try {
-      let response;
       if (editId) {
         // Update existing event
         const { error } = await supabase
@@ -432,7 +431,9 @@ export default function AdminNewSchedule() {
           <Dialog
             open={isDialogOpen}
             onOpenChange={(open) => {
-              if (!open) resetForm(); // Reset form on dialog close
+              if (open) {
+                resetForm(); // Call your form reset function here
+              }
               setIsDialogOpen(open);
             }}
           >

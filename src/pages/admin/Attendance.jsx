@@ -484,7 +484,7 @@ export default function Attendance() {
   ]);
 
   return (
-    <AdminSidebar>
+    <AdminSidebar titlePage="Attendance" descriptionPage="Manage and track attendance records.">
       <main className="mx-auto max-w-7xl p-4 lg:p-8">
         <div className="mb-2 md:flex md:justify-between">
           <div className="mb-8">
