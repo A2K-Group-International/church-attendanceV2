@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 import Logout from "../../authentication/Logout";
 import { Sheet, SheetTrigger, SheetContent } from "../../shadcn/sheet";
 import { Button } from "../../shadcn/button";
@@ -5,6 +7,8 @@ import NavigationItem from "../NavigationItem";
 import FamilyIcon from "../../assets/svg/family.svg";
 import CalendarIcon from "../../assets/svg/calendarIcon.svg";
 import HamburgerIcon from "../../assets/svg/hamburgerIcon.svg";
+import { useUser } from "../../authentication/useUser"; // Import useUser to get the current user
+import useUserData from "../../api/useUserData"; // Import useUserData to fetch user data
 
 const userLinks = [
   { link: "/events-page", label: "Events", icon: CalendarIcon },
@@ -12,15 +16,35 @@ const userLinks = [
 ];
 
 export default function UserSidebar({ children }) {
+  const { user } = useUser(); // Get the current user
+  const { userData, error } = useUserData(user ? user.id : null); // Get user data
+  const navigate = useNavigate(); // Initialize useNavigate for navigation
+
+  useEffect(() => {
+    if (error) {
+      console.error("Error fetching user data:", error);
+    }
+  }, [error]);
+
+  const handleSwitchToVolunteer = () => {
+    navigate("/volunteer-announcements"); // Navigate to the volunteer announcements page
+  };
+
   return (
     <div className="flex h-screen w-full">
-      {/* large screens */}
+      {/* Large screens */}
       <div className="hidden lg:block lg:w-64 lg:shrink-0 lg:border-r lg:bg-gray-100 dark:lg:bg-gray-800">
         <div className="flex h-full flex-col justify-between px-4 py-6">
           <div className="space-y-6">
-            <div className="flex items-center gap-2 font-bold">
-              <span className="text-xl">Family Management Centre</span>
-            </div>
+            {/* Welcome Message */}
+            {userData && (
+              <div className="mt-2 flex flex-col">
+                <span className="text-lg font-semibold">Welcome,</span>
+                <span className="text-xl font-bold">
+                  {userData.user_name} {userData.user_last_name}
+                </span>
+              </div>
+            )}
             <nav className="space-y-1">
               <ul>
                 {userLinks.map(({ link, label, icon }) => (
@@ -32,6 +56,16 @@ export default function UserSidebar({ children }) {
             </nav>
           </div>
           <div className="space-y-4">
+            {/* Switch to Volunteer Button */}
+            {userData?.user_role === "volunteer" && (
+              <Button
+                onClick={handleSwitchToVolunteer}
+                variant="outline"
+                className="w-full" // Add full width for better layout
+              >
+                Switch to Volunteer
+              </Button>
+            )}
             <Logout />
           </div>
         </div>
@@ -58,6 +92,15 @@ export default function UserSidebar({ children }) {
               <SheetContent side="right" className="w-64">
                 <div className="flex h-full flex-col justify-between px-4 py-6">
                   <div className="space-y-6">
+                    {/* Welcome Message for Small Screens */}
+                    {userData && (
+                      <div className="mt-2 flex flex-col">
+                        <span className="text-lg font-semibold">Welcome,</span>
+                        <span className="text-xl font-bold">
+                          {userData.user_name} {userData.user_last_name}
+                        </span>
+                      </div>
+                    )}
                     <nav className="space-y-1">
                       <ul>
                         {userLinks.map(({ link, label, icon }) => (
@@ -69,6 +112,16 @@ export default function UserSidebar({ children }) {
                     </nav>
                   </div>
                   <div className="space-y-4">
+                    {/* Switch to Volunteer Button for Small Screens */}
+                    {userData?.user_role === "volunteer" && (
+                      <Button
+                        onClick={handleSwitchToVolunteer}
+                        variant="outline"
+                        className="w-full" // Add full width for better layout
+                      >
+                        Switch to Volunteer
+                      </Button>
+                    )}
                     <Logout />
                   </div>
                 </div>
@@ -77,6 +130,8 @@ export default function UserSidebar({ children }) {
           </div>
         </header>
         {children}
+        {error && <div className="error-message">{error}</div>}{" "}
+        {/* Display error message if any */}
       </div>
     </div>
   );
