@@ -263,12 +263,12 @@ export default function Attendance() {
         setValue("guardian_last_name", itemToEdit.guardian_last_name);
         setValue("guardian_telephone", itemToEdit.guardian_telephone);
         // setValue("selectedEvent", itemToEdit.selected_event);
-        // setValue("preferredTime", itemToEdit.preferred_time);
+        // setValue("preferredTime", itemToEdit.preferred_time); For future update in attendance where they can edit event and time
         setValue("children_first_name", itemToEdit.children_first_name);
         setValue("children_last_name", itemToEdit.children_last_name);
       }
     } catch (error) {
-      console.log(error);
+      console.log("Error updating", error);
     }
   };
 
