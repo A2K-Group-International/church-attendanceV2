@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
 import supabase from "../../api/supabase";
 import VolunteerSidebar from "../../components/volunteer/VolunteerSidebar";
 import { useUser } from "../../authentication/useUser";
@@ -18,8 +17,8 @@ import {
 import { Input } from "../../shadcn/input";
 import { Textarea } from "../../shadcn/textarea";
 import { Label } from "../../shadcn/label";
-import { format } from "date-fns";
-import useUserData from "../../api/userUserData";
+import useUserData from "../../api/useUserData";
+import AnnouncementCard from "../../components/volunteer/AnnouncementCard"; // Import the new component
 
 export default function VolunteerAnnouncements() {
   const [groupId, setGroupId] = useState(null);
@@ -132,16 +131,6 @@ export default function VolunteerAnnouncements() {
     fetchAnnouncements();
   }, [fetchAnnouncements]);
 
-  const getInitials = (fullName) => {
-    if (!fullName) return "V";
-    const names = fullName.split(" ");
-    const initials =
-      names.length >= 2
-        ? `${names[0][0]}${names[names.length - 1][0]}`
-        : names[0][0];
-    return initials.toUpperCase();
-  };
-
   const filteredAnnouncements = announcements.filter(
     (post) =>
       post.post_content.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -253,42 +242,7 @@ export default function VolunteerAnnouncements() {
               ) : filteredAnnouncements.length > 0 ? (
                 <div className="space-y-4">
                   {filteredAnnouncements.slice(0, visibleCount).map((post) => (
-                    <div
-                      key={post.post_id}
-                      className="flex flex-col rounded-lg bg-white p-6 shadow-md dark:bg-gray-800"
-                    >
-                      <div className="mb-4 flex flex-col">
-                        <div className="flex items-center">
-                          <div className="mr-4 flex-shrink-0">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500 text-lg font-semibold text-white">
-                              {getInitials(`${post.user_name}`)}
-                            </div>
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex flex-col">
-                              <span className="font-semibold text-gray-900 dark:text-gray-100">
-                                {post.user_name}
-                              </span>
-                              <span className="text-sm text-gray-500">
-                                {format(new Date(post.created_at), "PP")}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <h2 className="mt-2 text-lg font-bold text-gray-900 dark:text-gray-100">
-                          {post.post_header}
-                        </h2>
-                        <p className="mt-2 text-gray-700 dark:text-gray-300">
-                          {post.post_content}
-                        </p>
-                      </div>
-                      <Link
-                        to={`/volunteer-announcements-info/${post.post_id}`}
-                        className="text-blue-500 hover:underline"
-                      >
-                        Read more
-                      </Link>
-                    </div>
+                    <AnnouncementCard key={post.post_id} post={post} />
                   ))}
                 </div>
               ) : (

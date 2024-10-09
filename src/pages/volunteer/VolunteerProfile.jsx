@@ -4,7 +4,7 @@ import supabase from "../../api/supabase"; // Ensure this path is correct
 import VolunteerSidebar from "../../components/volunteer/VolunteerSidebar"; // Ensure this path is correct
 import { useUser } from "../../authentication/useUser"; // Ensure this path is correct
 import Spinner from "../../components/Spinner"; // Ensure this path is correct
-import useUserData from "../../api/userUserData"; // Ensure this path is correct
+import useUserData from "../../api/useUserData"; // Ensure this path is correct
 import { Link } from "react-router-dom"; // Make sure you have this import for navigation
 
 export default function VolunteerProfile() {
