@@ -83,7 +83,7 @@ export default function AddNewCategory() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button onClick={() => setOpen(true)}>Add New Category</Button>
+        <Button size="sm" onClick={() => setOpen(true)}>Add New Category</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

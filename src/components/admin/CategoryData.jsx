@@ -1,20 +1,30 @@
 import PropTypes from "prop-types";
 import Table from "../Table";
-import AlertCategory from "./AlertCagory";
+import AlertAddSubCategory from "./AlertAddSubCategory";
+import BtnDeleteCategory from "./BtnDeleteCategory";
 
 // Headers for table
 const headers = ["#", "Category Name"];
 
 export default function CategoryData({ categories }) {
-  const rows = categories.map((item, index) => [
-    index + 1,
-    <AlertCategory
-      key={index}
-      categoryName={item.category_name}
-      subCategory={item.sub_category}
-    />,
-  ]);
-  return <Table headers={headers} rows={rows} className="border-b-2 border-gray-100 h-96 max-w-full" />;
+  const rows = categories
+    .filter((item) => item.is_approved) // Filter items where is_approved is true
+    .map((item, index) => [
+      index + 1,
+      <AlertAddSubCategory
+        key={index}
+        categoryName={item.category_name}
+        subCategory={item.sub_category}
+      />,
+      <BtnDeleteCategory key={index} id={item.id} />,
+    ]);
+  return (
+    <Table
+      headers={headers}
+      rows={rows}
+      className="no-scrollbar mt-2 !block max-h-96 min-h-96 !max-w-full rounded-xl border border-gray-100"
+    />
+  );
 }
 
 // Define PropTypes to enforce type checking
