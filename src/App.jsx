@@ -16,7 +16,11 @@ import VolunteerEvents from "./pages/volunteer/VolunteerEvents";
 import VolunteerAnnouncements from "./pages/volunteer/VolunteerAnnouncements";
 import VolunteerAnnouncementsInfo from "./pages/volunteer/VolunteerAnnoucementsInfo";
 import VolunteerProfile from "./pages/volunteer/VolunteerProfile";
+import VolunteerDuties from "./pages/volunteer/VolunteerDuties";
+
+
 import CategoryPage from "./pages/admin/CategoryPage";
+
 
 function App() {
   return (
@@ -140,6 +144,14 @@ function App() {
           element={
             <ProtectedRoute>
               <VolunteerAnnouncementsInfo />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer-duties"
+          element={
+            <ProtectedRoute>
+              <VolunteerDuties />
             </ProtectedRoute>
           }
         />
