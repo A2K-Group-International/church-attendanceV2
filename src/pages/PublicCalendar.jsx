@@ -84,7 +84,6 @@ export default function PublicCalendar() {
           .set("hour", parseInt(hours, 10))
           .set("minute", parseInt(minutes, 10));
         const startUtc = eventDateTime.utc().toISOString();
-        console.log(startUtc);
 
         return {
           title: event.name,
@@ -103,7 +102,6 @@ export default function PublicCalendar() {
     setEventName(title);
     setEventTime(eventTime);
     setEventSchedule(eventSchedule);
-    console.log(eventTime);
     setEventDialog({
       open: true,
       title,

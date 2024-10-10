@@ -27,7 +27,7 @@ import { Button } from "../../shadcn/button";
 import PropTypes from "prop-types";
 import { Icon } from "@iconify/react";
 
-export default function AlertCategory({ categoryName, subCategory }) {
+export default function AlertAddSubCategory({ categoryName, subCategory }) {
   const subCategories = Array.isArray(subCategory) ? subCategory : [];
   const addSubCategory = () => {}; // placeholder for adding subcategory
 
@@ -112,6 +112,6 @@ export default function AlertCategory({ categoryName, subCategory }) {
   );
 }
 
-AlertCategory.propTypes = {
+AlertAddSubCategory.propTypes = {
   categoryName: PropTypes.string.isRequired,
 };

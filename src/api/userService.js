@@ -141,12 +141,11 @@ const signUp = async (email, password, userData) => {
 };
 
 // Fetch Approved category
-export async function fetchApprovedCategory() {
+export async function fetchCategory() {
   try {
     const { data, error } = await supabase
       .from("category_list")
       .select("*")
-      .eq("is_approved", true)
       .order("id", { ascending: false });
 
     if (error) throw error;
@@ -154,5 +153,56 @@ export async function fetchApprovedCategory() {
   } catch (error) {
     console.error("Error fetching category list: ", error.message);
     throw new Error("Failed to load category list.");
+  }
+}
+
+export async function DeleteCategory(id) {
+  try {
+    const { data, error } = await supabase
+      .from("category_list")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error deleting category", error);
+  }
+}
+
+// Handling the update Approved Request Category
+export async function RequestCategory(id) {
+  try {
+    const { data, error } = await supabase
+      .from("category_list") // Ensure the table name is correct
+      .update({ is_approved: true, request_status: "Approved" }) // Update the is_approved field
+      .eq("id", id) // Match the id
+      .select(); // return the updated row(s)
+
+    if (error) {
+      throw error; // Throw an error if something goes wrong
+    }
+    return data; // Return the updated data
+  } catch (error) {
+    console.error("Error executing approval: ", error); // Log any errors
+  }
+}
+
+// Handling the Reject Request Category
+
+export async function RejectRequestCategory(id) {
+  try {
+    const { data, error } = await supabase
+      .from("category_list") // Ensure the table name is correct
+      .update({ is_rejected: true, request_status: "Rejected" }) // Update the is_approved field
+      .eq("id", id) // Match the id
+      .select(); // return the updated row(s)
+
+    if (error) {
+      throw error; // Throw an error if something goes wrong
+    }
+    return data; // Return the updated data
+  } catch (error) {
+    console.error("Error executing Rejection: ", error);
   }
 }
