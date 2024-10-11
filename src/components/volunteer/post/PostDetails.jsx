@@ -3,7 +3,7 @@
 import React from "react";
 import { format } from "date-fns";
 import Reactions from "./Reactions"; // Import the Reactions component
-import { Separator } from "../../../shadcn/Separator"; // Import the Separator component
+import { Separator } from "../../../shadcn/separator"; // Import the Separator component
 import PropTypes from "prop-types";
 
 const PostDetails = ({ post, userData, getInitials, handleReaction }) => {
