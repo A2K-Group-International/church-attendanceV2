@@ -18,12 +18,12 @@ import { Input } from "../../shadcn/input";
 import { Textarea } from "../../shadcn/textarea";
 import { Label } from "../../shadcn/label";
 import useUserData from "../../api/useUserData";
-import AnnouncementCard from "../../components/volunteer/AnnouncementCard"; // Import the new component
+import useAnnouncements from "../../api/useAnnouncements"; // Import the new hook
+import AnnouncementCard from "../../components/volunteer/post/AnnouncementCard"; // Import the new component
 
 export default function VolunteerAnnouncements() {
   const [groupId, setGroupId] = useState(null);
   const [groupData, setGroupData] = useState(null);
-  const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -38,6 +38,13 @@ export default function VolunteerAnnouncements() {
 
   const { user } = useUser();
   const { userData, loading: userLoading, error: userError } = useUserData();
+
+  // Use the custom hook to fetch announcements
+  const {
+    announcements,
+    loading: announcementsLoading,
+    error: announcementsError,
+  } = useAnnouncements(groupId);
 
   const fetchGroupInfo = useCallback(async () => {
     if (!userData) return;
@@ -59,30 +66,6 @@ export default function VolunteerAnnouncements() {
       setLoading(false);
     }
   }, [userData]);
-
-  const fetchAnnouncements = useCallback(async () => {
-    if (!groupId) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data, error } = await supabase
-        .from("post_data")
-        .select("*")
-        .eq("post_group_id", groupId)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      setAnnouncements(data);
-    } catch (err) {
-      setError("Error fetching announcements. Please try again.");
-      console.error("Error fetching announcements:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [groupId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -113,6 +96,7 @@ export default function VolunteerAnnouncements() {
 
       if (error) throw error;
 
+      // Fetch the announcements again after adding a new one
       fetchAnnouncements();
 
       setIsDialogOpen(false);
@@ -126,10 +110,6 @@ export default function VolunteerAnnouncements() {
   useEffect(() => {
     fetchGroupInfo();
   }, [fetchGroupInfo]);
-
-  useEffect(() => {
-    fetchAnnouncements();
-  }, [fetchAnnouncements]);
 
   const filteredAnnouncements = announcements.filter(
     (post) =>
@@ -148,7 +128,7 @@ export default function VolunteerAnnouncements() {
           className="w-full max-w-2xl space-y-6 overflow-y-auto p-4 lg:p-8"
           style={{ maxHeight: "calc(100vh - 2rem)" }}
         >
-          {loading || userLoading ? (
+          {loading || userLoading || announcementsLoading ? (
             <Spinner />
           ) : (
             <>
@@ -216,6 +196,20 @@ export default function VolunteerAnnouncements() {
                           />
                         </div>
 
+                        {/* Attach File button above the submit button */}
+                        <div className="flex justify-between">
+                          <Button
+                            type="button"
+                            className="w-full"
+                            onClick={() => {
+                              // Implement attachment functionality later
+                              console.log("Attach file clicked");
+                            }}
+                          >
+                            Attach File
+                          </Button>
+                        </div>
+
                         <DialogFooter>
                           <DialogClose asChild>
                             <Button type="submit">Post Announcement</Button>
@@ -237,22 +231,25 @@ export default function VolunteerAnnouncements() {
                 />
               </div>
 
-              {error ? (
-                <p className="text-red-500">{error}</p>
-              ) : filteredAnnouncements.length > 0 ? (
-                <div className="space-y-4">
-                  {filteredAnnouncements.slice(0, visibleCount).map((post) => (
-                    <AnnouncementCard key={post.post_id} post={post} />
-                  ))}
-                </div>
-              ) : (
-                <p>No announcements found.</p>
-              )}
+              <div className="space-y-4">
+                {filteredAnnouncements.slice(0, visibleCount).map((post) => (
+                  <AnnouncementCard
+                    key={post.post_id}
+                    post={post}
+                    userId={userData.user_id}
+                  />
+                ))}
+              </div>
 
-              {visibleCount < filteredAnnouncements.length && (
+              {filteredAnnouncements.length > visibleCount && (
                 <Button onClick={loadMoreAnnouncements} className="mt-4">
                   Load More
                 </Button>
+              )}
+
+              {error && <div className="text-red-500">{error}</div>}
+              {announcementsError && (
+                <div className="text-red-500">{announcementsError}</div>
               )}
             </>
           )}

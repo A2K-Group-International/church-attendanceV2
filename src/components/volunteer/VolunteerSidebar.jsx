@@ -28,7 +28,6 @@ export default function VolunteerSidebar({ children }) {
   const { user } = useUser(); // Get the current user
   const { userData, error } = useUserData(user ? user.id : null); // Get user data using useUserData
   const navigate = useNavigate(); // Initialize useNavigate for navigation
-  console.log(userData);
 
   useEffect(() => {
     if (error) {
