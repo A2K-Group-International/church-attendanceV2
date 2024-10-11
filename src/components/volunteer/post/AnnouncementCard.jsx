@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { FaThumbsUp, FaHeart, FaStar } from "react-icons/fa";
-import { Separator } from "../../../shadcn/Separator";
+import { Separator } from "../../../shadcn/separator";
 import PropTypes from "prop-types";
 
 const AnnouncementCard = ({ post, handleReaction }) => {
