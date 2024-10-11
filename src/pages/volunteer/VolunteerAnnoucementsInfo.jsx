@@ -8,8 +8,8 @@ import { Button } from "../../shadcn/button";
 import Spinner from "../../components/Spinner";
 import { useUser } from "../../authentication/useUser";
 import useUserData from "../../api/useUserData";
-import PostDetails from "../../components/volunteer/PostDetails";
-import CommentsSection from "../../components/volunteer/CommentsSection";
+import PostDetails from "../../components/volunteer/post/PostDetails";
+import CommentsSection from "../../components/volunteer/post/CommentsSection";
 
 export default function VolunteerAnnouncementsInfo() {
   const { postId } = useParams();
