@@ -9,6 +9,7 @@ import HamburgerIcon from "../../assets/svg/hamburgerIcon.svg";
 import CalendarIcon from "../../assets/svg/calendarIcon.svg";
 import ChurchIcon from "../../assets/svg/churchIcon.svg";
 import PersonIcon from "../../assets/svg/person.svg";
+import UploadIcon from "../../assets/svg/upload.svg";
 import { useUser } from "../../authentication/useUser";
 import useUserData from "../../api/useUserData";
 
@@ -21,6 +22,7 @@ const volunteerLinks = [
   { link: "/volunteer-dashboard", label: "Dashboard", icon: DashboardIcon },
   { link: "/volunteer-duties", label: "Duties", icon: PersonIcon },
   { link: "/volunteer-events", label: "Events", icon: CalendarIcon },
+  { link: "/volunteer-upload", label: "Upload", icon: UploadIcon },
   { link: "/volunteer-profile", label: "Profile", icon: PersonIcon },
 ];
 
