@@ -21,7 +21,6 @@ import CategoryPage from "./pages/admin/CategoryPage";
 import VolunteerClasses from "./pages/volunteer/VolunteerClasses";
 import VolunteerClass from "./pages/volunteer/VolunteerClass";
 import VolunteerUpload from "./pages/volunteer/VolunteerUpload";
-import CategoryPage from "./pages/admin/CategoryPage";
 
 function App() {
   return (
@@ -173,9 +172,9 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route 
-        path="/volunteer-classes/:id" 
-        element={<VolunteerClass />} />
+        <Route path="/volunteer-classes/:id" element={<VolunteerClass />} />
+
+        <Route
           path="/volunteer-upload"
           element={
             <ProtectedRoute>

@@ -20,6 +20,7 @@ export default function Home() {
             <div className="grid grid-cols-2 gap-2 p-2 sm:grid-cols-4">
               <Login />
               <RegisterUser />
+              {/* <BtnSelectRegistration /> */}
               <DialogWalkInRegister btnName="Walk-In Register" title="Register" description="Fill up the forms for one-time registration" btnSubmit="Submit" />
               <EditWalkInRegister />
             </div>
