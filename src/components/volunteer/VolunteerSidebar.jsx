@@ -12,6 +12,7 @@ import PersonIcon from "../../assets/svg/person.svg";
 import UploadIcon from "../../assets/svg/upload.svg";
 import { useUser } from "../../authentication/useUser";
 import useUserData from "../../api/useUserData";
+import blackboard from "../../assets/svg/blackboard.svg"
 
 const volunteerLinks = [
   {
@@ -24,6 +25,7 @@ const volunteerLinks = [
   { link: "/volunteer-events", label: "Events", icon: CalendarIcon },
   { link: "/volunteer-upload", label: "Upload", icon: UploadIcon },
   { link: "/volunteer-profile", label: "Profile", icon: PersonIcon },
+  { link: "/volunteer-classes", label: "Classes", icon: blackboard },
 ];
 
 export default function VolunteerSidebar({ children }) {
@@ -42,7 +44,7 @@ export default function VolunteerSidebar({ children }) {
   };
 
   return (
-    <div className="flex h-screen w-full">
+    <div className="flex h-screen overflow-y-clip w-full">
       {/* Large screens */}
       <div className="hidden lg:block lg:w-64 lg:shrink-0 lg:border-r lg:bg-gray-100 dark:lg:bg-gray-800">
         <div className="flex h-full flex-col justify-between px-4 py-6">

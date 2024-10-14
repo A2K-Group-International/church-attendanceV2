@@ -17,8 +17,10 @@ import VolunteerAnnouncements from "./pages/volunteer/VolunteerAnnouncements";
 import VolunteerAnnouncementsInfo from "./pages/volunteer/VolunteerAnnoucementsInfo";
 import VolunteerProfile from "./pages/volunteer/VolunteerProfile";
 import VolunteerDuties from "./pages/volunteer/VolunteerDuties";
+import CategoryPage from "./pages/admin/CategoryPage";
+import VolunteerClasses from "./pages/volunteer/VolunteerClasses";
+import VolunteerClass from "./pages/volunteer/VolunteerClass";
 import VolunteerUpload from "./pages/volunteer/VolunteerUpload";
-
 import CategoryPage from "./pages/admin/CategoryPage";
 
 function App() {
@@ -164,6 +166,16 @@ function App() {
           }
         />
         <Route
+          path="/volunteer-classes"
+          element={
+            <ProtectedRoute>
+              <VolunteerClasses />
+            </ProtectedRoute>
+          }
+        />
+        <Route 
+        path="/volunteer-classes/:id" 
+        element={<VolunteerClass />} />
           path="/volunteer-upload"
           element={
             <ProtectedRoute>
