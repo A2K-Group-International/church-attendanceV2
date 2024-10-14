@@ -1,6 +1,6 @@
 // src/components/volunteer/VolunteerUpload/RenameModal.jsx
 import { useState, useEffect, useRef } from "react";
-import { Button } from "../../../shadcn/Button";
+import { Button } from "../../../shadcn/button";
 
 export default function RenameModal({
   isOpen,

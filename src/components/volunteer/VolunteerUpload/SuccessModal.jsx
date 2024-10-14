@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogClose,
 } from "../../../shadcn/dialog"; // Import Shadcn Dialog components
-import { Button } from "../../../shadcn/Button";
+import { Button } from "../../../shadcn/button";
 
 const SuccessModal = ({ isOpen, onClose, message }) => {
   return (

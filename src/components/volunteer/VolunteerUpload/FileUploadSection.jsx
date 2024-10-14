@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Button } from "../../../shadcn/Button";
+import { Button } from "../../../shadcn/button";
 
 export default function FileUploadSection({
   onFileSelect,

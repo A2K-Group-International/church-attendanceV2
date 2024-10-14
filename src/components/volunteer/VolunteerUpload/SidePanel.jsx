@@ -1,5 +1,5 @@
 // src/components/volunteer/VolunteerUpload/SidePanel.jsx
-import { Button } from "../../../shadcn/Button";
+import { Button } from "../../../shadcn/button";
 
 export default function SidePanel({ selectedImage, onClear }) {
   return (
