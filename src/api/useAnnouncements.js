@@ -36,7 +36,7 @@ const useAnnouncements = (groupId) => {
     fetchAnnouncements();
   }, [fetchAnnouncements]);
 
-  return { announcements, loading, error };
+  return { announcements, loading, error, fetchAnnouncements };
 };
 
 export default useAnnouncements;
