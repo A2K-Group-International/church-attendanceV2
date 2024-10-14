@@ -39,6 +39,7 @@ const AnnouncementCard = ({
   const [selectedReaction, setSelectedReaction] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   // Toggle menu open/close state
   const toggleMenu = () => setMenuOpen((prev) => !prev);
@@ -91,6 +92,13 @@ const AnnouncementCard = ({
     setIsDeleteDialogOpen(false); // Close the dialog after deletion
   };
 
+  // Handle closing the image modal when clicking outside
+  const handleCloseImageModal = (event) => {
+    if (event.target === event.currentTarget) {
+      setIsImageModalOpen(false);
+    }
+  };
+
   return (
     <div className="flex flex-col rounded-lg bg-white p-6 shadow-md dark:bg-gray-800">
       {/* Post Header */}
@@ -137,6 +145,17 @@ const AnnouncementCard = ({
       <p className="mb-4 text-gray-700 dark:text-gray-300">
         {renderPostContent(post.post_content)}
       </p>
+      {/* Image Section */}
+      {post.uploaded_image && (
+        <div className="relative mb-4 h-48 w-full overflow-hidden">
+          <img
+            src={post.uploaded_image}
+            alt="Post"
+            className="h-full w-full cursor-pointer object-cover"
+            onClick={() => setIsImageModalOpen(true)} // Open modal on image click
+          />
+        </div>
+      )}
       {/* Edited Tag */}
       {post.edited && (
         <p className="mb-4 text-sm italic text-gray-500 dark:text-gray-400">
@@ -194,6 +213,21 @@ const AnnouncementCard = ({
         onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={confirmDelete}
       />
+      {/* Image Modal */}
+      {isImageModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={handleCloseImageModal} // Close on clicking outside
+        >
+          <div className="relative rounded bg-white p-4">
+            <img
+              src={post.uploaded_image}
+              alt="Full View"
+              className="max-h-[90vh] max-w-[90vw] rounded"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -206,12 +240,13 @@ AnnouncementCard.propTypes = {
     created_at: PropTypes.string.isRequired,
     post_header: PropTypes.string.isRequired,
     post_content: PropTypes.string.isRequired,
+    uploaded_image: PropTypes.string, // Add uploaded_image to PropTypes
     edited: PropTypes.bool.isRequired, // Add edited to PropTypes
   }).isRequired,
   handleReaction: PropTypes.func.isRequired,
-  onEdit: PropTypes.func.isRequired, // Prop for edit handler
-  onDelete: PropTypes.func.isRequired, // Prop for delete handler
-  userId: PropTypes.number.isRequired, // Prop for current user ID
+  onEdit: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  userId: PropTypes.number.isRequired,
 };
 
 export default AnnouncementCard;

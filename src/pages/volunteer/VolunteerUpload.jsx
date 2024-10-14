@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import supabase from "../../api/supabase";
 import VolunteerSidebar from "../../components/volunteer/VolunteerSidebar";
 import FileUploadSection from "../../components/volunteer/VolunteerUpload/FileUploadSection";
@@ -25,9 +25,35 @@ export default function VolunteerUploadPage() {
   const [successModalOpen, setSuccessModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [groupName, setGroupName] = useState("");
 
-  const userData = useUserData();
+  const { userData } = useUserData();
+  console.log(uploadedImages);
 
+  const fetchGroupInfo = useCallback(async () => {
+    if (!userData) return;
+    try {
+      const { data: groupData, error: groupError } = await supabase
+        .from("group_list")
+        .select("")
+        .eq("group_id", userData.group_id);
+      if (groupError) throw groupError;
+
+      // Ensure groupData is an array and extract the group_name
+      if (groupData && groupData.length > 0) {
+        setGroupName(groupData[0].group_name); // Set the group name correctly
+      } else {
+        setGroupName("No Group Found"); // Fallback if no group is found
+      }
+    } catch (err) {
+      console.error("Error fetching group information:", err);
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    fetchGroupInfo();
+    fetchUploadedContent();
+  }, [fetchGroupInfo]);
   // Handle file selection
   const handleFileSelect = (e) => {
     if (e.target.files.length === 0) return;
@@ -37,8 +63,9 @@ export default function VolunteerUploadPage() {
   };
 
   // Upload the selected file
+  // Upload the selected file
   const handleUpload = async (customFileName) => {
-    if (!selectedFile) return;
+    if (!selectedFile || !groupName) return;
 
     try {
       setLoadingUpload(true);
@@ -46,7 +73,9 @@ export default function VolunteerUploadPage() {
       const folder = isImage ? "Images" : "Files";
       const fileExtension = selectedFile.name.split(".").pop();
       const fileName = `${customFileName}.${fileExtension}`;
-      const filePath = `${folder}/${fileName}`;
+
+      // Include groupName in the file path
+      const filePath = `${groupName}/${folder}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("Uploaded files")
@@ -60,7 +89,7 @@ export default function VolunteerUploadPage() {
       setSuccessMessage(`File "${fileName}" uploaded successfully!`);
       setSuccessModalOpen(true);
       setSelectedFile(null); // Clear selected file after upload
-      await fetchUploadedContent(); // Await to ensure data is updated
+      await fetchUploadedContent(); // Ensure data is updated after upload
     } catch (err) {
       console.error("Upload Error:", err);
       setUploadError("Error uploading file. Please try again.");
@@ -71,12 +100,14 @@ export default function VolunteerUploadPage() {
 
   // Fetch uploaded images and files
   const fetchUploadedContent = async () => {
+    if (!groupName) return; // Ensure groupName is available
     setLoadingFetch(true);
     try {
       const fetchData = async (folder) => {
+        // Include groupName in the folder path
         const { data: files, error } = await supabase.storage
           .from("Uploaded files")
-          .list(folder);
+          .list(`${groupName}/${folder}`);
         if (error) throw error;
 
         const urls = await Promise.all(
@@ -85,7 +116,7 @@ export default function VolunteerUploadPage() {
             .map(async (file) => {
               const { data } = supabase.storage
                 .from("Uploaded files")
-                .getPublicUrl(`${folder}/${file.name}`);
+                .getPublicUrl(`${groupName}/${folder}/${file.name}`);
               return { name: file.name, url: data.publicUrl, folder };
             }),
         );
@@ -105,10 +136,6 @@ export default function VolunteerUploadPage() {
     }
   };
 
-  useEffect(() => {
-    fetchUploadedContent();
-  }, []);
-
   // Rename file
   const handleRenameConfirm = async (newFileName) => {
     if (!renameItem) return;
@@ -120,10 +147,12 @@ export default function VolunteerUploadPage() {
       const finalNewName = newFileName.endsWith(`.${fileExtension}`)
         ? newFileName
         : `${newFileName}.${fileExtension}`;
+      const oldPath = `${groupName}/${folder}/${name}`;
+      const newPath = `${groupName}/${folder}/${finalNewName}`;
 
       const { error: moveError } = await supabase.storage
         .from("Uploaded files")
-        .move(`${folder}/${name}`, `${folder}/${finalNewName}`);
+        .move(oldPath, newPath);
 
       if (moveError) throw moveError;
 
@@ -137,19 +166,21 @@ export default function VolunteerUploadPage() {
       setLoadingRename(false);
     }
   };
-
   // Delete file
   const handleDelete = (item) => {
     setDeleteItem(item);
-    setDeleteModalOpen(true);
+    setDeleteModalOpen(true); // Show the confirmation modal for deletion
   };
 
+  // Confirm deletion of the selected file
   const confirmDelete = async () => {
+    if (!deleteItem) return;
+
     const { name, folder } = deleteItem;
 
-    if (!folder || !name) {
+    if (!folder || !name || !groupName) {
       console.error(
-        "Delete Error: Missing folder or name in item:",
+        "Delete Error: Missing folder, name, or groupName in item:",
         deleteItem,
       );
       return;
@@ -157,15 +188,12 @@ export default function VolunteerUploadPage() {
 
     setLoadingDelete(true);
     try {
-      const filePath = `${folder}/${name}`;
-      const { data, error: deleteError } = await supabase.storage
+      const filePath = `${groupName}/${folder}/${name}`;
+      const { error: deleteError } = await supabase.storage
         .from("Uploaded files")
         .remove([filePath]);
 
-      if (deleteError) {
-        console.error("Delete Error:", deleteError);
-        throw deleteError;
-      }
+      if (deleteError) throw deleteError;
 
       if (selectedImage === deleteItem.url && folder === "Images") {
         setSelectedImage(null);
@@ -181,7 +209,6 @@ export default function VolunteerUploadPage() {
       setDeleteModalOpen(false);
     }
   };
-
   // Open Rename Modal
   const openRenameModal = (item, folder) => {
     setRenameItem({ name: item.name, folder });
@@ -197,6 +224,10 @@ export default function VolunteerUploadPage() {
       <main className="flex h-screen flex-col lg:flex-row">
         {/* Main Content */}
         <div className="w-full space-y-6 overflow-auto p-4 lg:w-3/4 lg:p-8">
+          <div>
+            <h1 className="text-2xl font-bold">{groupName} Files</h1>
+            {/* Display group name */}
+          </div>
           {/* File Upload Section */}
           <FileUploadSection
             onFileSelect={handleFileSelect}
@@ -209,7 +240,9 @@ export default function VolunteerUploadPage() {
           {/* Main layout for images and viewer */}
           <div className="flex flex-col lg:flex-row lg:space-x-4">
             {/* Uploaded Images Section */}
-            <div className="flex h-96 flex-col lg:w-1/3">
+            <div className="flex h-96 flex-col lg:w-1/2">
+              {" "}
+              {/* Change to lg:w-1/2 for equal split */}
               <h2 className="mb-2 text-xl font-semibold">📸 Uploaded Images</h2>
               <div className="flex-grow overflow-auto rounded-md border">
                 <UploadedImagesSection
@@ -223,7 +256,9 @@ export default function VolunteerUploadPage() {
             </div>
 
             {/* Image Viewer */}
-            <div className="flex h-96 flex-col lg:w-2/3">
+            <div className="flex h-96 flex-col lg:w-1/2">
+              {" "}
+              {/* Change to lg:w-1/2 for equal split */}
               <h2 className="mb-2 text-xl font-semibold">Image Viewer</h2>
               <div className="flex-grow overflow-auto rounded-md border">
                 {selectedImage ? (

@@ -31,9 +31,11 @@ export default function VolunteerAnnouncements() {
     post_content: "",
     post_header: "",
   });
+
   const [announcementToEdit, setAnnouncementToEdit] = useState(null); // State for the announcement being edited
   const [searchQuery, setSearchQuery] = useState("");
   const [visibleCount, setVisibleCount] = useState(10); // For pagination
+  const [uploadedImage, setUploadedImage] = useState(null); // State for the uploaded image
 
   const { user } = useUser();
   const { userData, loading: userLoading, error: userError } = useUserData();
@@ -62,7 +64,41 @@ export default function VolunteerAnnouncements() {
     }
   }, [userData]);
 
+  // Helper function to retrieve public URL with retries
+  const getPublicUrlWithRetry = async (
+    bucket,
+    filePath,
+    retries = 3,
+    delayMs = 1000,
+  ) => {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      const { data, error } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(filePath);
+
+      if (error) {
+        console.error(
+          `Attempt ${attempt}: URL Retrieval Error:`,
+          error.message,
+        );
+      } else if (data && data.publicUrl) {
+        console.log(`Attempt ${attempt}: Public URL retrieved successfully.`);
+        return data.publicUrl;
+      } else {
+        console.warn(`Attempt ${attempt}: publicUrl is undefined.`);
+      }
+
+      // Wait for the specified delay before the next attempt
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+
+    throw new Error(
+      "Failed to retrieve the public URL after multiple attempts.",
+    );
+  };
+
   const handleSubmit = async (e) => {
+    console.log("submitted");
     e.preventDefault();
     if (
       !newAnnouncement.post_content.trim() ||
@@ -71,10 +107,50 @@ export default function VolunteerAnnouncements() {
       setError("Please enter both announcement content and header.");
       return;
     }
+
     try {
       const groupName =
         groupData && groupData[0] ? groupData[0].group_name : "";
-      const { error } = await supabase.from("post_data").insert([
+      let imageUrl = null; // Initialize imageUrl to null
+
+      if (uploadedImage) {
+        const fileExtension = uploadedImage.name.split(".").pop();
+        const date = new Date();
+        const dateString = date.toISOString().split("T")[0].replace(/-/g, ""); // YYYYMMDD
+        const sanitizedHeader = newAnnouncement.post_header.replace(
+          /[^a-zA-Z0-9]/g,
+          "_",
+        );
+        const fileName = `${sanitizedHeader}_${dateString}.${fileExtension}`;
+        const folder = "Images";
+
+        // **Important:** Do NOT encode the path components
+        const filePath = `${groupName}/${folder}/${fileName}`; // No encoding
+
+        const BUCKET_NAME = "Uploaded files"; // Ensure this matches your bucket name
+
+        // Upload the image to Supabase storage
+        const { error: uploadError } = await supabase.storage
+          .from(BUCKET_NAME)
+          .upload(filePath, uploadedImage, {
+            cacheControl: "3600",
+            upsert: false,
+          });
+
+        if (uploadError) {
+          console.error("Upload Error:", uploadError.message);
+          throw new Error(`Upload Error: ${uploadError.message}`);
+        }
+
+        console.log(`Image uploaded successfully to: ${filePath}`);
+
+        // Retrieve the public URL with retry mechanism
+        imageUrl = await getPublicUrlWithRetry(BUCKET_NAME, filePath, 5, 1000);
+        console.log(`Public URL retrieved: ${imageUrl}`);
+      }
+
+      // Insert the announcement into the database
+      const { error: insertError } = await supabase.from("post_data").insert([
         {
           post_content: newAnnouncement.post_content,
           post_header: newAnnouncement.post_header,
@@ -83,13 +159,24 @@ export default function VolunteerAnnouncements() {
           post_group_id: groupId,
           group_name: groupName,
           user_name: `${userData.user_name} ${userData.user_last_name}`,
+          uploaded_image: imageUrl, // Use the publicUrl variable here
         },
       ]);
-      if (error) throw error;
 
+      if (insertError) {
+        console.error("Insert Error:", insertError.message);
+        throw insertError;
+      }
+
+      console.log("Announcement inserted successfully.");
+
+      // Fetch announcements to refresh the list
       fetchAnnouncements();
+
+      // Reset the dialog and form state
       setIsDialogOpen(false);
       setNewAnnouncement({ post_content: "", post_header: "" });
+      setUploadedImage(null); // Reset the uploaded image
     } catch (err) {
       setError("Error creating announcement. Please try again.");
       console.error("Error creating announcement:", err);
@@ -108,7 +195,12 @@ export default function VolunteerAnnouncements() {
         })
         .eq("post_id", announcement.post_id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Edit Error:", error.message);
+        throw error;
+      }
+
+      console.log("Announcement edited successfully.");
 
       fetchAnnouncements();
       setIsEditDialogOpen(false); // Close the edit dialog
@@ -126,7 +218,13 @@ export default function VolunteerAnnouncements() {
         .from("post_data")
         .delete()
         .eq("post_id", postId);
-      if (error) throw error;
+      if (error) {
+        console.error("Delete Error:", error.message);
+        throw error;
+      }
+
+      console.log("Announcement deleted successfully.");
+
       fetchAnnouncements();
     } catch (err) {
       setError("Error deleting announcement. Please try again.");
@@ -188,6 +286,12 @@ export default function VolunteerAnnouncements() {
                         newAnnouncement={newAnnouncement}
                         setNewAnnouncement={setNewAnnouncement}
                         handleSubmit={handleSubmit} // Pass the handleSubmit to the form
+                        groupName={
+                          groupData && groupData[0]
+                            ? groupData[0].group_name
+                            : ""
+                        } // Pass the group name here
+                        setUploadedImage={setUploadedImage} // Pass the function to set uploaded image
                       />
                     </DialogContent>
                   </Dialog>
@@ -210,11 +314,12 @@ export default function VolunteerAnnouncements() {
                     key={post.post_id}
                     post={post}
                     userId={userData.user_id}
-                    onEdit={(postId) => {
+                    onEdit={() => {
+                      // Fix the onEdit handler
                       setAnnouncementToEdit(post); // Set the announcement to edit
                       setIsEditDialogOpen(true); // Open the edit dialog
                     }}
-                    onDelete={handleDelete} // Pass the delete function
+                    onDelete={handleDelete}
                   />
                 ))}
               </div>
