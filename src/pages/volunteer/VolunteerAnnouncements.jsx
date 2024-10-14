@@ -11,46 +11,48 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
-  DialogClose,
 } from "../../shadcn/dialog";
 import { Input } from "../../shadcn/input";
-import { Textarea } from "../../shadcn/textarea";
 import { Label } from "../../shadcn/label";
 import useUserData from "../../api/useUserData";
-import AnnouncementCard from "../../components/volunteer/AnnouncementCard"; // Import the new component
+import useAnnouncements from "../../api/useAnnouncements";
+import AnnouncementCard from "../../components/volunteer/post/AnnouncementCard";
+import AnnouncementForm from "../../components/volunteer/post/AnnouncementForm";
+import AnnouncementEdit from "../../components/volunteer/post/AnnouncementEdit"; // Import the edit component
 
 export default function VolunteerAnnouncements() {
   const [groupId, setGroupId] = useState(null);
   const [groupData, setGroupData] = useState(null);
-  const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // New state for edit dialog
   const [newAnnouncement, setNewAnnouncement] = useState({
     post_content: "",
     post_header: "",
   });
+  const [announcementToEdit, setAnnouncementToEdit] = useState(null); // State for the announcement being edited
   const [searchQuery, setSearchQuery] = useState("");
-
-  // New state for managing displayed announcements
-  const [visibleCount, setVisibleCount] = useState(10); // Initial number of announcements to show
+  const [visibleCount, setVisibleCount] = useState(10); // For pagination
 
   const { user } = useUser();
   const { userData, loading: userLoading, error: userError } = useUserData();
+  const {
+    announcements,
+    loading: announcementsLoading,
+    error: announcementsError,
+    fetchAnnouncements,
+  } = useAnnouncements(groupId);
 
   const fetchGroupInfo = useCallback(async () => {
     if (!userData) return;
     try {
       setGroupId(userData.group_id);
-
       const { data: groupData, error: groupError } = await supabase
         .from("group_list")
         .select("*")
         .eq("group_id", userData.group_id);
-
       if (groupError) throw groupError;
-
       setGroupData(groupData);
     } catch (err) {
       setError("Error fetching group information. Please try again.");
@@ -60,33 +62,8 @@ export default function VolunteerAnnouncements() {
     }
   }, [userData]);
 
-  const fetchAnnouncements = useCallback(async () => {
-    if (!groupId) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { data, error } = await supabase
-        .from("post_data")
-        .select("*")
-        .eq("post_group_id", groupId)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      setAnnouncements(data);
-    } catch (err) {
-      setError("Error fetching announcements. Please try again.");
-      console.error("Error fetching announcements:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [groupId]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (
       !newAnnouncement.post_content.trim() ||
       !newAnnouncement.post_header.trim()
@@ -94,11 +71,9 @@ export default function VolunteerAnnouncements() {
       setError("Please enter both announcement content and header.");
       return;
     }
-
     try {
       const groupName =
         groupData && groupData[0] ? groupData[0].group_name : "";
-
       const { error } = await supabase.from("post_data").insert([
         {
           post_content: newAnnouncement.post_content,
@@ -110,11 +85,9 @@ export default function VolunteerAnnouncements() {
           user_name: `${userData.user_name} ${userData.user_last_name}`,
         },
       ]);
-
       if (error) throw error;
 
       fetchAnnouncements();
-
       setIsDialogOpen(false);
       setNewAnnouncement({ post_content: "", post_header: "" });
     } catch (err) {
@@ -123,13 +96,47 @@ export default function VolunteerAnnouncements() {
     }
   };
 
+  // New function to handle editing announcements
+  const handleEdit = async (announcement) => {
+    try {
+      const { error } = await supabase
+        .from("post_data")
+        .update({
+          post_content: announcement.post_content,
+          post_header: announcement.post_header,
+          edited: true,
+        })
+        .eq("post_id", announcement.post_id);
+
+      if (error) throw error;
+
+      fetchAnnouncements();
+      setIsEditDialogOpen(false); // Close the edit dialog
+      setAnnouncementToEdit(null); // Clear the selected announcement
+    } catch (err) {
+      setError("Error editing announcement. Please try again.");
+      console.error("Error editing announcement:", err);
+    }
+  };
+
+  // New function to handle deletion
+  const handleDelete = async (postId) => {
+    try {
+      const { error } = await supabase
+        .from("post_data")
+        .delete()
+        .eq("post_id", postId);
+      if (error) throw error;
+      fetchAnnouncements();
+    } catch (err) {
+      setError("Error deleting announcement. Please try again.");
+      console.error("Error deleting announcement:", err);
+    }
+  };
+
   useEffect(() => {
     fetchGroupInfo();
   }, [fetchGroupInfo]);
-
-  useEffect(() => {
-    fetchAnnouncements();
-  }, [fetchAnnouncements]);
 
   const filteredAnnouncements = announcements.filter(
     (post) =>
@@ -138,7 +145,7 @@ export default function VolunteerAnnouncements() {
   );
 
   const loadMoreAnnouncements = () => {
-    setVisibleCount((prevCount) => prevCount + 10); // Load 10 more announcements
+    setVisibleCount((prevCount) => prevCount + 10);
   };
 
   return (
@@ -148,7 +155,7 @@ export default function VolunteerAnnouncements() {
           className="w-full max-w-2xl space-y-6 overflow-y-auto p-4 lg:p-8"
           style={{ maxHeight: "calc(100vh - 2rem)" }}
         >
-          {loading || userLoading ? (
+          {loading || userLoading || announcementsLoading ? (
             <Spinner />
           ) : (
             <>
@@ -177,51 +184,11 @@ export default function VolunteerAnnouncements() {
                           Post a new announcement for your group.
                         </DialogDescription>
                       </DialogHeader>
-                      <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="post_header">
-                            Announcement Header
-                          </Label>
-                          <Input
-                            id="post_header"
-                            type="text"
-                            value={newAnnouncement.post_header}
-                            onChange={(e) =>
-                              setNewAnnouncement({
-                                ...newAnnouncement,
-                                post_header: e.target.value,
-                              })
-                            }
-                            required
-                            placeholder="Enter the announcement header..."
-                            className="w-full"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="post_content">
-                            Announcement Content
-                          </Label>
-                          <Textarea
-                            id="post_content"
-                            value={newAnnouncement.post_content}
-                            onChange={(e) =>
-                              setNewAnnouncement({
-                                ...newAnnouncement,
-                                post_content: e.target.value,
-                              })
-                            }
-                            required
-                            placeholder="Enter your announcement here..."
-                            className="h-40 w-full"
-                          />
-                        </div>
-
-                        <DialogFooter>
-                          <DialogClose asChild>
-                            <Button type="submit">Post Announcement</Button>
-                          </DialogClose>
-                        </DialogFooter>
-                      </form>
+                      <AnnouncementForm
+                        newAnnouncement={newAnnouncement}
+                        setNewAnnouncement={setNewAnnouncement}
+                        handleSubmit={handleSubmit} // Pass the handleSubmit to the form
+                      />
                     </DialogContent>
                   </Dialog>
                 ) : null}
@@ -237,22 +204,46 @@ export default function VolunteerAnnouncements() {
                 />
               </div>
 
-              {error ? (
-                <p className="text-red-500">{error}</p>
-              ) : filteredAnnouncements.length > 0 ? (
-                <div className="space-y-4">
-                  {filteredAnnouncements.slice(0, visibleCount).map((post) => (
-                    <AnnouncementCard key={post.post_id} post={post} />
-                  ))}
-                </div>
-              ) : (
-                <p>No announcements found.</p>
-              )}
+              <div className="space-y-4">
+                {filteredAnnouncements.slice(0, visibleCount).map((post) => (
+                  <AnnouncementCard
+                    key={post.post_id}
+                    post={post}
+                    userId={userData.user_id}
+                    onEdit={(postId) => {
+                      setAnnouncementToEdit(post); // Set the announcement to edit
+                      setIsEditDialogOpen(true); // Open the edit dialog
+                    }}
+                    onDelete={handleDelete} // Pass the delete function
+                  />
+                ))}
+              </div>
 
-              {visibleCount < filteredAnnouncements.length && (
+              {filteredAnnouncements.length > visibleCount && (
                 <Button onClick={loadMoreAnnouncements} className="mt-4">
                   Load More
                 </Button>
+              )}
+
+              {error && <div className="text-red-500">{error}</div>}
+              {announcementsError && (
+                <div className="text-red-500">{announcementsError}</div>
+              )}
+
+              {/* Edit Announcement Dialog */}
+              {announcementToEdit && (
+                <Dialog
+                  open={isEditDialogOpen}
+                  onOpenChange={setIsEditDialogOpen}
+                >
+                  <DialogContent className="sm:max-w-[500px]">
+                    <AnnouncementEdit
+                      announcement={announcementToEdit}
+                      setAnnouncement={setAnnouncementToEdit} // Set the edited announcement
+                      handleEdit={handleEdit} // Pass the edit function
+                    />
+                  </DialogContent>
+                </Dialog>
               )}
             </>
           )}

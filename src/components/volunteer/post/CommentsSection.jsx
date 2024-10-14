@@ -3,8 +3,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import Comment from "./Comment";
-import { Button } from "../../shadcn/button";
-import Spinner from "../../components/Spinner";
+import { Button } from "../../../shadcn/button";
+import Spinner from "../../../components/Spinner";
 
 const CommentsSection = ({
   comments,
