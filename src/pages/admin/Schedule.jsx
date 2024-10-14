@@ -53,6 +53,9 @@ import {
   AlertDialogTrigger,
 } from "../../shadcn/alert-dialog";
 import { Icon } from "@iconify/react";
+import { fetchCategory, fetchSubCategory } from "../../api/userService";
+import CreateMeeting from "./CreateMeeting";
+import { Textarea } from "../../shadcn/textarea";
 
 const headers = ["Event Name", "Date", "Time", "Description"];
 
@@ -67,6 +70,9 @@ export default function AdminNewSchedule() {
   const [error, setError] = useState(null); // Error Handling
   const [isDialogOpen, setIsDialogOpen] = useState(false); // Dialog Open/Close
   const [editId, setEditId] = useState(null); // Get the current ID of Event
+  const [categoryData, setCategoryData] = useState([]); // List of category
+  const [selectedCategory, setSelectedCategory] = useState(""); // If selected category, show sub category
+  const [selectedSubCategory, setSelectedSubCategory] = useState([]);
   const itemsPerPage = 10;
 
   const {
@@ -423,146 +429,262 @@ export default function AdminNewSchedule() {
     </DropdownMenu>,
   ]);
 
+  // Fetch Categories
+  const fetchCategories = async () => {
+    try {
+      const data = await fetchCategory();
+      setCategoryData(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchSubCategories = async (categoryId) => {
+    try {
+      const data = await fetchSubCategory(categoryId);
+      setSelectedSubCategory(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await fetchCategories(); // Ensure categories are fetched first
+
+        // After categories are fetched, check if there's a selected category
+        if (selectedCategory) {
+          await fetchSubCategories(selectedCategory); // Fetch subcategories with the selected category ID
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error.message);
+      }
+    };
+
+    fetchData();
+  }, [selectedCategory]);
+
   return (
     <AdminSidebar>
       <main className="space-y-6 p-4 lg:p-8">
         <header>
           <h1 className="text-2xl font-bold">Schedule</h1>
-          <Dialog
-            open={isDialogOpen}
-            onOpenChange={(open) => {
-              if (open) {
-                resetForm(); // Call your form reset function here
-              }
-              setIsDialogOpen(open);
-            }}
-          >
-            <DialogTrigger asChild>
-              <Button className="mt-2">Create Event</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Create Event</DialogTitle>
-                <DialogDescription>
-                  Schedule an upcoming event.
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Event Name</Label>
-                  <Input id="name" {...register("name", { required: true })} />
-                  {errors.name && (
-                    <p className="text-sm text-red-500">
-                      Event name is required
-                    </p>
-                  )}
-                </div>
+          <div className="mt-2 flex gap-x-2">
+            <Dialog
+              open={isDialogOpen}
+              onOpenChange={(open) => {
+                if (open) {
+                  resetForm(); // Call your form reset function here
+                }
+                setIsDialogOpen(open);
+              }}
+            >
+              <DialogTrigger asChild>
+                <Button>Create Event</Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[700px]">
+                <DialogHeader>
+                  <DialogTitle>Create Event</DialogTitle>
+                  <DialogDescription>
+                    Schedule an upcoming event.
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Event Name</Label>
+                    <Input
+                      id="name"
+                      {...register("name", { required: true })}
+                    />
+                    {errors.name && (
+                      <p className="text-sm text-red-500">
+                        Event name is required
+                      </p>
+                    )}
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="schedule">Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start"
-                      >
-                        {selectedDate
-                          ? selectedDate.format("MMMM Do YYYY") // Format date using Moment.js
-                          : "Please select a date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={selectedDate ? selectedDate.toDate() : null} // Convert to Date object for Calendar
-                        onSelect={handleDateSelect}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  {isSubmitted && !selectedDate && (
-                    <p className="text-sm text-red-500">Date is required</p>
-                  )}
-                </div>
+                  {/* Event Category */}
+                  <div className="space-y-2">
+                    <Label htmlFor="Event Category">Event Category</Label>
+                    <div className="flex gap-x-2">
+                      <div>
+                        <Select
+                          onValueChange={(value) => {
+                            setValue("schedule_category", value);
+                            setSelectedCategory(value);
+                            fetchSubCategories(value); // Passing the selected category ID
+                          }}
+                        >
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Select Category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categoryData.map((item) => (
+                              <SelectItem
+                                key={item.category_id}
+                                value={item.category_id}
+                              >
+                                {item.category_name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {errors.schedule_category && (
+                          <p className="text-sm text-red-500">
+                            {errors.schedule_category.message}
+                          </p>
+                        )}
+                      </div>
+                      <div>
+                        {selectedCategory && (
+                          <Select
+                            onValueChange={(value) => {
+                              setValue("schedule_sub_category", value);
+                            }}
+                          >
+                            <SelectTrigger className="w-[180px]">
+                              <SelectValue placeholder="Select Sub Category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {selectedSubCategory.map((item) => (
+                                <SelectItem
+                                  key={item.sub_category_id}
+                                  value={item.sub_category_name}
+                                >
+                                  {item.sub_category_name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                        {errors.schedule_sub_category && (
+                          <p className="text-sm text-red-500">
+                            {errors.schedule_sub_category.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Input
-                    id="description"
-                    as="textarea"
-                    rows={3}
-                    {...register("description")}
-                    className="w-full"
-                    placeholder="Event description (optional)"
-                  />
-                </div>
+                  {/* Schedule Privacy */}
+                  <div className="space-y-2">
+                    <Label htmlFor="schedule_privacy">Schedule Privacy</Label>
+                    <Select
+                      onValueChange={(value) => {
+                        setValue("schedule_privacy", value);
+                      }}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select privacy" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="public">Public</SelectItem>
+                        <SelectItem value="private">Private</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors.schedule_privacy && (
+                      <p className="text-sm text-red-500">
+                        {errors.schedule_privacy.message}
+                      </p>
+                    )}
+                  </div>
 
-                {/* Schedule Privacy */}
-                <div className="space-y-2">
-                  <Label htmlFor="schedule_privacy">Schedule Privacy</Label>
-                  <Select
-                    onValueChange={(value) => {
-                      setValue("schedule_privacy", value);
-                    }}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Select privacy" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="public">Public</SelectItem>
-                      <SelectItem value="private">Private</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.schedule_privacy && (
-                    <p className="text-sm text-red-500">
-                      {errors.schedule_privacy.message}
-                    </p>
-                  )}
-                </div>
+                  <div className="flex gap-x-5">
+                    <div className="space-y-2">
+                      <Label htmlFor="schedule">Date</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start"
+                          >
+                            {selectedDate
+                              ? selectedDate.format("MMMM Do YYYY") // Format date using Moment.js
+                              : "Please select a date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={
+                              selectedDate ? selectedDate.toDate() : null
+                            } // Convert to Date object for Calendar
+                            onSelect={handleDateSelect}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      {isSubmitted && !selectedDate && (
+                        <p className="text-sm text-red-500">Date is required</p>
+                      )}
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="time">Time</Label>
-                  {time.map((t, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <Input
-                        type="time"
-                        value={t}
-                        step="00:15"
-                        onChange={(e) =>
-                          handleChangeTime(index, e.target.value)
-                        }
-                        className="flex-grow"
-                      />
+                    <div className="space-y-2">
+                      <Label htmlFor="time">Time</Label>
+                      {time.map((t, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center space-x-2"
+                        >
+                          <Input
+                            type="time"
+                            value={t}
+                            step="00:15"
+                            onChange={(e) =>
+                              handleChangeTime(index, e.target.value)
+                            }
+                            className="flex-grow"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => handleRemoveTimeInput(index)}
+                            className="shrink-0"
+                          >
+                            Remove
+                          </Button>
+                        </div>
+                      ))}
                       <Button
                         type="button"
-                        variant="outline"
-                        onClick={() => handleRemoveTimeInput(index)}
-                        className="shrink-0"
+                        onClick={handleAddTimeInput}
+                        className="w-full"
                       >
-                        Remove
+                        Add Time
                       </Button>
                     </div>
-                  ))}
-                  <Button
-                    type="button"
-                    onClick={handleAddTimeInput}
-                    className="w-full"
-                  >
-                    Add Time
-                  </Button>
-                </div>
+                    
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      as="textarea"
+                      rows={3}
+                      {...register("description")}
+                      className="w-full"
+                      placeholder="Event description (optional)"
+                    />
+                  </div>
 
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button type="button" onClick={resetForm}>
-                      Cancel
-                    </Button>
-                  </DialogClose>
-                  <Button type="submit">Create</Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+                  <DialogFooter className="gap-y-2">
+                    <DialogClose asChild>
+                      <Button type="button" onClick={resetForm}>
+                        Cancel
+                      </Button>
+                    </DialogClose>
+                    <Button type="submit">Create</Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+            <CreateMeeting />
+          </div>
         </header>
 
         {loading ? (

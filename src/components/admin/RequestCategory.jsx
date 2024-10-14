@@ -2,15 +2,15 @@ import { useState } from "react";
 import Table from "../Table";
 import BtnRequestAction from "./BtnRequestAction";
 
-const headers = ["Requester Name", "Requesting", "Status", "Action"];
+const headers = ["Name", "Requesting", "Description", "Status", "Action"];
 
 export default function RequestCategory({ categories }) {
   const [categoryList, setCategoryList] = useState(categories);
 
   //Handling success approved
-  const handleRequestSuccess = (id) => {
+  const handleRequestSuccess = (category_id) => {
     setCategoryList((prevCategories) =>
-      prevCategories.filter((item) => item.id !== id),
+      prevCategories.filter((item) => item.category_id !== category_id),
     );
   };
 
@@ -22,7 +22,7 @@ export default function RequestCategory({ categories }) {
       item.request_status,
       <BtnRequestAction
         key={index}
-        id={item.id}
+        id={item.category_id}
         onSuccess={handleRequestSuccess}
       />,
     ]);
@@ -30,7 +30,7 @@ export default function RequestCategory({ categories }) {
   return (
     // Adjust the height
     <div className="h-auto">
-      <h2>Request</h2>
+      <h2>Mass Intention Request</h2>
       <Table
         headers={headers}
         rows={rows}
