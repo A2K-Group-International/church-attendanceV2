@@ -56,6 +56,7 @@ import { Icon } from "@iconify/react";
 import { fetchCategory, fetchSubCategory } from "../../api/userService";
 import CreateMeeting from "./CreateMeeting";
 import { Textarea } from "../../shadcn/textarea";
+import CreatePoll from "./CreatePoll";
 
 const headers = ["Event Name", "Date", "Time", "Description"];
 
@@ -658,7 +659,6 @@ export default function AdminNewSchedule() {
                         Add Time
                       </Button>
                     </div>
-                    
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="description">Description</Label>
@@ -684,6 +684,7 @@ export default function AdminNewSchedule() {
               </DialogContent>
             </Dialog>
             <CreateMeeting />
+            <CreatePoll />
           </div>
         </header>
 

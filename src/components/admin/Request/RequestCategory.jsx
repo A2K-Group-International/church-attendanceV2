@@ -3,8 +3,8 @@ import Table from "../../Table";
 import BtnRequestAction from "./BtnRequestAction";
 
 const headers = [
-  "Requester Name",
-  "Title of Category",
+  "Requester",
+  "Category/Sub-category",
   "Description",
   "Status",
   "Action",
@@ -38,7 +38,7 @@ export default function RequestCategory({ categories }) {
     // Adjust the height
     <div className="h-auto">
       <h2>
-        <strong>List</strong>
+        <strong>List of Requests</strong>
       </h2>
       <Table
         headers={headers}

@@ -184,209 +184,212 @@ export default function UsersPage() {
 
   return (
     <RequestPage>
-        {/* Feedback Message */}
-        {feedbackMessage && (
-          <div className="mt-4 rounded bg-blue-100 p-4 text-blue-800">
-            {feedbackMessage}
-          </div>
-        )}
-
-        {/* Filters Section */}
-        <div className="mb-4 mt-4 flex space-x-4">
-          {/* Confirmation Filter Dropdown */}
-          <div className="relative inline-block text-left">
-            <div>
-              <Button
-                variant="default"
-                className="flex w-56 items-center justify-between rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                onClick={() => setIsDropdownOpen((prev) => !prev)}
-              >
-                {filter === "all" && "All Users"}
-                {filter === "approved" && "Approved Users"}
-                {filter === "not_approved" && "Not Approved Users"}
-                <svg
-                  className={`-mr-1 ml-2 h-5 w-5 transition-transform duration-200 ${
-                    isDropdownOpen ? "rotate-180 transform" : ""
-                  }`}
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </Button>
-            </div>
-
-            {/* Confirmation Dropdown Menu */}
-            {isDropdownOpen && (
-              <div className="absolute right-0 z-10 mt-2 w-56 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
-                <div
-                  className="py-1"
-                  role="menu"
-                  aria-orientation="vertical"
-                  aria-labelledby="options-menu"
-                >
-                  {["all", "approved", "not_approved"].map((option) => (
-                    <button
-                      key={option}
-                      className={`block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 ${
-                        filter === option
-                          ? "bg-gray-100 font-semibold text-gray-900"
-                          : ""
-                      }`}
-                      role="menuitem"
-                      onClick={() => {
-                        setFilter(option);
-                        setCurrentPage(1); // Reset to first page when filter changes
-                        setIsDropdownOpen(false); // Close the dropdown after selection
-                      }}
-                    >
-                      {option === "all"
-                        ? "All Users"
-                        : option === "approved"
-                          ? "Approved Users"
-                          : "Not Approved Users"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Role Filter Dropdown */}
-          <div className="relative inline-block text-left">
-            <div>
-              <Button
-                variant="default"
-                className="flex w-56 items-center justify-between rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                onClick={() => setIsRoleDropdownOpen((prev) => !prev)}
-              >
-                {roleFilter === "all" && "All Roles"}
-                {roleFilter === "admin" && "Admins"}
-                {roleFilter === "user" && "Users"}
-                {roleFilter === "volunteer" && "Volunteers"}
-                <svg
-                  className={`-mr-1 ml-2 h-5 w-5 transition-transform duration-200 ${
-                    isRoleDropdownOpen ? "rotate-180 transform" : ""
-                  }`}
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </Button>
-            </div>
-
-            {/* Role Dropdown Menu */}
-            {isRoleDropdownOpen && (
-              <div className="absolute right-0 z-10 mt-2 w-56 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
-                <div
-                  className="py-1"
-                  role="menu"
-                  aria-orientation="vertical"
-                  aria-labelledby="role-options-menu"
-                >
-                  {["all", "admin", "user", "volunteer"].map((option) => (
-                    <button
-                      key={option}
-                      className={`block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 ${
-                        roleFilter === option
-                          ? "bg-gray-100 font-semibold text-gray-900"
-                          : ""
-                      }`}
-                      role="menuitem"
-                      onClick={() => {
-                        setRoleFilter(option);
-                        setCurrentPage(1); // Reset to first page when filter changes
-                        setIsRoleDropdownOpen(false); // Close the dropdown after selection
-                      }}
-                    >
-                      {option === "all"
-                        ? "All Roles"
-                        : option === "admin"
-                          ? "Admins"
-                          : option === "user"
-                            ? "Users"
-                            : "Volunteers"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+      {/* Feedback Message */}
+      {feedbackMessage && (
+        <div className="mt-4 rounded bg-blue-100 p-4 text-blue-800">
+          {feedbackMessage}
         </div>
+      )}
 
-        {/* Users Table */}
-        <div className="mt-4 rounded-lg bg-card shadow">
-          {loading ? (
-            <div className="p-8 text-center">
-              <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-              <p className="mt-4 text-muted-foreground">Loading users...</p>
-            </div>
-          ) : error ? (
-            <div className="p-8 text-center">
-              <p className="text-destructive">{error}</p>
-            </div>
-          ) : data.length > 0 ? (
-            <>
-              <Table headers={headers} rows={rows} />
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-                      }}
-                      disabled={currentPage === 1}
-                    />
-                  </PaginationItem>
-                  {Array.from({ length: totalPages }, (_, index) => (
-                    <PaginationItem key={index}>
-                      <PaginationLink
-                        href="#"
-                        isActive={currentPage === index + 1}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setCurrentPage(index + 1);
-                        }}
-                      >
-                        {index + 1}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (currentPage < totalPages)
-                          setCurrentPage((prev) => prev + 1);
-                      }}
-                      disabled={currentPage === totalPages}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </>
-          ) : (
-            <div className="p-8 text-center">
-              <p className="text-muted-foreground">No users found.</p>
+      {/* Filters Section */}
+      <div className="mb-4 mt-4 flex space-x-4">
+        {/* Confirmation Filter Dropdown */}
+        <div className="relative inline-block text-left">
+          <div>
+            <Button
+              variant="default"
+              className="flex w-56 items-center justify-between rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              onClick={() => setIsDropdownOpen((prev) => !prev)}
+            >
+              {filter === "all" && "All Users"}
+              {filter === "approved" && "Approved Users"}
+              {filter === "not_approved" && "Not Approved Users"}
+              <svg
+                className={`-mr-1 ml-2 h-5 w-5 transition-transform duration-200 ${
+                  isDropdownOpen ? "rotate-180 transform" : ""
+                }`}
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </Button>
+          </div>
+
+          {/* Confirmation Dropdown Menu */}
+          {isDropdownOpen && (
+            <div className="absolute right-0 z-10 mt-2 w-56 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+              <div
+                className="py-1"
+                role="menu"
+                aria-orientation="vertical"
+                aria-labelledby="options-menu"
+              >
+                {["all", "approved", "not_approved"].map((option) => (
+                  <button
+                    key={option}
+                    className={`block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 ${
+                      filter === option
+                        ? "bg-gray-100 font-semibold text-gray-900"
+                        : ""
+                    }`}
+                    role="menuitem"
+                    onClick={() => {
+                      setFilter(option);
+                      setCurrentPage(1); // Reset to first page when filter changes
+                      setIsDropdownOpen(false); // Close the dropdown after selection
+                    }}
+                  >
+                    {option === "all"
+                      ? "All Users"
+                      : option === "approved"
+                        ? "Approved Users"
+                        : "Not Approved Users"}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>
+
+        {/* Role Filter Dropdown */}
+        <div className="relative inline-block text-left">
+          <div>
+            <Button
+              variant="default"
+              className="flex w-56 items-center justify-between rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              onClick={() => setIsRoleDropdownOpen((prev) => !prev)}
+            >
+              {roleFilter === "all" && "All Roles"}
+              {roleFilter === "admin" && "Admins"}
+              {roleFilter === "user" && "Users"}
+              {roleFilter === "volunteer" && "Volunteers"}
+              <svg
+                className={`-mr-1 ml-2 h-5 w-5 transition-transform duration-200 ${
+                  isRoleDropdownOpen ? "rotate-180 transform" : ""
+                }`}
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </Button>
+          </div>
+
+          {/* Role Dropdown Menu */}
+          {isRoleDropdownOpen && (
+            <div className="absolute right-0 z-10 mt-2 w-56 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+              <div
+                className="py-1"
+                role="menu"
+                aria-orientation="vertical"
+                aria-labelledby="role-options-menu"
+              >
+                {["all", "admin", "user", "volunteer"].map((option) => (
+                  <button
+                    key={option}
+                    className={`block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 ${
+                      roleFilter === option
+                        ? "bg-gray-100 font-semibold text-gray-900"
+                        : ""
+                    }`}
+                    role="menuitem"
+                    onClick={() => {
+                      setRoleFilter(option);
+                      setCurrentPage(1); // Reset to first page when filter changes
+                      setIsRoleDropdownOpen(false); // Close the dropdown after selection
+                    }}
+                  >
+                    {option === "all"
+                      ? "All Roles"
+                      : option === "admin"
+                        ? "Admins"
+                        : option === "user"
+                          ? "Users"
+                          : "Volunteers"}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="flex w-full justify-end">
+          <Button>Create Account</Button>
+        </div>
+      </div>
+
+      {/* Users Table */}
+      <div className="mt-4 rounded-lg bg-card shadow">
+        {loading ? (
+          <div className="p-8 text-center">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+            <p className="mt-4 text-muted-foreground">Loading users...</p>
+          </div>
+        ) : error ? (
+          <div className="p-8 text-center">
+            <p className="text-destructive">{error}</p>
+          </div>
+        ) : data.length > 0 ? (
+          <>
+            <Table headers={headers} rows={rows} />
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+                    }}
+                    disabled={currentPage === 1}
+                  />
+                </PaginationItem>
+                {Array.from({ length: totalPages }, (_, index) => (
+                  <PaginationItem key={index}>
+                    <PaginationLink
+                      href="#"
+                      isActive={currentPage === index + 1}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentPage(index + 1);
+                      }}
+                    >
+                      {index + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (currentPage < totalPages)
+                        setCurrentPage((prev) => prev + 1);
+                    }}
+                    disabled={currentPage === totalPages}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">No users found.</p>
+          </div>
+        )}
+      </div>
       {/* Approve Account Dialog */}
       {isApproveDialogOpen && (
         <div

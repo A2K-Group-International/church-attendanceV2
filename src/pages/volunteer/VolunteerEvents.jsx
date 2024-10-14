@@ -22,6 +22,8 @@ import { Label } from "../../shadcn/label";
 import { Pagination } from "../../shadcn/pagination"; // Adjust as necessary
 import { format } from "date-fns"; // For date formatting
 import BtnVolunteerRequestCategory from "../../components/volunteer/BtnVolunteerRequestCategory";
+import CreatePoll from "../admin/CreatePoll";
+import CreateMeeting from "../admin/CreateMeeting";
 
 const headers = ["Event Name", "Date", "Time", "Description", "Actions"]; // Added "Actions" column
 
@@ -459,7 +461,10 @@ export default function VolunteerEvents() {
               </DialogContent>
             </Dialog>
             {/* Request Button */}
-            <BtnVolunteerRequestCategory />
+            {/* <BtnVolunteerRequestCategory /> */}
+            {/* Create poll */}
+            <CreateMeeting />
+            <CreatePoll />
           </div>
 
           {/* Edit Event Dialog */}

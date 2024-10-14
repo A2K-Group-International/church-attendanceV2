@@ -291,13 +291,7 @@ export default function VolunteersPage() {
 
         {/* Generate Volunteer Account Button */}
         <div>
-          <Button
-            variant="primary"
-            onClick={handleOpenCreateModal}
-            className="w-full bg-blue-600 font-semibold text-white hover:bg-blue-700 sm:w-auto"
-          >
-            Create Volunteer Account
-          </Button>
+          <Button onClick={handleOpenCreateModal}>Create Account</Button>
         </div>
       </div>
 

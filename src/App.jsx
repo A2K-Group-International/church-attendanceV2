@@ -124,7 +124,7 @@ function App() {
           }
         />
         <Route
-          path="/volunteer-events"
+          path="/volunteer-schedule"
           element={
             <ProtectedRoute>
               <VolunteerEvents />
