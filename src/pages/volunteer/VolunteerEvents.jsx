@@ -21,6 +21,7 @@ import { Input } from "../../shadcn/input"; // Adjust import as necessary
 import { Label } from "../../shadcn/label";
 import { Pagination } from "../../shadcn/pagination"; // Adjust as necessary
 import { format } from "date-fns"; // For date formatting
+import BtnVolunteerRequestCategory from "../../components/volunteer/BtnVolunteerRequestCategory";
 
 const headers = ["Event Name", "Date", "Time", "Description", "Actions"]; // Added "Actions" column
 
@@ -333,126 +334,133 @@ export default function VolunteerEvents() {
         <header>
           <h1 className="text-2xl font-bold">Volunteer Events</h1>
           {/* Create Event Dialog */}
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="mt-2">Create Event</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Create Event</DialogTitle>
-                <DialogDescription>
-                  Schedule an upcoming event.
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Event Name</Label>
-                  <Input
-                    id="name"
-                    value={newEvent.name}
-                    onChange={(e) =>
-                      setNewEvent({ ...newEvent, name: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="schedule">Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start"
-                      >
-                        {selectedDate
-                          ? format(new Date(selectedDate), "P")
-                          : "Select date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent>
-                      <Calendar
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={handleDateSelect}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                {times.map((time, index) => (
-                  <div key={index} className="flex space-x-2">
-                    <div>
-                      <Label htmlFor={`hour-${index}`}>Hour</Label>
-                      <select
-                        id={`hour-${index}`}
-                        value={time.hour}
-                        onChange={(e) =>
-                          handleChangeTime(index, "hour", e.target.value)
-                        }
-                        required
-                      >
-                        <option value="">--</option>
-                        {hours.map((hour) => (
-                          <option key={hour} value={hour}>
-                            {hour.toString().padStart(2, "0")}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <Label htmlFor={`minute-${index}`}>Minute</Label>
-                      <select
-                        id={`minute-${index}`}
-                        value={time.minute}
-                        onChange={(e) =>
-                          handleChangeTime(index, "minute", e.target.value)
-                        }
-                        required
-                      >
-                        <option value="">--</option>
-                        {minutes.map((minute) => (
-                          <option key={minute} value={minute}>
-                            {minute.toString().padStart(2, "0")}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <Button
-                      type="button"
-                      onClick={() => handleRemoveTimeInput(index)}
-                    >
-                      Remove
-                    </Button>
+          <div className="mt-2 flex items-center gap-2">
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>Create Event</Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Create Event</DialogTitle>
+                  <DialogDescription>
+                    Schedule an upcoming event.
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Event Name</Label>
+                    <Input
+                      id="name"
+                      value={newEvent.name}
+                      onChange={(e) =>
+                        setNewEvent({ ...newEvent, name: e.target.value })
+                      }
+                      required
+                    />
                   </div>
-                ))}
 
-                <Button type="button" onClick={handleAddTimeInput}>
-                  Add Time
-                </Button>
+                  <div className="space-y-2">
+                    <Label htmlFor="schedule">Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start"
+                        >
+                          {selectedDate
+                            ? format(new Date(selectedDate), "P")
+                            : "Select date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent>
+                        <Calendar
+                          mode="single"
+                          selected={selectedDate}
+                          onSelect={handleDateSelect}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Input
-                    id="description"
-                    value={newEvent.description}
-                    onChange={(e) =>
-                      setNewEvent({ ...newEvent, description: e.target.value })
-                    }
-                    required
-                  />
-                </div>
+                  {times.map((time, index) => (
+                    <div key={index} className="flex space-x-2">
+                      <div>
+                        <Label htmlFor={`hour-${index}`}>Hour</Label>
+                        <select
+                          id={`hour-${index}`}
+                          value={time.hour}
+                          onChange={(e) =>
+                            handleChangeTime(index, "hour", e.target.value)
+                          }
+                          required
+                        >
+                          <option value="">--</option>
+                          {hours.map((hour) => (
+                            <option key={hour} value={hour}>
+                              {hour.toString().padStart(2, "0")}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button type="submit">Create Event</Button>
-                  </DialogClose>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+                      <div>
+                        <Label htmlFor={`minute-${index}`}>Minute</Label>
+                        <select
+                          id={`minute-${index}`}
+                          value={time.minute}
+                          onChange={(e) =>
+                            handleChangeTime(index, "minute", e.target.value)
+                          }
+                          required
+                        >
+                          <option value="">--</option>
+                          {minutes.map((minute) => (
+                            <option key={minute} value={minute}>
+                              {minute.toString().padStart(2, "0")}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <Button
+                        type="button"
+                        onClick={() => handleRemoveTimeInput(index)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+
+                  <Button type="button" onClick={handleAddTimeInput}>
+                    Add Time
+                  </Button>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <Input
+                      id="description"
+                      value={newEvent.description}
+                      onChange={(e) =>
+                        setNewEvent({
+                          ...newEvent,
+                          description: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                  </div>
+
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button type="submit">Create Event</Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+            {/* Request Button */}
+            <BtnVolunteerRequestCategory />
+          </div>
 
           {/* Edit Event Dialog */}
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>

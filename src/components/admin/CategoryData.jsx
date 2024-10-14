@@ -14,9 +14,9 @@ export default function CategoryData({ categories }) {
       <AlertAddSubCategory
         key={index}
         categoryName={item.category_name}
-        subCategory={item.sub_category}
+        categoryId={item.category_id}
       />,
-      <BtnDeleteCategory key={index} id={item.id} />,
+      <BtnDeleteCategory key={index} id={item.category_id} />,
     ]);
   return (
     <Table

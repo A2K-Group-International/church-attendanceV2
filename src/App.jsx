@@ -84,7 +84,7 @@ function App() {
           }
         />
         <Route
-          path="/category"
+          path="/categories"
           element={
             <ProtectedRoute>
               <CategoryPage />

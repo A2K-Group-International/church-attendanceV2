@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import RequestPage from "./RequestPage";
-import { fetchCategory } from "../../api/userService";
+import { fetchCategory, fetchSubCategory } from "../../api/userService";
 import Spinner from "../../components/Spinner";
 import CategoryData from "../../components/admin/CategoryData";
 import AddNewCategory from "../../components/admin/AddNewCategory";
@@ -25,7 +25,7 @@ export default function CategoryPage() {
   };
 
   useEffect(() => {
-    fetchCategories(); // Initial fetch
+    fetchCategories();
 
     //Real time update from supabase
     const subscription = supabase
