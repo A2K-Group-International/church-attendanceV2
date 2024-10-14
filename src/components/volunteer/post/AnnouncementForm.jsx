@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react"; // Import useState
 import { Button } from "../../../shadcn/button";
 import { DialogFooter, DialogClose } from "../../../shadcn/dialog";
 import { Input } from "../../../shadcn/input";
@@ -9,7 +9,23 @@ const AnnouncementForm = ({
   newAnnouncement,
   setNewAnnouncement,
   handleSubmit,
+  setUploadedImage,
 }) => {
+  const [imagePreview, setImagePreview] = useState(null); // State for image preview
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const validImageTypes = ["image/jpeg", "image/png", "image/gif"];
+      if (validImageTypes.includes(file.type)) {
+        setUploadedImage(file); // Set the uploaded image
+        setImagePreview(URL.createObjectURL(file)); // Set the image preview
+      } else {
+        alert("Please upload a valid image file (JPEG, PNG, GIF).");
+      }
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
@@ -45,17 +61,24 @@ const AnnouncementForm = ({
           className="h-40 w-full"
         />
       </div>
-      <div className="flex justify-between">
-        <Button
-          type="button"
+      <div className="space-y-2">
+        <Label htmlFor="image_upload">Upload Image</Label>
+        <Input
+          type="file"
+          id="image_upload"
+          accept="image/jpeg,image/png,image/gif" // Accept only image files
+          onChange={handleImageUpload}
           className="w-full"
-          onClick={() => {
-            // Implement attachment functionality later
-            console.log("Attach file clicked");
-          }}
-        >
-          Attach File
-        </Button>
+        />
+        {imagePreview && (
+          <div className="mt-2">
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="h-32 w-32 object-cover"
+            />
+          </div>
+        )}
       </div>
       <DialogFooter>
         <DialogClose asChild>
