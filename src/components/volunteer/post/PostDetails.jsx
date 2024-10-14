@@ -13,12 +13,24 @@ const PostDetails = ({ post, userData, getInitials, handleReaction }) => {
       <h2 className="mb-2 text-xl font-bold text-gray-900 dark:text-gray-100">
         {post.post_header}
       </h2>
+
       {/* Post Content */}
       <p className="mb-4 text-gray-700 dark:text-gray-300">
         {post.post_content}
       </p>
+
+      {/* Post Image */}
+      {post.uploaded_image && (
+        <img
+          src={post.uploaded_image}
+          alt={post.post_header}
+          className="mb-4 h-48 w-full rounded-lg object-cover"
+        />
+      )}
+
       {/* Separator */}
       <Separator className="my-4" />
+
       {/* User and Date Information */}
       <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
         <div className="mr-2 flex-shrink-0">
@@ -36,6 +48,7 @@ const PostDetails = ({ post, userData, getInitials, handleReaction }) => {
         </div>
       </div>
       <Separator className="my-4" />
+
       {/* Reactions */}
       <Reactions postId={post.post_id} handleReaction={handleReaction} />
     </div>
@@ -48,6 +61,7 @@ PostDetails.propTypes = {
     post_header: PropTypes.string.isRequired,
     post_content: PropTypes.string.isRequired,
     post_id: PropTypes.number.isRequired,
+    uploaded_image: PropTypes.string, // Use uploaded_image prop for the image
   }).isRequired,
   userData: PropTypes.shape({
     user_name: PropTypes.string.isRequired,
