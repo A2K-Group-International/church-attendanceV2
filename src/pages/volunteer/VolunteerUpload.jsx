@@ -1,198 +1,322 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import supabase from "../../api/supabase";
-import { Button } from "../../shadcn/button";
-import { StorageError } from "@supabase/storage-js";
 import VolunteerSidebar from "../../components/volunteer/VolunteerSidebar";
-import { v4 as uuidv4 } from "uuid";
+import FileUploadSection from "../../components/volunteer/VolunteerUpload/FileUploadSection";
+import UploadedImagesSection from "../../components/volunteer/VolunteerUpload/UploadedImagesSection";
+import UploadedFilesSection from "../../components/volunteer/VolunteerUpload/UploadedFilesSection";
+import RenameModal from "../../components/volunteer/VolunteerUpload/RenameModal";
+import SuccessModal from "../../components/volunteer/VolunteerUpload/SuccessModal";
+import DeleteConfirmationModal from "../../components/volunteer/VolunteerUpload/DeleteConfirmationModal";
+import useUserData from "../../api/useUserData";
 
-export default function VolunteerUpload() {
-  const [testSelectedFile, setTestSelectedFile] = useState(null);
-  const [testUploadStatus, setTestUploadStatus] = useState(null);
-  const [testUploadError, setTestUploadError] = useState(null);
+export default function VolunteerUploadPage() {
+  // State variables
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadError, setUploadError] = useState(null);
   const [uploadedImages, setUploadedImages] = useState([]);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [renameItem, setRenameItem] = useState(null);
+  const [deleteItem, setDeleteItem] = useState(null);
+  const [loadingUpload, setLoadingUpload] = useState(false);
+  const [loadingFetch, setLoadingFetch] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState(false);
+  const [loadingRename, setLoadingRename] = useState(false);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [groupData, setGroupData] = useState(null);
+  const { userData } = useUserData();
 
-  const testFileInputRef = useRef(null);
+  const fetchGroupInfo = useCallback(async () => {
+    if (!userData || !userData.group_id) return;
 
-  const handleTestFileChange = async (e) => {
+    setLoadingFetch(true);
+    try {
+      const { data, error } = await supabase
+        .from("group_list")
+        .select("*")
+        .eq("group_id", userData.group_id);
+
+      if (error) throw error;
+
+      // Assuming groupData is always an array
+      if (data.length > 0) {
+        setGroupData(data[0]); // Set group data (first item)
+      } else {
+        console.warn("No group data found.");
+      }
+    } catch (err) {
+      console.error("Error fetching group information:", err);
+    } finally {
+      setLoadingFetch(false);
+      console.log(groupData.group_name);
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    fetchGroupInfo();
+  }, [fetchGroupInfo]);
+
+  // Handle file selection
+  const handleFileSelect = (e) => {
     if (e.target.files.length === 0) return;
-
     const file = e.target.files[0];
-    setTestSelectedFile(file);
-    setTestUploadStatus(null);
-    setTestUploadError(null);
+    setSelectedFile(file);
+    setUploadError(null);
+  };
 
-    const allowedImageTypes = [
-      "image/jpeg",
-      "image/jpg",
-      "image/png",
-      "image/gif",
-      "image/webp",
-      "image/svg+xml",
-    ];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-
-    const isImage = allowedImageTypes.includes(file.type);
-
-    if (!isImage) {
-      setTestUploadError("Unsupported file type.");
-      return;
-    }
-
-    if (file.size > maxSize) {
-      setTestUploadError("File size exceeds the 5MB limit.");
-      return;
-    }
+  // Upload the selected file
+  const handleUpload = async (customFileName) => {
+    if (!selectedFile) return;
 
     try {
-      setTestUploadStatus("Uploading...");
-      const fileExtension = file.name.split(".").pop();
-      const fileName = `${uuidv4()}.${fileExtension}`;
-      const filePath = `Images/${fileName}`;
+      setLoadingUpload(true);
+      const isImage = selectedFile.type.startsWith("image");
+      const folder = isImage ? "Images" : "Files";
+      const fileExtension = selectedFile.name.split(".").pop();
+      const fileName = `${customFileName}.${fileExtension}`;
+      const filePath = `${folder}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("Uploaded files")
-        .upload(filePath, file, {
+        .upload(filePath, selectedFile, {
           cacheControl: "3600",
           upsert: false,
         });
 
-      if (uploadError) {
-        throw uploadError;
-      }
+      if (uploadError) throw uploadError;
 
-      setTestUploadStatus(`File uploaded successfully!`);
-      fetchUploadedImages();
+      setSuccessMessage(`File "${fileName}" uploaded successfully!`);
+      setSuccessModalOpen(true);
+      setSelectedFile(null); // Clear selected file after upload
+      await fetchUploadedContent(); // Await to ensure data is updated
     } catch (err) {
-      console.error("Test Upload Error:", err);
-      if (err instanceof StorageError) {
-        setTestUploadError("Error uploading file. Please try again.");
-      } else {
-        setTestUploadError("An unexpected error occurred.");
-      }
+      console.error("Upload Error:", err);
+      setUploadError("Error uploading file. Please try again.");
+    } finally {
+      setLoadingUpload(false);
     }
   };
 
-  const fetchUploadedImages = async () => {
+  // Fetch uploaded images and files
+  const fetchUploadedContent = async () => {
+    setLoadingFetch(true);
     try {
-      const { data: imageFiles, error: imageError } = await supabase.storage
-        .from("Uploaded files")
-        .list("Images");
+      const fetchData = async (folder) => {
+        const { data: files, error } = await supabase.storage
+          .from("Uploaded files")
+          .list(folder);
+        if (error) throw error;
 
-      if (imageError) throw imageError;
+        const urls = await Promise.all(
+          files
+            .filter((file) => file.name !== ".emptyFolderPlaceholder")
+            .map(async (file) => {
+              const { data } = supabase.storage
+                .from("Uploaded files")
+                .getPublicUrl(`${folder}/${file.name}`);
+              return { name: file.name, url: data.publicUrl, folder };
+            }),
+        );
 
-      const imageUrls = imageFiles
-        .filter((file) => file.name !== ".emptyFolderPlaceholder")
-        .map((file) => {
-          const { data } = supabase.storage
-            .from("Uploaded files")
-            .getPublicUrl(`Images/${file.name}`);
-          return data.publicUrl;
-        });
+        return urls;
+      };
+
+      const imageUrls = await fetchData("Images");
+      const fileUrls = await fetchData("Files");
 
       setUploadedImages(imageUrls);
+      setUploadedFiles(fileUrls);
     } catch (err) {
-      console.error("Error fetching images:", err);
-    }
-  };
-
-  const handleTestButtonClick = () => {
-    if (testFileInputRef.current) {
-      testFileInputRef.current.click();
-    }
-  };
-
-  const handleImageClick = (url) => {
-    setSelectedImage(url);
-  };
-
-  const closeModal = () => {
-    setSelectedImage(null);
-  };
-
-  const handleOverlayClick = (e) => {
-    if (e.target === e.currentTarget) {
-      closeModal();
+      console.error("Error fetching content:", err);
+    } finally {
+      setLoadingFetch(false);
     }
   };
 
   useEffect(() => {
-    fetchUploadedImages();
+    fetchUploadedContent();
   }, []);
+
+  // Rename file
+  const handleRenameConfirm = async (newFileName) => {
+    if (!renameItem) return;
+
+    setLoadingRename(true);
+    try {
+      const { name, folder } = renameItem;
+      const fileExtension = name.split(".").pop();
+      const finalNewName = newFileName.endsWith(`.${fileExtension}`)
+        ? newFileName
+        : `${newFileName}.${fileExtension}`;
+
+      const { error: moveError } = await supabase.storage
+        .from("Uploaded files")
+        .move(`${folder}/${name}`, `${folder}/${finalNewName}`);
+
+      if (moveError) throw moveError;
+
+      setRenameItem(null);
+      setSuccessMessage(`File "${finalNewName}" renamed successfully!`);
+      setSuccessModalOpen(true);
+      await fetchUploadedContent();
+    } catch (err) {
+      console.error("Rename Error:", err);
+    } finally {
+      setLoadingRename(false);
+    }
+  };
+
+  // Delete file
+  const handleDelete = (item) => {
+    setDeleteItem(item);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    const { name, folder } = deleteItem;
+
+    if (!folder || !name) {
+      console.error(
+        "Delete Error: Missing folder or name in item:",
+        deleteItem,
+      );
+      return;
+    }
+
+    setLoadingDelete(true);
+    try {
+      const filePath = `${folder}/${name}`;
+      const { data, error: deleteError } = await supabase.storage
+        .from("Uploaded files")
+        .remove([filePath]);
+
+      if (deleteError) {
+        console.error("Delete Error:", deleteError);
+        throw deleteError;
+      }
+
+      if (selectedImage === deleteItem.url && folder === "Images") {
+        setSelectedImage(null);
+      }
+
+      setSuccessMessage(`File "${name}" deleted successfully!`);
+      setSuccessModalOpen(true);
+      await fetchUploadedContent();
+    } catch (err) {
+      console.error("Delete Error:", err);
+    } finally {
+      setLoadingDelete(false);
+      setDeleteModalOpen(false);
+    }
+  };
+
+  // Open Rename Modal
+  const openRenameModal = (item, folder) => {
+    setRenameItem({ name: item.name, folder });
+  };
+
+  // Clear selected image
+  const clearSelectedImage = () => {
+    setSelectedImage(null);
+  };
 
   return (
     <VolunteerSidebar>
-      <main className="flex h-screen justify-center">
-        <div className="w-full max-w-2xl space-y-6 p-4 lg:p-8">
-          <section className="mb-8 rounded-md border p-4">
-            <h2 className="mb-2 text-xl font-semibold">🔍 Test File Upload</h2>
-            <div className="flex items-center space-x-4">
-              <Button onClick={handleTestButtonClick}>Upload Test File</Button>
-              <input
-                type="file"
-                ref={testFileInputRef}
-                className="hidden"
-                onChange={handleTestFileChange}
-                accept="image/*"
-              />
-              {testSelectedFile && (
-                <span className="text-sm text-gray-700">
-                  Selected File: {testSelectedFile.name}
-                </span>
-              )}
-            </div>
-            {testUploadStatus && (
-              <p className="mt-2 break-all text-green-600">
-                {testUploadStatus}
-              </p>
-            )}
-            {testUploadError && (
-              <p className="mt-2 text-red-600">{testUploadError}</p>
-            )}
-          </section>
+      <main className="flex h-screen flex-col lg:flex-row">
+        {/* Main Content */}
+        <div className="w-full space-y-6 overflow-auto p-4 lg:w-3/4 lg:p-8">
+          {/* File Upload Section */}
+          <FileUploadSection
+            onFileSelect={handleFileSelect}
+            onUpload={handleUpload}
+            loading={loadingUpload}
+            uploadError={uploadError}
+            selectedFile={selectedFile} // Pass selectedFile state
+          />
 
-          <section className="rounded-md border p-4">
-            <h2 className="mb-2 text-xl font-semibold">📸 Uploaded Images</h2>
-            <div className="grid grid-cols-2 gap-4">
-              {uploadedImages.length === 0 ? (
-                <p>No images uploaded yet.</p>
-              ) : (
-                uploadedImages.map((url, index) => (
-                  <div key={index} className="flex justify-center">
-                    <img
-                      src={url}
-                      alt={`Uploaded Image ${index + 1}`}
-                      className="h-40 w-40 cursor-pointer object-cover"
-                      onClick={() => handleImageClick(url)}
-                    />
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
-
-          {selectedImage && (
-            <div
-              className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75"
-              onClick={handleOverlayClick} // Close modal on overlay click
-            >
-              <div className="relative">
-                <button
-                  onClick={closeModal}
-                  className="absolute right-0 top-0 p-2 text-white"
-                >
-                  ✖️
-                </button>
-                <img
-                  src={selectedImage}
-                  alt="Full Size"
-                  className="max-h-80 max-w-2xl object-contain" // Adjusted dimensions
+          {/* Main layout for images and viewer */}
+          <div className="flex flex-col lg:flex-row lg:space-x-4">
+            {/* Uploaded Images Section */}
+            <div className="flex h-96 flex-col lg:w-1/3">
+              <h2 className="mb-2 text-xl font-semibold">📸 Uploaded Images</h2>
+              <div className="flex-grow overflow-auto rounded-md border">
+                <UploadedImagesSection
+                  images={uploadedImages}
+                  onImageSelect={setSelectedImage}
+                  onRename={(item) => openRenameModal(item, "Images")}
+                  onDelete={handleDelete}
+                  loading={loadingFetch}
                 />
               </div>
             </div>
-          )}
+
+            {/* Image Viewer Section */}
+            <div className="flex h-96 flex-col lg:w-2/3">
+              <h2 className="mb-2 text-xl font-semibold">Image Viewer</h2>
+              <div className="flex-grow overflow-auto rounded-md border">
+                {selectedImage && (
+                  <div className="flex flex-col items-center justify-center">
+                    <img
+                      src={selectedImage}
+                      alt="Selected"
+                      className="h-full object-cover"
+                    />
+                    <button
+                      className="mt-2 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+                      onClick={clearSelectedImage}
+                    >
+                      Clear Selection
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Uploaded Files Section */}
+          <div className="flex flex-col lg:w-full">
+            <h2 className="mb-2 text-xl font-semibold">📁 Uploaded Files</h2>
+            <div className="overflow-auto rounded-md border">
+              <UploadedFilesSection
+                files={uploadedFiles}
+                onRename={openRenameModal}
+                onDelete={handleDelete}
+                loading={loadingFetch}
+              />
+            </div>
+          </div>
         </div>
       </main>
+
+      {/* Rename Modal */}
+      {renameItem && (
+        <RenameModal
+          item={renameItem}
+          onConfirm={handleRenameConfirm}
+          onCancel={() => setRenameItem(null)}
+          loading={loadingRename}
+        />
+      )}
+
+      {/* Success Modal */}
+      {successModalOpen && (
+        <SuccessModal
+          message={successMessage}
+          onClose={() => setSuccessModalOpen(false)}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModalOpen && (
+        <DeleteConfirmationModal
+          item={deleteItem}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteModalOpen(false)}
+          loading={loadingDelete}
+        />
+      )}
     </VolunteerSidebar>
   );
 }
