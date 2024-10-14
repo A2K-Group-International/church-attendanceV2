@@ -1,5 +1,5 @@
-import { DeleteCategory } from "../../api/userService";
-import { Button } from "../../shadcn/button";
+import { DeleteCategory } from "../../../api/userService";
+import { Button } from "../../../shadcn/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,7 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "../../shadcn/alert-dialog";
+} from "../../../shadcn/alert-dialog";
 
 export default function BtnDeleteCategory({ id, onSuccess }) {
   const handleDelete = async () => {

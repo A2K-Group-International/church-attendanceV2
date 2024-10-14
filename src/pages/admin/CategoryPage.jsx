@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import RequestPage from "./RequestPage";
 import { fetchCategory, fetchSubCategory } from "../../api/userService";
 import Spinner from "../../components/Spinner";
-import CategoryData from "../../components/admin/CategoryData";
-import AddNewCategory from "../../components/admin/AddNewCategory";
-import RequestCategory from "../../components/admin/RequestCategory";
-import CategoryRequestHistory from "../../components/admin/CategoryRequestHistory";
+import CategoryData from "../../components/admin/Request/CategoryData";
+import AddNewCategory from "../../components/admin/Request/AddNewCategory";
+import RequestCategory from "../../components/admin/Request/RequestCategory";
+import CategoryRequestHistory from "../../components/admin/Request/CategoryRequestHistory";
 import supabase from "../../api/supabase";
 
 export default function CategoryPage() {

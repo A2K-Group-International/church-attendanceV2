@@ -32,6 +32,7 @@ import {
 } from "../shadcn/card";
 import { Label } from "../shadcn/label";
 import FormLabel from "../components/FormLabel";
+import CalendarCategoriesBtn from "../components/admin/Calendar/CalendarCategoriesBtn";
 
 export default function PublicCalendar() {
   //Attend form states
@@ -227,11 +228,7 @@ export default function PublicCalendar() {
           <DialogHeader>
             <DialogTitle className="sr-only">Events</DialogTitle>
             <DialogDescription className="sr-only">Events</DialogDescription>
-            <Input
-              type="text"
-              placeholder="Search"
-              className="w-52 rounded-xl"
-            />
+            <CalendarCategoriesBtn /> 
             <FullCalendar
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
               initialView="dayGridMonth"

@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import Table from "../Table";
+import Table from "../../Table";
 import AlertAddSubCategory from "./AlertAddSubCategory";
 import BtnDeleteCategory from "./BtnDeleteCategory";
 

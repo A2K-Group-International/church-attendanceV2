@@ -6,6 +6,8 @@ const buttonLinks = [
   { link: "/volunteers", label: "Volunteers" },
   { link: "/users", label: "Parishioners" },
   { link: "/categories", label: "Categories" },
+  { link: "#", label: "Mass Intention" },
+  { link: "#", label: "Facility" },
 ];
 
 export default function RequestPage({ children }) {

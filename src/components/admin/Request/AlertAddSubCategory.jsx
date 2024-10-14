@@ -5,13 +5,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../../shadcn/dialog";
+} from "../../../shadcn/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../../shadcn/dropdown-menu";
+} from "../../../shadcn/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,11 +22,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "../../shadcn/alert-dialog";
-import { Button } from "../../shadcn/button";
+} from "../../../shadcn/alert-dialog";
+import { Button } from "../../../shadcn/button";
 import PropTypes from "prop-types";
 import { Icon } from "@iconify/react";
-import { fetchSubCategory } from "../../api/userService";
+import { fetchSubCategory } from "../../../api/userService";
 import { useState } from "react";
 
 export default function AlertAddSubCategory({ categoryName, categoryId }) {
