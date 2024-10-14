@@ -1,8 +1,14 @@
 import { useState } from "react";
-import Table from "../Table";
+import Table from "../../Table";
 import BtnRequestAction from "./BtnRequestAction";
 
-const headers = ["Name", "Requesting", "Description", "Status", "Action"];
+const headers = [
+  "Requester Name",
+  "Title of Category",
+  "Description",
+  "Status",
+  "Action",
+];
 
 export default function RequestCategory({ categories }) {
   const [categoryList, setCategoryList] = useState(categories);
@@ -19,6 +25,7 @@ export default function RequestCategory({ categories }) {
     .map((item, index) => [
       `${item.requester_first_name} ${item.requester_last_name}`,
       item.category_name,
+      item.category_description,
       item.request_status,
       <BtnRequestAction
         key={index}
@@ -30,7 +37,9 @@ export default function RequestCategory({ categories }) {
   return (
     // Adjust the height
     <div className="h-auto">
-      <h2>Mass Intention Request</h2>
+      <h2>
+        <strong>List</strong>
+      </h2>
       <Table
         headers={headers}
         rows={rows}

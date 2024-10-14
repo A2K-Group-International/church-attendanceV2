@@ -48,8 +48,8 @@ import { Icon } from "@iconify/react";
 const headers = [
   "Action",
   "#",
-  "Children Name",
-  "Guardian Name",
+  "Name of Attendees",
+  "Main Applicant",
   "Telephone",
   "Status",
 ];

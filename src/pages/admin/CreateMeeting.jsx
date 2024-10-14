@@ -62,7 +62,7 @@ export default function CreateMeeting() {
                 width="1.5em"
                 height="1.5em"
               />
-              <Input placeholder="Add required attendees" />
+              <Input placeholder="Add required attendees or groups" />
             </div>
             <div className="flex items-center gap-x-2">
               <Icon

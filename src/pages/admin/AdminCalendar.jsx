@@ -20,6 +20,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "../../shadcn/sheet";
+import CalendarCategoriesBtn from "../../components/admin/Calendar/CalendarCategoriesBtn";
 
 const AdminCalendar = () => {
   const [events, setEvents] = useState([]);
@@ -118,6 +119,7 @@ const AdminCalendar = () => {
   return (
     <AdminSidebar>
       <div className="p-5">
+        <CalendarCategoriesBtn />
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
