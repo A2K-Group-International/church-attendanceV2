@@ -146,7 +146,7 @@ export async function fetchCategory() {
     const { data, error } = await supabase
       .from("category_list")
       .select("*")
-      .order("id", { ascending: false });
+      .order("category_id", { ascending: false });
 
     if (error) throw error;
     return data;
@@ -156,12 +156,29 @@ export async function fetchCategory() {
   }
 }
 
+// Fetch Approved SubCategory category
+export async function fetchSubCategory(categoryId) {
+  try {
+    const { data, error } = await supabase
+      .from("sub_category_list")
+      .select("*")
+      .eq("category_id", categoryId)
+      .eq("is_approved", true);
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error fetching sub category list: ", error.message);
+    throw new Error("Failed to load sub category list.");
+  }
+}
+
 export async function DeleteCategory(id) {
   try {
     const { data, error } = await supabase
       .from("category_list")
       .delete()
-      .eq("id", id);
+      .eq("category_id", id);
 
     if (error) throw error;
     return data;
@@ -174,13 +191,13 @@ export async function DeleteCategory(id) {
 export async function RequestCategory(id) {
   try {
     const { data, error } = await supabase
-      .from("category_list") // Ensure the table name is correct
+      .from("category_list")
       .update({ is_approved: true, request_status: "Approved" }) // Update the is_approved field
-      .eq("id", id) // Match the id
+      .eq("category_id", id) // Match the id
       .select(); // return the updated row(s)
 
     if (error) {
-      throw error; // Throw an error if something goes wrong
+      throw error;
     }
     return data; // Return the updated data
   } catch (error) {
@@ -189,13 +206,12 @@ export async function RequestCategory(id) {
 }
 
 // Handling the Reject Request Category
-
 export async function RejectRequestCategory(id) {
   try {
     const { data, error } = await supabase
       .from("category_list") // Ensure the table name is correct
       .update({ is_rejected: true, request_status: "Rejected" }) // Update the is_approved field
-      .eq("id", id) // Match the id
+      .eq("category_id", id) // Match the id
       .select(); // return the updated row(s)
 
     if (error) {
@@ -204,5 +220,70 @@ export async function RejectRequestCategory(id) {
     return data; // Return the updated data
   } catch (error) {
     console.error("Error executing Rejection: ", error);
+  }
+}
+
+// Handling Volunteer Request Insert Category
+export async function InsertRequestCategory(
+  category_name,
+  requester_id,
+  requester_first_name,
+  requester_last_name,
+  category_description,
+) {
+  try {
+    const { data, error } = await supabase.from("category_list").insert([
+      {
+        category_name: category_name,
+        requester_id: requester_id,
+        requester_first_name: requester_first_name,
+        requester_last_name: requester_last_name,
+        is_approved: false,
+        is_rejected: false,
+        request_status: "Pending",
+        category_description: category_description,
+      },
+    ]);
+
+    if (error) {
+      throw error;
+    }
+    console.log("Category inserted successfully:", data);
+    return data; // Return data for any additional processing
+  } catch (error) {
+    console.error("Error inserting category:", error.message);
+    return { error: error.message };
+  }
+}
+
+// Handling Volunteer Request Insert Category
+export async function InsertRequestSubCategory(
+  sub_category_name,
+  category_id,
+  requester_id,
+  requester_first_name,
+  requester_last_name,
+  sub_category_description,
+) {
+  try {
+    const { data, error } = await supabase.from("sub_category_list").insert([
+      {
+        sub_category_name: sub_category_name,
+        category_id: category_id,
+        requester_id: requester_id,
+        requester_first_name: requester_first_name,
+        requester_last_name: requester_last_name,
+        is_approved: false,
+        sub_category_description: sub_category_description,
+      },
+    ]);
+
+    if (error) {
+      throw error;
+    }
+    return data; // Return data for any additional processing
+  } catch (error) {
+    console.error("Error inserting category:", error.message);
+    return { error: error.message };
   }
 }

@@ -18,7 +18,7 @@ const adminLinks = [
   { link: "/schedule", label: "Schedule", icon: CalendarIcon },
 
   { link: "/admin-calendar", label: "Calendar", icon: CalendarIcon },
-  { link: "/volunteers", label: "Request", icon: RequestIcon },
+  { link: "/volunteers", label: "Request(s)", icon: RequestIcon },
 ];
 
 export default function AdminSidebar({ children }) {

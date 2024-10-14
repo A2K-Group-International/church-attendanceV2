@@ -26,28 +26,50 @@ import {
 import { Button } from "../../shadcn/button";
 import PropTypes from "prop-types";
 import { Icon } from "@iconify/react";
+import { fetchSubCategory } from "../../api/userService";
+import { useState } from "react";
 
-export default function AlertAddSubCategory({ categoryName, subCategory }) {
-  const subCategories = Array.isArray(subCategory) ? subCategory : [];
+export default function AlertAddSubCategory({ categoryName, categoryId }) {
+  const [subCategoryList, setSubCategoryList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const addSubCategory = () => {}; // placeholder for adding subcategory
+
+  const fetchsubCategoryList = async () => {
+    try {
+      const data = await fetchSubCategory(categoryId);
+      setSubCategoryList(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFetchSubCategory = () => {
+    fetchsubCategoryList();
+  };
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">{categoryName}</Button>
+        <Button variant="outline" onClick={handleFetchSubCategory}>
+          {categoryName}
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Sub Categories</DialogTitle>
+          <DialogTitle>{categoryName}</DialogTitle>
           <DialogDescription className="sr-only">
             List of Sub Categories
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col">
-          {subCategories.length > 0 ? (
-            subCategories.map((item, index) => (
+          {subCategoryList.length > 0 ? (
+            subCategoryList.map((item, index) => (
               <div key={index} className="flex justify-between">
-                <span>{`${index + 1}. ${item.name || item}`}</span>
+                <span>{`${index + 1}. ${item.sub_category_name || item}`}</span>
                 <DropdownMenu key={item.id}>
                   <DropdownMenuTrigger asChild>
                     <button aria-label="Options">
@@ -90,7 +112,7 @@ export default function AlertAddSubCategory({ categoryName, subCategory }) {
               </div>
             ))
           ) : (
-            <span>No subcategories available</span>
+            <span>No Sub Category available</span>
           )}
         </div>
         <Dialog>
