@@ -18,9 +18,9 @@ import VolunteerAnnouncementsInfo from "./pages/volunteer/VolunteerAnnoucementsI
 import VolunteerProfile from "./pages/volunteer/VolunteerProfile";
 import VolunteerDuties from "./pages/volunteer/VolunteerDuties";
 
-
 import CategoryPage from "./pages/admin/CategoryPage";
-
+import VolunteerClasses from "./pages/volunteer/VolunteerClasses";
+import VolunteerClass from "./pages/volunteer/VolunteerClass";
 
 function App() {
   return (
@@ -164,6 +164,17 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/volunteer-classes"
+          element={
+            <ProtectedRoute>
+              <VolunteerClasses />
+            </ProtectedRoute>
+          }
+        />
+        <Route 
+        path="/volunteer-classes/:id" 
+        element={<VolunteerClass />} />
       </Routes>
     </Router>
   );
