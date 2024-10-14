@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import supabase from "../../api/supabase";
 import VolunteerSidebar from "../../components/volunteer/VolunteerSidebar";
 import FileUploadSection from "../../components/volunteer/VolunteerUpload/FileUploadSection";
@@ -25,38 +25,8 @@ export default function VolunteerUploadPage() {
   const [successModalOpen, setSuccessModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [groupData, setGroupData] = useState(null);
-  const { userData } = useUserData();
 
-  const fetchGroupInfo = useCallback(async () => {
-    if (!userData || !userData.group_id) return;
-
-    setLoadingFetch(true);
-    try {
-      const { data, error } = await supabase
-        .from("group_list")
-        .select("*")
-        .eq("group_id", userData.group_id);
-
-      if (error) throw error;
-
-      // Assuming groupData is always an array
-      if (data.length > 0) {
-        setGroupData(data[0]); // Set group data (first item)
-      } else {
-        console.warn("No group data found.");
-      }
-    } catch (err) {
-      console.error("Error fetching group information:", err);
-    } finally {
-      setLoadingFetch(false);
-      console.log(groupData.group_name);
-    }
-  }, [userData]);
-
-  useEffect(() => {
-    fetchGroupInfo();
-  }, [fetchGroupInfo]);
+  const userData = useUserData();
 
   // Handle file selection
   const handleFileSelect = (e) => {
@@ -247,76 +217,64 @@ export default function VolunteerUploadPage() {
                   onImageSelect={setSelectedImage}
                   onRename={(item) => openRenameModal(item, "Images")}
                   onDelete={handleDelete}
-                  loading={loadingFetch}
+                  loadingDelete={loadingDelete}
                 />
               </div>
             </div>
 
-            {/* Image Viewer Section */}
+            {/* Image Viewer */}
             <div className="flex h-96 flex-col lg:w-2/3">
               <h2 className="mb-2 text-xl font-semibold">Image Viewer</h2>
               <div className="flex-grow overflow-auto rounded-md border">
-                {selectedImage && (
-                  <div className="flex flex-col items-center justify-center">
-                    <img
-                      src={selectedImage}
-                      alt="Selected"
-                      className="h-full object-cover"
-                    />
-                    <button
-                      className="mt-2 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-                      onClick={clearSelectedImage}
-                    >
-                      Clear Selection
-                    </button>
-                  </div>
+                {selectedImage ? (
+                  <img
+                    src={selectedImage}
+                    alt={selectedImage.name}
+                    className="h-full w-full object-contain"
+                  />
+                ) : (
+                  <p className="text-center">
+                    No image selected. Please select an image to view.
+                  </p>
                 )}
               </div>
             </div>
           </div>
 
           {/* Uploaded Files Section */}
-          <div className="flex flex-col lg:w-full">
-            <h2 className="mb-2 text-xl font-semibold">📁 Uploaded Files</h2>
-            <div className="overflow-auto rounded-md border">
-              <UploadedFilesSection
-                files={uploadedFiles}
-                onRename={openRenameModal}
-                onDelete={handleDelete}
-                loading={loadingFetch}
-              />
-            </div>
-          </div>
+          <UploadedFilesSection
+            files={uploadedFiles}
+            onRename={(item) => openRenameModal(item, "Files")}
+            onDelete={handleDelete}
+            loadingDelete={loadingDelete}
+          />
         </div>
-      </main>
 
-      {/* Rename Modal */}
-      {renameItem && (
+        {/* Rename Modal */}
         <RenameModal
+          isOpen={!!renameItem}
+          onClose={() => setRenameItem(null)}
           item={renameItem}
-          onConfirm={handleRenameConfirm}
-          onCancel={() => setRenameItem(null)}
-          loading={loadingRename}
+          onRenameConfirm={handleRenameConfirm}
+          loadingRename={loadingRename}
         />
-      )}
 
-      {/* Success Modal */}
-      {successModalOpen && (
+        {/* Success Modal */}
         <SuccessModal
-          message={successMessage}
+          isOpen={successModalOpen}
           onClose={() => setSuccessModalOpen(false)}
+          message={successMessage}
         />
-      )}
 
-      {/* Delete Confirmation Modal */}
-      {deleteModalOpen && (
+        {/* Delete Confirmation Modal */}
         <DeleteConfirmationModal
-          item={deleteItem}
+          isOpen={deleteModalOpen}
+          onClose={() => setDeleteModalOpen(false)}
           onConfirm={confirmDelete}
-          onCancel={() => setDeleteModalOpen(false)}
-          loading={loadingDelete}
+          item={deleteItem}
+          loadingDelete={loadingDelete}
         />
-      )}
+      </main>
     </VolunteerSidebar>
   );
 }
