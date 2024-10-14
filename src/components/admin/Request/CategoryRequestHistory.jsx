@@ -5,8 +5,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../../shadcn/dialog";
-import { Button } from "../../shadcn/button";
+} from "../../../shadcn/dialog";
+import { Button } from "../../../shadcn/button";
 import { Icon } from "@iconify/react";
 
 export default function CategoryRequestHistory() {

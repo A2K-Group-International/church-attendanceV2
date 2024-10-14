@@ -6,14 +6,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../../shadcn/dialog";
-import { Button } from "../../shadcn/button";
+} from "../../../shadcn/dialog";
+import { Button } from "../../../shadcn/button";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import supabase from "../../api/supabase";
-import { Label } from "../../shadcn/label";
-import { Input } from "../../shadcn/input";
+import supabase from "../../../api/supabase";
+import { Label } from "../../../shadcn/label";
+import { Input } from "../../../shadcn/input";
 
 const categorySchema = z.object({
   categoryName: z.string().min(1, "Category name is required"), // Minimum one character
@@ -56,7 +56,6 @@ export default function AddNewCategory() {
   // Function to handle form submission
   const onSubmit = async (data) => {
     const { categoryName } = data;
-    const subCategoryData = newSubCategory.length > 0 ? newSubCategory : null;
 
     // Insert the new category into the Supabase database
     const { error } = await supabase
@@ -64,7 +63,6 @@ export default function AddNewCategory() {
       .insert([
         {
           category_name: categoryName,
-          sub_category: subCategoryData,
           is_approved: true,
         },
       ]);

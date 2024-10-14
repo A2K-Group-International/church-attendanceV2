@@ -1,5 +1,5 @@
-import { Button } from "../../shadcn/button";
-import { RequestCategory, RejectRequestCategory } from "../../api/userService";
+import { Button } from "../../../shadcn/button";
+import { RequestCategory, RejectRequestCategory } from "../../../api/userService";
 
 export default function BtnRequestAction({ id, onSuccess }) {
   const handleApprove = async () => {

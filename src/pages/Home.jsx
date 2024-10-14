@@ -7,6 +7,7 @@ import churchBg from "../assets/images/church-background.webp";
 import churchIcon from "../assets/svg/churchIcon.svg";
 import CarouselEvents from "../components/CarouselEvents";
 import { Button } from "../shadcn/button";
+import BtnSelectRegistration from "./registration/BtnSelectRegistration";
 
 export default function Home() {
   return (
@@ -20,7 +21,8 @@ export default function Home() {
             <div className="grid grid-cols-2 gap-2 p-2 sm:grid-cols-4">
               <Login />
               <RegisterUser />
-              <DialogWalkInRegister btnName="Walk-In Register" title="Register" description="Fill up the forms for one-time registration" btnSubmit="Submit" />
+              <BtnSelectRegistration />
+              {/* <DialogWalkInRegister btnName="Walk-In Register" title="Register" description="Fill up the forms for one-time registration" btnSubmit="Submit" /> */}
               <EditWalkInRegister />
             </div>
           </div>
