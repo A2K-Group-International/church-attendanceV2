@@ -240,9 +240,7 @@ export default function VolunteerUploadPage() {
           {/* Main layout for images and viewer */}
           <div className="flex flex-col lg:flex-row lg:space-x-4">
             {/* Uploaded Images Section */}
-            <div className="flex h-96 flex-col lg:w-1/2">
-              {" "}
-              {/* Change to lg:w-1/2 for equal split */}
+            <div className="flex h-96 flex-col lg:w-1/3">
               <h2 className="mb-2 text-xl font-semibold">📸 Uploaded Images</h2>
               <div className="flex-grow overflow-auto rounded-md border">
                 <UploadedImagesSection
@@ -256,9 +254,7 @@ export default function VolunteerUploadPage() {
             </div>
 
             {/* Image Viewer */}
-            <div className="flex h-96 flex-col lg:w-1/2">
-              {" "}
-              {/* Change to lg:w-1/2 for equal split */}
+            <div className="flex h-96 flex-col lg:w-2/3">
               <h2 className="mb-2 text-xl font-semibold">Image Viewer</h2>
               <div className="flex-grow overflow-auto rounded-md border">
                 {selectedImage ? (

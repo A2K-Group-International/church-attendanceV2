@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 import Logout from "../../authentication/Logout";
 import { Sheet, SheetTrigger, SheetContent } from "../../shadcn/sheet";
 import { Button } from "../../shadcn/button";
@@ -8,23 +10,40 @@ import CheckListIcon from "../../assets/svg/checklist.svg";
 import DashboardIcon from "../../assets/svg/dashboard.svg";
 import HamburgerIcon from "../../assets/svg/hamburgerIcon.svg";
 import RequestIcon from "../../assets/svg/requestIcon.svg";
-import ClockIcon from "../../assets/svg/clockIcon.svg";
+import { useUser } from "../../authentication/useUser";
+import useUserData from "../../api/useUserData";
 
 const adminLinks = [
   { link: "/admin-dashboard", label: "Dashboard", icon: DashboardIcon },
   { link: "/attendance", label: "Attendance", icon: CheckListIcon },
-
   { link: "/groups", label: "Groups", icon: PersonIcon },
   { link: "/schedule", label: "Schedule", icon: CalendarIcon },
-
   { link: "/admin-calendar", label: "Calendar", icon: CalendarIcon },
   { link: "/volunteers", label: "Request(s)", icon: RequestIcon },
 ];
 
 export default function AdminSidebar({ children }) {
+  const navigate = useNavigate(); // Initialize useNavigate for navigation
+  const { user } = useUser(); // Get the current user
+  const { userData, error } = useUserData(user ? user.id : null); // Get user data
+
+  useEffect(() => {
+    if (error) {
+      console.error("Error fetching user data:", error);
+    }
+  }, [error]);
+
+  const handleNavigateToVolunteer = () => {
+    navigate("/volunteer-dashboard"); // Navigate to the volunteer dashboard
+  };
+
+  const handleNavigateToUser = () => {
+    navigate("/events-page"); // Navigate to the user events page
+  };
+
   return (
     <div className="flex h-screen w-full">
-      {/* large screens */}
+      {/* Large screens */}
       <div className="hidden lg:block lg:w-64 lg:shrink-0 lg:border-r lg:bg-gray-100 dark:lg:bg-gray-800">
         <div className="flex h-full flex-col justify-between px-4 py-6">
           <div className="space-y-6">
@@ -42,6 +61,22 @@ export default function AdminSidebar({ children }) {
             </nav>
           </div>
           <div className="space-y-4">
+            {/* Navigate to Volunteer Dashboard Button */}
+            <Button
+              onClick={handleNavigateToVolunteer}
+              variant="outline"
+              className="w-full" // Add full width for better layout
+            >
+              Go to Volunteer Dashboard
+            </Button>
+            {/* Navigate to User Events Page Button */}
+            <Button
+              onClick={handleNavigateToUser}
+              variant="outline"
+              className="w-full" // Add full width for better layout
+            >
+              Go to User Events Page
+            </Button>
             <Logout />
           </div>
         </div>
@@ -79,6 +114,22 @@ export default function AdminSidebar({ children }) {
                     </nav>
                   </div>
                   <div className="space-y-4">
+                    {/* Navigate to Volunteer Dashboard Button for Small Screens */}
+                    <Button
+                      onClick={handleNavigateToVolunteer}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      Go to Volunteer Dashboard
+                    </Button>
+                    {/* Navigate to User Events Page Button for Small Screens */}
+                    <Button
+                      onClick={handleNavigateToUser}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      Go to User Events Page
+                    </Button>
                     <Logout />
                   </div>
                 </div>
