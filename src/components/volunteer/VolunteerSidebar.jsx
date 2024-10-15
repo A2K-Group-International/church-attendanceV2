@@ -12,7 +12,7 @@ import PersonIcon from "../../assets/svg/person.svg";
 import UploadIcon from "../../assets/svg/upload.svg";
 import { useUser } from "../../authentication/useUser";
 import useUserData from "../../api/useUserData";
-import blackboard from "../../assets/svg/blackboard.svg"
+import blackboard from "../../assets/svg/blackboard.svg";
 
 const volunteerLinks = [
   {
@@ -43,8 +43,12 @@ export default function VolunteerSidebar({ children }) {
     navigate("/events-page"); // Navigate to the events page
   };
 
+  const handleReturnToAdmin = () => {
+    navigate("/admin-dashboard"); // Navigate to the admin dashboard
+  };
+
   return (
-    <div className="flex h-screen overflow-y-clip w-full">
+    <div className="flex h-screen w-full overflow-y-clip">
       {/* Large screens */}
       <div className="hidden lg:block lg:w-64 lg:shrink-0 lg:border-r lg:bg-gray-100 dark:lg:bg-gray-800">
         <div className="flex h-full flex-col justify-between px-4 py-6">
@@ -69,14 +73,25 @@ export default function VolunteerSidebar({ children }) {
             </nav>
           </div>
           <div className="space-y-4">
-            {/* Switch to Parishoner Button */}
-            {userData?.user_role === "volunteer" && (
+            {/* Switch to Parishoner Button for Admin and Volunteer */}
+            {(userData?.user_role === "volunteer" ||
+              userData?.user_role === "admin") && (
               <Button
                 onClick={handleSwitchToParishoner}
                 variant="outline"
                 className="w-full" // Add full width for better layout
               >
                 Switch to Parishoner
+              </Button>
+            )}
+            {/* Return to Admin Button */}
+            {userData?.user_role === "admin" && (
+              <Button
+                onClick={handleReturnToAdmin}
+                variant="outline"
+                className="w-full" // Add full width for better layout
+              >
+                Return to Admin
               </Button>
             )}
             <Logout />
@@ -125,14 +140,25 @@ export default function VolunteerSidebar({ children }) {
                     </nav>
                   </div>
                   <div className="space-y-4">
-                    {/* Switch to Parishoner Button for Small Screens */}
-                    {userData?.user_role === "volunteer" && (
+                    {/* Switch to Parishoner Button for Admin and Volunteer on Small Screens */}
+                    {(userData?.user_role === "volunteer" ||
+                      userData?.user_role === "admin") && (
                       <Button
                         onClick={handleSwitchToParishoner}
                         variant="outline"
                         className="w-full" // Add full width for better layout
                       >
                         Switch to Parishoner
+                      </Button>
+                    )}
+                    {/* Return to Admin Button for Small Screens */}
+                    {userData?.user_role === "admin" && (
+                      <Button
+                        onClick={handleReturnToAdmin}
+                        variant="outline"
+                        className="w-full" // Add full width for better layout
+                      >
+                        Return to Admin
                       </Button>
                     )}
                     <Logout />

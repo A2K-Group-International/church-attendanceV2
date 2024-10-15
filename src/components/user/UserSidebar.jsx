@@ -30,6 +30,10 @@ export default function UserSidebar({ children }) {
     navigate("/volunteer-announcements"); // Navigate to the volunteer announcements page
   };
 
+  const handleReturnToAdmin = () => {
+    navigate("/admin-dashboard"); // Navigate to the Admin dashboard
+  };
+
   return (
     <div className="flex h-screen w-full">
       {/* Large screens */}
@@ -57,7 +61,8 @@ export default function UserSidebar({ children }) {
           </div>
           <div className="space-y-4">
             {/* Switch to Volunteer Button */}
-            {userData?.user_role === "volunteer" && (
+            {(userData?.user_role === "volunteer" ||
+              userData?.user_role === "admin") && (
               <Button
                 onClick={handleSwitchToVolunteer}
                 variant="outline"
@@ -66,6 +71,18 @@ export default function UserSidebar({ children }) {
                 Switch to Volunteer
               </Button>
             )}
+
+            {/* Return to Admin Button */}
+            {userData?.user_role === "admin" && (
+              <Button
+                onClick={handleReturnToAdmin}
+                variant="outline"
+                className="w-full" // Add full width for better layout
+              >
+                Return to Admin
+              </Button>
+            )}
+
             <Logout />
           </div>
         </div>
@@ -113,7 +130,8 @@ export default function UserSidebar({ children }) {
                   </div>
                   <div className="space-y-4">
                     {/* Switch to Volunteer Button for Small Screens */}
-                    {userData?.user_role === "volunteer" && (
+                    {(userData?.user_role === "volunteer" ||
+                      userData?.user_role === "admin") && (
                       <Button
                         onClick={handleSwitchToVolunteer}
                         variant="outline"
@@ -122,6 +140,18 @@ export default function UserSidebar({ children }) {
                         Switch to Volunteer
                       </Button>
                     )}
+
+                    {/* Return to Admin Button for Small Screens */}
+                    {userData?.user_role === "admin" && (
+                      <Button
+                        onClick={handleReturnToAdmin}
+                        variant="outline"
+                        className="w-full" // Add full width for better layout
+                      >
+                        Return to Admin
+                      </Button>
+                    )}
+
                     <Logout />
                   </div>
                 </div>
