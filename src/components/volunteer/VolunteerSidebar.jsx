@@ -13,7 +13,7 @@ import UploadIcon from "../../assets/svg/upload.svg";
 import { useUser } from "../../authentication/useUser";
 import useUserData from "../../api/useUserData";
 import blackboard from "../../assets/svg/blackboard.svg";
-import RequestIcon from "../../assets/svg/RequestIcon.svg";
+import RequestIcon from "../../assets/svg/requestIcon.svg";
 
 const volunteerLinks = [
   {

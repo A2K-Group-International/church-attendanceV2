@@ -1,3 +1,5 @@
+// src/components/volunteer/duty/AssignUsersModal.jsx
+
 import React, { useState } from "react";
 import {
   Dialog,
@@ -7,8 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogClose,
-} from "../../shadcn/dialog"; // Import Shadcn Dialog components
-import { Button } from "../../shadcn/button"; // Import Shadcn Button component
+} from "../../../shadcn/dialog"; // Import Shadcn Dialog components
+import { Button } from "../../../shadcn/button"; // Import Shadcn Button component
 
 const AssignUsersModal = ({
   isOpen,
@@ -29,6 +31,7 @@ const AssignUsersModal = ({
 
   const handleSubmit = () => {
     onAssign(selectedUsers);
+    setSelectedUsers([]); // Clear selections after assigning
     onRequestClose(); // Close the dialog after assignment
   };
 
@@ -43,19 +46,25 @@ const AssignUsersModal = ({
             Select users to assign to this duty.
           </DialogDescription>
         </DialogHeader>
-        <div className="mt-4">
-          {users.map((user) => (
-            <div key={user.user_id} className="flex items-center">
-              <input
-                type="checkbox"
-                id={user.user_id}
-                checked={selectedUsers.includes(user.user_id)}
-                onChange={() => handleUserToggle(user.user_id)}
-                className="mr-2"
-              />
-              <label htmlFor={user.user_id}>{user.user_name}</label>
-            </div>
-          ))}
+        <div className="mt-4 max-h-60 overflow-y-auto">
+          {users.length > 0 ? (
+            users.map((user) => (
+              <div key={user.user_id} className="mb-2 flex items-center">
+                <input
+                  type="checkbox"
+                  id={`user-${user.user_id}`}
+                  checked={selectedUsers.includes(user.user_id)}
+                  onChange={() => handleUserToggle(user.user_id)}
+                  className="mr-2"
+                />
+                <label htmlFor={`user-${user.user_id}`}>
+                  {user.user_name} {user.user_last_name}
+                </label>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">No available users to assign.</p>
+          )}
         </div>
         <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
           <DialogClose asChild>
@@ -63,7 +72,12 @@ const AssignUsersModal = ({
               Cancel
             </Button>
           </DialogClose>
-          <Button type="button" variant="primary" onClick={handleSubmit}>
+          <Button
+            type="button"
+            variant="primary"
+            onClick={handleSubmit}
+            disabled={selectedUsers.length === 0}
+          >
             Assign
           </Button>
         </DialogFooter>

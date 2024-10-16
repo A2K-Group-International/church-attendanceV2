@@ -1,6 +1,6 @@
 import React, { useState } from "react"; // Import useState
 import { Button } from "../../../shadcn/button";
-import { DialogFooter, DialogClose } from "../../../shadcn/dialog";
+import { DialogFooter } from "../../../shadcn/dialog"; // Remove DialogClose here
 import { Input } from "../../../shadcn/input";
 import { Textarea } from "../../../shadcn/textarea";
 import { Label } from "../../../shadcn/label";
@@ -10,6 +10,7 @@ const AnnouncementForm = ({
   setNewAnnouncement,
   handleSubmit,
   setUploadedImage,
+  error, // Add error prop to receive error messages
 }) => {
   const [imagePreview, setImagePreview] = useState(null); // State for image preview
 
@@ -28,6 +29,9 @@ const AnnouncementForm = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Display error message if it exists */}
+      {error && <div className="text-red-500">{error}</div>}
+
       <div className="space-y-2">
         <Label htmlFor="post_header">Announcement Header</Label>
         <Input
@@ -81,9 +85,8 @@ const AnnouncementForm = ({
         )}
       </div>
       <DialogFooter>
-        <DialogClose asChild>
-          <Button type="submit">Post Announcement</Button>
-        </DialogClose>
+        <Button type="submit">Post Announcement</Button>{" "}
+        {/* No DialogClose wrapping */}
       </DialogFooter>
     </form>
   );

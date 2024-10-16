@@ -48,19 +48,29 @@ export default function VolunteerAnnouncements() {
 
   const fetchGroupInfo = useCallback(async () => {
     if (!userData) return;
+
+    // Check if userData.group_id is null or undefined
+    if (userData.group_id == null) {
+      console.log("NO GROUP");
+      setError("You are not a member of any group. Please contact an admin.");
+      setLoading(false); // Stop loading immediately
+      return; // Exit early
+    }
+
     try {
       setGroupId(userData.group_id);
       const { data: groupData, error: groupError } = await supabase
         .from("group_list")
         .select("*")
         .eq("group_id", userData.group_id);
+
       if (groupError) throw groupError;
       setGroupData(groupData);
     } catch (err) {
       setError("Error fetching group information. Please try again.");
       console.error("Error fetching group information:", err);
     } finally {
-      setLoading(false);
+      setLoading(false); // Ensure loading is set to false
     }
   }, [userData]);
 
@@ -98,14 +108,13 @@ export default function VolunteerAnnouncements() {
   };
 
   const handleSubmit = async (e) => {
-    console.log("submitted");
-    e.preventDefault();
+    e.preventDefault(); // Prevent default form submission
     if (
       !newAnnouncement.post_content.trim() ||
       !newAnnouncement.post_header.trim()
     ) {
-      setError("Please enter both announcement content and header.");
-      return;
+      setError("Please enter both announcement content and header."); // Set error message
+      return; // Stop further execution
     }
 
     try {
@@ -178,7 +187,7 @@ export default function VolunteerAnnouncements() {
       setNewAnnouncement({ post_content: "", post_header: "" });
       setUploadedImage(null); // Reset the uploaded image
     } catch (err) {
-      setError("Error creating announcement. Please try again.");
+      setError("Error creating announcement. Please try again."); // Set error message
       console.error("Error creating announcement:", err);
     }
   };
@@ -253,7 +262,7 @@ export default function VolunteerAnnouncements() {
           className="w-full max-w-2xl space-y-6 overflow-y-auto p-4 lg:p-8"
           style={{ maxHeight: "calc(100vh - 2rem)" }}
         >
-          {loading || userLoading || announcementsLoading ? (
+          {loading ? (
             <Spinner />
           ) : (
             <>
@@ -286,6 +295,7 @@ export default function VolunteerAnnouncements() {
                         newAnnouncement={newAnnouncement}
                         setNewAnnouncement={setNewAnnouncement}
                         handleSubmit={handleSubmit} // Pass the handleSubmit to the form
+                        error={error} // Pass the error state here
                         groupName={
                           groupData && groupData[0]
                             ? groupData[0].group_name
