@@ -72,7 +72,7 @@ export default function CategoryRequestHistory() {
           <Icon icon="mdi:clipboard-text-history" width="2em" height="2em" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[30rem] overflow-scroll no-scrollbar">
+      <DialogContent className="no-scrollbar max-h-[30rem] max-w-3xl overflow-scroll">
         <DialogHeader>
           <DialogTitle>Category Request History</DialogTitle>
           <DialogDescription className="sr-only">
