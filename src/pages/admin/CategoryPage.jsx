@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import RequestPage from "./RequestPage";
-import { fetchCategory, fetchSubCategory } from "../../api/userService";
+import { fetchCategory } from "../../api/userService";
 import Spinner from "../../components/Spinner";
 import CategoryData from "../../components/admin/Request/CategoryData";
 import AddNewCategory from "../../components/admin/Request/AddNewCategory";
@@ -23,6 +23,7 @@ export default function CategoryPage() {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     fetchCategories();

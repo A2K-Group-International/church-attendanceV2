@@ -74,6 +74,7 @@ export default function AdminNewSchedule() {
   const [categoryData, setCategoryData] = useState([]); // List of category
   const [selectedCategory, setSelectedCategory] = useState(""); // If selected category, show sub category
   const [selectedSubCategory, setSelectedSubCategory] = useState([]);
+  const [selectedCategoryName, setSelectedCategoryName] = useState("");
   const itemsPerPage = 10;
 
   const {
@@ -531,6 +532,7 @@ export default function AdminNewSchedule() {
                                 value={item.category_id}
                               >
                                 {item.category_name}
+                                {console.log(item.category_id)}
                               </SelectItem>
                             ))}
                           </SelectContent>

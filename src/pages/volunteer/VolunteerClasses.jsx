@@ -27,7 +27,7 @@ export default function VolunteerClasses() {
     <VolunteerSidebar>
       <main className="h-screen overflow-y-scroll rounded-md p-8 shadow-md">
         <div className="mb-4 flex flex-grow justify-between">
-          <Title className="mb-2 text-2xl font-bold">Your Classes</Title>
+          <Title>Your Classes</Title>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger>
               <Button onClick={() => setIsDialogOpen(true)}>Add Class</Button>

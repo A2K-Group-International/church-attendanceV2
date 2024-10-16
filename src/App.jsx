@@ -21,6 +21,7 @@ import CategoryPage from "./pages/admin/CategoryPage";
 import VolunteerClasses from "./pages/volunteer/VolunteerClasses";
 import VolunteerClass from "./pages/volunteer/VolunteerClass";
 import VolunteerUpload from "./pages/volunteer/VolunteerUpload";
+import VolunteerRequests from "./pages/volunteer/VolunteerRequests";
 
 function App() {
   return (
@@ -172,6 +173,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route path="/volunteer-classes/:id" element={<VolunteerClass />} />
 
         <Route
@@ -179,6 +181,14 @@ function App() {
           element={
             <ProtectedRoute>
               <VolunteerUpload />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer-requests"
+          element={
+            <ProtectedRoute>
+              <VolunteerRequests />
             </ProtectedRoute>
           }
         />
