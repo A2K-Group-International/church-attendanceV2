@@ -13,6 +13,7 @@ import UploadIcon from "../../assets/svg/upload.svg";
 import { useUser } from "../../authentication/useUser";
 import useUserData from "../../api/useUserData";
 import blackboard from "../../assets/svg/blackboard.svg";
+import RequestIcon from "../../assets/svg/RequestIcon.svg";
 
 const volunteerLinks = [
   {
@@ -26,6 +27,7 @@ const volunteerLinks = [
   { link: "/volunteer-upload", label: "Upload", icon: UploadIcon },
   { link: "/volunteer-profile", label: "Profile", icon: PersonIcon },
   { link: "/volunteer-classes", label: "Classes", icon: blackboard },
+  { link: "/volunteer-requests", label: "Requests", icon: RequestIcon },
 ];
 
 export default function VolunteerSidebar({ children }) {

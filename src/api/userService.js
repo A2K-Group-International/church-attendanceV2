@@ -172,6 +172,20 @@ export async function fetchSubCategory(categoryId) {
     throw new Error("Failed to load sub category list.");
   }
 }
+export async function fetchNotApprovedSubCategory() {
+  try {
+    const { data, error } = await supabase
+      .from("sub_category_list")
+      .select("*")
+      .eq("sub_category_status", "Pending");
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error fetching sub category list: ", error.message);
+    throw new Error("Failed to load sub category list.");
+  }
+}
 
 export async function DeleteCategory(id) {
   try {
@@ -285,5 +299,56 @@ export async function InsertRequestSubCategory(
   } catch (error) {
     console.error("Error inserting category:", error.message);
     return { error: error.message };
+  }
+}
+
+// Handle approve sub category
+export async function ApproveSubCategory(id) {
+  try {
+    const { data, error } = await supabase
+      .from("sub_category_list")
+      .update({ is_approved: true, sub_category_status: "Approved" }) // Update the is_approved field
+      .eq("sub_category_id", id) // Match the id
+      .select(); // return the updated row(s)
+
+    if (error) {
+      throw error;
+    }
+    return data; // Return the updated data
+  } catch (error) {
+    console.error("Error executing approval: ", error); // Log any errors
+  }
+}
+
+// Handling the Reject Request Sub Category
+export async function RejectSubCategory(id) {
+  try {
+    const { data, error } = await supabase
+      .from("sub_category_list") // Ensure the table name is correct
+      .update({ sub_category_status: "Rejected" }) // Update the is_approved field
+      .eq("sub_category_id", id) // Match the id
+      .select(); // returns the updated row(s)
+
+    if (error) {
+      throw error; // Throw an error if something goes wrong
+    }
+    return data; // Return the updated data
+  } catch (error) {
+    console.error("Error executing Rejection: ", error);
+  }
+}
+// Fetch All Sub Category
+export async function fetchAllSubCategory() {
+  try {
+    const { data, error } = await supabase
+      .from("sub_category_list")
+      .select("*")
+      .order("sub_category_id", { ascending: false });
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error fetching sub category list: ", error.message);
+    throw new Error("Failed to load sub category list.");
   }
 }

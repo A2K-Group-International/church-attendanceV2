@@ -1,5 +1,8 @@
 import { Button } from "../../../shadcn/button";
-import { RequestCategory, RejectRequestCategory } from "../../../api/userService";
+import {
+  RequestCategory,
+  RejectRequestCategory,
+} from "../../../api/userService";
 
 export default function BtnRequestAction({ id, onSuccess }) {
   const handleApprove = async () => {
@@ -26,8 +29,12 @@ export default function BtnRequestAction({ id, onSuccess }) {
   };
   return (
     <div className="flex gap-x-2">
-      <Button variant="outline" onClick={handleApprove}>Approve</Button>
-      <Button variant="outline" onClick={handleReject}>Reject</Button>
+      <Button variant="outline" onClick={handleApprove}>
+        Approve
+      </Button>
+      <Button variant="outline" onClick={handleReject}>
+        Reject
+      </Button>
     </div>
   );
 }
