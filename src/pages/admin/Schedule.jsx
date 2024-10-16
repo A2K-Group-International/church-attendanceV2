@@ -110,6 +110,8 @@ export default function AdminNewSchedule() {
             time: time,
             schedule_privacy: data.schedule_privacy,
             description: data.description,
+            schedule_category: selectedCategoryName,
+            schedule_sub_category: data.schedule_sub_category,
           })
           .eq("id", editId);
 
@@ -124,6 +126,8 @@ export default function AdminNewSchedule() {
             time: time,
             schedule_privacy: data.schedule_privacy,
             description: data.description,
+            schedule_category: selectedCategoryName,
+            schedule_sub_category: data.schedule_sub_category,
           },
         ]);
 
@@ -148,6 +152,7 @@ export default function AdminNewSchedule() {
   const resetForm = () => {
     reset();
     setTime([]);
+    setSelectedCategoryName("");
     setSelectedDate(null);
     setIsSubmitted(false);
     setEditId(null); // Reset editId when resetting the form
@@ -219,6 +224,8 @@ export default function AdminNewSchedule() {
         setValue("name", itemToEdit.name);
         setSelectedDate(moment(itemToEdit.schedule_date)); // Set the date for Calendar
         setValue("schedule_privacy", itemToEdit.schedule_privacy);
+        setValue("schedule_privacy", itemToEdit.schedule_category);
+        setValue("schedule_privacy", itemToEdit.schedule_sub_category);
         setValue("description", itemToEdit.description || "");
         if (itemToEdit.time && Array.isArray(itemToEdit.time)) {
           // Map through the time array and format each time
@@ -329,6 +336,78 @@ export default function AdminNewSchedule() {
                   {isSubmitted && !selectedDate && (
                     <p className="text-sm text-red-500">Date is required</p>
                   )}
+                </div>
+
+                {/* Event Category */}
+                <div className="space-y-2">
+                  <Label htmlFor="Event Category">Event Category</Label>
+                  <div className="flex gap-x-2">
+                    <div>
+                      <Select
+                        value={watch("schedule_category")}
+                        onValueChange={(value) => {
+                          const selectedCategory = categoryData.find(
+                            (item) => item.category_id === value,
+                          );
+                          if (selectedCategory) {
+                            setSelectedCategoryName(
+                              selectedCategory.category_name,
+                            ); // Set the selected category name
+                            setValue("schedule_category", value); // Set the category_id in the form
+                            fetchSubCategories(value); // Passing the selected category ID
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Select Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categoryData.map((item) => (
+                            <SelectItem
+                              key={item.category_id}
+                              value={item.category_id}
+                            >
+                              {item.category_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {errors.schedule_category && (
+                        <p className="text-sm text-red-500">
+                          {errors.schedule_category.message}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      {selectedCategoryName &&
+                        selectedSubCategory.length > 0 && (
+                          <Select
+                            onValueChange={(value) => {
+                              setValue("schedule_sub_category", value);
+                            }}
+                          >
+                            <SelectTrigger className="w-[180px] text-start">
+                              <SelectValue placeholder="Sub category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {selectedSubCategory.map((item) => (
+                                <SelectItem
+                                  key={item.sub_category_id}
+                                  value={item.sub_category_name}
+                                >
+                                  {item.sub_category_name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      {errors.schedule_sub_category && (
+                        <p className="text-sm text-red-500">
+                          {errors.schedule_sub_category.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -517,13 +596,22 @@ export default function AdminNewSchedule() {
                       <div>
                         <Select
                           onValueChange={(value) => {
-                            setValue("schedule_category", value);
-                            setSelectedCategory(value);
-                            fetchSubCategories(value); // Passing the selected category ID
+                            const selectedCategory = categoryData.find(
+                              (item) => item.category_id === value,
+                            );
+                            if (selectedCategory) {
+                              setSelectedCategoryName(
+                                selectedCategory.category_name,
+                              ); // Set the selected category name
+                              setValue("schedule_category", value); // Set the category_id in the form
+                              fetchSubCategories(value); // Passing the selected category ID
+                            }
                           }}
                         >
                           <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Select Category" />
+                            <SelectValue placeholder="Select Category">
+                              {selectedCategoryName || "Select Category"}
+                            </SelectValue>
                           </SelectTrigger>
                           <SelectContent>
                             {categoryData.map((item) => (
@@ -532,7 +620,6 @@ export default function AdminNewSchedule() {
                                 value={item.category_id}
                               >
                                 {item.category_name}
-                                {console.log(item.category_id)}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -544,27 +631,28 @@ export default function AdminNewSchedule() {
                         )}
                       </div>
                       <div>
-                        {selectedCategory && (
-                          <Select
-                            onValueChange={(value) => {
-                              setValue("schedule_sub_category", value);
-                            }}
-                          >
-                            <SelectTrigger className="w-[180px]">
-                              <SelectValue placeholder="Select Sub Category" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {selectedSubCategory.map((item) => (
-                                <SelectItem
-                                  key={item.sub_category_id}
-                                  value={item.sub_category_name}
-                                >
-                                  {item.sub_category_name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
+                        {selectedCategoryName &&
+                          selectedSubCategory.length > 0 && (
+                            <Select
+                              onValueChange={(value) => {
+                                setValue("schedule_sub_category", value);
+                              }}
+                            >
+                              <SelectTrigger className="w-[180px] text-start">
+                                <SelectValue placeholder="Sub category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {selectedSubCategory.map((item) => (
+                                  <SelectItem
+                                    key={item.sub_category_id}
+                                    value={item.sub_category_name}
+                                  >
+                                    {item.sub_category_name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
                         {errors.schedule_sub_category && (
                           <p className="text-sm text-red-500">
                             {errors.schedule_sub_category.message}

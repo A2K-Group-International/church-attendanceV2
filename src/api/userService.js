@@ -352,3 +352,27 @@ export async function fetchAllSubCategory() {
     throw new Error("Failed to load sub category list.");
   }
 }
+
+// Get all the events based on selected category
+export async function filterEvent(schedule_category) {
+  try {
+    const query = supabase
+      .from("schedule")
+      .select("*")
+      .order("id", { ascending: false });
+
+    // Add a filter for the category if provided
+    if (schedule_category) {
+      query.eq("schedule_category", schedule_category); 
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching events:", error.message);
+    throw new Error("Failed to load events.");
+  }
+}

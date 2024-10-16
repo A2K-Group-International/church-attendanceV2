@@ -86,7 +86,7 @@ export default function AlertAddSubCategory({ categoryName, categoryId }) {
                               Edit Sub Category
                             </AlertDialogTitle>
                             <AlertDialogDescription>
-                              {/* Add form or logic to edit subcategory here */}
+                              {/* Add edit or delete sub category */}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                         </AlertDialogContent>

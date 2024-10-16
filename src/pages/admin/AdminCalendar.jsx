@@ -4,7 +4,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import AdminSidebar from "../../components/admin/AdminSidebar";
-import { fetchAllEvents } from "../../api/userService";
+import { filterEvent } from "../../api/userService";
 import moment from "moment-timezone";
 import {
   Dialog,
@@ -25,6 +25,7 @@ import CalendarCategoriesBtn from "../../components/admin/Calendar/CalendarCateg
 const AdminCalendar = () => {
   const [events, setEvents] = useState([]);
   const [error, setError] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   // Dialog states
   const [eventDialog, setEventDialog] = useState({
@@ -39,20 +40,27 @@ const AdminCalendar = () => {
   const [sheetEventList, setSheetEventList] = useState([]);
 
   // Fetch events and transform into FullCalendar format
-  useEffect(() => {
-    const fetchSchedule = async () => {
-      try {
-        const fetchedEvents = await fetchAllEvents();
-        const transformedEvents = transformEvents(fetchedEvents);
-        setEvents(transformedEvents);
-      } catch (error) {
-        console.error("Error fetching schedule:", error);
-        setError("Failed to load schedule.");
-      }
-    };
 
-    fetchSchedule();
-  }, []);
+  const fetchSchedule = useCallback(async (schedule_category) => {
+    try {
+      const fetchedEvents = await filterEvent(schedule_category);
+      const transformedEvents = transformEvents(fetchedEvents);
+      console.log(transformedEvents);
+      setEvents(transformedEvents);
+    } catch (error) {
+      console.error("Error fetching schedule:", error);
+      setError("Failed to load schedule.");
+    }
+  }, []); // No dependencies needed, since the function doesn't depend on external state
+
+  useEffect(() => {
+    // Fetch all events initially or based on the selected category
+    if (selectedCategory) {
+      fetchSchedule(selectedCategory);
+    } else {
+      fetchSchedule(); // This should be modified to handle fetching all events
+    }
+  }, [selectedCategory, fetchSchedule]);
 
   // Transform the events data for FullCalendar
   const transformEvents = (events) => {
@@ -74,6 +82,13 @@ const AdminCalendar = () => {
         };
       });
     });
+  };
+
+  //Handle select category
+
+  const handleSelectCategory = (categoryName) => {
+    console.log(categoryName);
+    setSelectedCategory(categoryName);
   };
 
   // Event click handler for modal
@@ -119,7 +134,7 @@ const AdminCalendar = () => {
   return (
     <AdminSidebar>
       <div className="p-5">
-        <CalendarCategoriesBtn />
+        <CalendarCategoriesBtn onSelectCategory={handleSelectCategory} />
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
