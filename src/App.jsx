@@ -22,10 +22,14 @@ import VolunteerClasses from "./pages/volunteer/VolunteerClasses";
 import VolunteerClass from "./pages/volunteer/VolunteerClass";
 import VolunteerUpload from "./pages/volunteer/VolunteerUpload";
 import VolunteerRequests from "./pages/volunteer/VolunteerRequests";
+import { Toaster } from "./shadcn/toaster";
+
+
 
 function App() {
   return (
     <Router>
+       <Toaster/>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route
