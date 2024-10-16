@@ -1,6 +1,6 @@
-// src/components/volunteer/EditDutyModal.jsx
+// src/components/volunteer/DutyFormModal.jsx
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,25 +9,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogClose,
-} from "../../shadcn/dialog"; // Import Shadcn Dialog components
-import { Button } from "../../shadcn/button"; // Import Shadcn Button component
-import { Input } from "../../shadcn/input"; // Import Shadcn Input component
-import { Label } from "../../shadcn/label"; // Import Shadcn Label component
+} from "../../../shadcn/dialog"; // Import Shadcn Dialog components
+import { Button } from "../../../shadcn/button"; // Import Shadcn Button component
+import { Input } from "../../../shadcn/input"; // Import Shadcn Input component
+import { Label } from "../../../shadcn/label"; // Import Shadcn Label component
 
-const EditDutyModal = ({ isOpen, onRequestClose, onSubmit, duty }) => {
+const DutyFormModal = ({ isOpen, onRequestClose, onSubmit }) => {
   const [dutyName, setDutyName] = useState("");
   const [dutyDescription, setDutyDescription] = useState("");
   const [dutyDueDate, setDutyDueDate] = useState("");
   const [error, setError] = useState(""); // State to handle form errors
-
-  // Initialize form fields with the selected duty's data
-  useEffect(() => {
-    if (duty) {
-      setDutyName(duty.duty_name || "");
-      setDutyDescription(duty.duty_description || "");
-      setDutyDueDate(duty.duty_due_date ? duty.duty_due_date.slice(0, 10) : "");
-    }
-  }, [duty]);
 
   // Handle form submission
   const handleSubmit = (e) => {
@@ -39,7 +30,7 @@ const EditDutyModal = ({ isOpen, onRequestClose, onSubmit, duty }) => {
       return;
     }
 
-    // Pass the updated duty data to the onSubmit handler
+    // Pass the form data to the onSubmit handler
     onSubmit({ dutyName, dutyDescription, dutyDueDate });
 
     // Clear form fields and errors
@@ -53,22 +44,20 @@ const EditDutyModal = ({ isOpen, onRequestClose, onSubmit, duty }) => {
     <Dialog open={isOpen} onOpenChange={onRequestClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader className="space-y-3">
-          <DialogTitle className="text-2xl font-semibold">
-            Edit Duty
-          </DialogTitle>
+          <DialogTitle className="text-2xl font-semibold">Add Duty</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Update the details of the duty.
+            Fill out the details for the new duty.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
           <div className="space-y-4">
             {/* Duty Name */}
             <div className="space-y-2">
-              <Label htmlFor="editDutyName" className="text-sm font-medium">
+              <Label htmlFor="dutyName" className="text-sm font-medium">
                 Duty Name
               </Label>
               <Input
-                id="editDutyName"
+                id="dutyName"
                 type="text"
                 value={dutyName}
                 onChange={(e) => setDutyName(e.target.value)}
@@ -80,14 +69,11 @@ const EditDutyModal = ({ isOpen, onRequestClose, onSubmit, duty }) => {
 
             {/* Duty Description */}
             <div className="space-y-2">
-              <Label
-                htmlFor="editDutyDescription"
-                className="text-sm font-medium"
-              >
+              <Label htmlFor="dutyDescription" className="text-sm font-medium">
                 Duty Description
               </Label>
               <Input
-                id="editDutyDescription"
+                id="dutyDescription"
                 type="text"
                 value={dutyDescription}
                 onChange={(e) => setDutyDescription(e.target.value)}
@@ -99,11 +85,11 @@ const EditDutyModal = ({ isOpen, onRequestClose, onSubmit, duty }) => {
 
             {/* Due Date */}
             <div className="space-y-2">
-              <Label htmlFor="editDutyDueDate" className="text-sm font-medium">
+              <Label htmlFor="dutyDueDate" className="text-sm font-medium">
                 Due Date
               </Label>
               <Input
-                id="editDutyDueDate"
+                id="dutyDueDate"
                 type="date"
                 value={dutyDueDate}
                 onChange={(e) => setDutyDueDate(e.target.value)}
@@ -123,7 +109,7 @@ const EditDutyModal = ({ isOpen, onRequestClose, onSubmit, duty }) => {
                 Cancel
               </Button>
             </DialogClose>
-            <Button type="submit">Save Changes</Button>
+            <Button type="submit">Add Duty</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -131,4 +117,4 @@ const EditDutyModal = ({ isOpen, onRequestClose, onSubmit, duty }) => {
   );
 };
 
-export default EditDutyModal;
+export default DutyFormModal;

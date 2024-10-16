@@ -9,8 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogClose,
-} from "../../shadcn/dialog"; // Import Shadcn Dialog components
-import { Button } from "../../shadcn/button"; // Import Shadcn Button component
+} from "../../../shadcn/dialog"; // Import Shadcn Dialog components
+import { Button } from "../../../shadcn/button"; // Import Shadcn Button component
 
 const DeleteDutyModal = ({ isOpen, onRequestClose, onConfirm, duty }) => {
   return (
