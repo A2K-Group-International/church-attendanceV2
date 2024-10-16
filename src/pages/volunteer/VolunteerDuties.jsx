@@ -1,11 +1,13 @@
+// src/components/volunteer/VolunteerDuties.jsx
+
 import React, { useState, useEffect } from "react";
 import supabase from "../../api/supabase";
 import VolunteerSidebar from "../../components/volunteer/VolunteerSidebar";
-import DutyCard from "../../components/volunteer/DutyCard"; // Import the DutyCard component
-import DutyFormModal from "../../components/volunteer/DutyFormModal"; // Modal component for adding duties
-import EditDutyModal from "../../components/volunteer/EditDutyModal"; // Modal component for editing duties
-import DeleteDutyModal from "../../components/volunteer/DeleteDutyModal"; // Modal component for deleting duties
-import AssignUsersModal from "../../components/volunteer/AssignUsersModal"; // Import AssignUsersModal
+import DutyCard from "../../components/volunteer/duty/DutyCard"; // Import the DutyCard component
+import DutyFormModal from "../../components/volunteer/duty/DutyFormModal"; // Modal component for adding duties
+import EditDutyModal from "../../components/volunteer/duty/EditDutyModal"; // Modal component for editing duties
+import DeleteDutyModal from "../../components/volunteer/duty/DeleteDutyModal"; // Modal component for deleting duties
+import AssignUsersModal from "../../components/volunteer/duty/AssignUsersModal"; // Import AssignUsersModal
 
 import { Button } from "../../shadcn/button"; // Import Shadcn Button component
 import useUserData from "../../api/useUserData"; // Hook to get logged-in user data
@@ -21,43 +23,83 @@ const VolunteerDuties = () => {
 
   const [users, setUsers] = useState([]); // State to store group users
   const [isAssignUsersModalOpen, setIsAssignUsersModalOpen] = useState(false);
-  const [currentDuty, setCurrentDuty] = useState(null);
+  const [currentDuty, setCurrentDuty] = useState(null); // Duty selected for assigning users
 
   // Fetch users based on group_id
-  const fetchUsers = async () => {
+  const fetchUsers = async (dutyId = null) => {
     try {
       if (!userData?.group_id) return; // Ensure group_id is available
-      const { data, error } = await supabase
+
+      // Fetch all users based on group_id
+      const { data: allUsers, error: userError } = await supabase
         .from("user_list")
         .select("*")
-        .eq("group_id", userData.group_id); // Fetch users based on group_id
+        .eq("group_id", userData.group_id);
 
-      if (error) throw error;
+      if (userError) throw userError;
 
-      setUsers(data);
+      // If dutyId is provided, fetch assigned users for that duty
+      let assignedUserIds = [];
+      if (dutyId) {
+        const { data: assignments, error: assignmentError } = await supabase
+          .from("user_assignments")
+          .select("user_id")
+          .eq("duties_id", dutyId);
+
+        if (assignmentError) throw assignmentError;
+
+        assignedUserIds = assignments.map((assignment) => assignment.user_id);
+      }
+
+      // Filter out users who are already assigned to the current duty
+      const filteredUsers = dutyId
+        ? allUsers.filter((user) => !assignedUserIds.includes(user.user_id))
+        : allUsers;
+
+      setUsers(filteredUsers);
     } catch (error) {
       console.error("Error fetching users:", error.message);
     }
   };
 
-  // Fetch users when the component mounts
+  // Fetch users when the component mounts or group_id changes
   useEffect(() => {
     fetchUsers();
   }, [userData?.group_id]); // Refetch when group_id becomes available
 
-  // Fetch duties based on group_id
+  // Fetch duties based on group_id, including assigned users
   const fetchDuties = async () => {
     try {
       if (!userData?.group_id) return; // Ensure group_id is available
       setLoading(true);
       const { data, error } = await supabase
         .from("duties_list")
-        .select("*")
+        .select(
+          `
+          *,
+          user_assignments (
+            user_id,
+            user_list (user_name, user_last_name)
+          )
+        `,
+        )
         .eq("group_id", userData.group_id); // Fetch only duties for the user's group
 
       if (error) throw error;
 
-      setDuties(data);
+      // Transform data to include assigned users
+      const dutiesWithAssignments = data.map((duty) => ({
+        ...duty,
+        assigned_users: duty.user_assignments
+          ? duty.user_assignments.map((assignment) => ({
+              user_id: assignment.user_id,
+              user_name: assignment.user_list.user_name,
+              user_last_name: assignment.user_list.user_lasts_name,
+            }))
+          : [],
+      }));
+
+      setDuties(dutiesWithAssignments);
     } catch (error) {
       console.error("Error fetching duties:", error.message);
     } finally {
@@ -65,7 +107,7 @@ const VolunteerDuties = () => {
     }
   };
 
-  // Fetch duties when the component mounts
+  // Fetch duties when the component mounts or group_id changes
   useEffect(() => {
     fetchDuties();
   }, [userData?.group_id]); // Refetch when group_id becomes available
@@ -92,6 +134,22 @@ const VolunteerDuties = () => {
       console.error("Error adding duty:", error.message);
     } finally {
       setIsAddModalOpen(false); // Close the modal after submission
+    }
+  };
+  const handleRemoveUser = async (dutyId, userId) => {
+    try {
+      const { error } = await supabase
+        .from("user_assignments")
+        .delete()
+        .eq("duties_id", dutyId)
+        .eq("user_id", userId);
+
+      if (error) throw error;
+
+      console.log("User unassigned successfully");
+      fetchDuties(); // Refresh the duties list after unassigning
+    } catch (error) {
+      console.error("Error unassigning user:", error.message);
     }
   };
 
@@ -156,17 +214,22 @@ const VolunteerDuties = () => {
   // Handle opening the Assign Users modal
   const handleOpenAssignModal = (duty) => {
     setCurrentDuty(duty);
+    fetchUsers(duty.duties_id); // Fetch users while considering current duty assignments
     setIsAssignUsersModalOpen(true);
   };
 
   // Function to assign users to the current duty
   const assignUsersToDuty = async (selectedUsers) => {
     try {
-      // Here you would typically update your database with the assigned users
-      const { error } = await supabase
-        .from("duties_list")
-        .update({ assigned_users: selectedUsers }) // Assuming you have a field for assigned users
-        .eq("duties_id", currentDuty.duties_id);
+      if (!currentDuty || selectedUsers.length === 0) return; // Ensure duty and users are selected
+
+      // Insert assignments into user_assignments
+      const { error } = await supabase.from("user_assignments").insert(
+        selectedUsers.map((userId) => ({
+          duties_id: currentDuty.duties_id, // ID of the duty to which users are assigned
+          user_id: userId, // ID of the user being assigned
+        })),
+      );
 
       if (error) throw error;
 
@@ -211,6 +274,7 @@ const VolunteerDuties = () => {
                 onEditDuty={handleOpenEditModal} // Pass edit handler
                 onDeleteDuty={handleOpenDeleteModal} // Pass delete handler
                 onAssignUsers={() => handleOpenAssignModal(duty)} // Pass assign handler
+                onRemoveUser={handleRemoveUser} // Pass the remove user function
               />
             ))
           ) : (
@@ -254,7 +318,8 @@ const VolunteerDuties = () => {
         <AssignUsersModal
           isOpen={isAssignUsersModalOpen}
           onRequestClose={() => setIsAssignUsersModalOpen(false)}
-          onAssign={assignUsersToDuty}
+          onAssign={assignUsersToDuty} // Pass the assign function
+          onRemoveUser={handleRemoveUser} // Unassign users
           duty={currentDuty}
           users={users} // Pass the fetched users to the modal
         />
