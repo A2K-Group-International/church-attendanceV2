@@ -54,10 +54,10 @@ const EditDutyModal = ({ isOpen, onRequestClose, onSubmit, duty }) => {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader className="space-y-3">
           <DialogTitle className="text-2xl font-semibold">
-            Edit Duty
+            Edit Rota
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Update the details of the duty.
+            Update the details of the Rota.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
@@ -65,7 +65,7 @@ const EditDutyModal = ({ isOpen, onRequestClose, onSubmit, duty }) => {
             {/* Duty Name */}
             <div className="space-y-2">
               <Label htmlFor="editDutyName" className="text-sm font-medium">
-                Duty Name
+                Rota Name
               </Label>
               <Input
                 id="editDutyName"
@@ -84,7 +84,7 @@ const EditDutyModal = ({ isOpen, onRequestClose, onSubmit, duty }) => {
                 htmlFor="editDutyDescription"
                 className="text-sm font-medium"
               >
-                Duty Description
+                Rota Description
               </Label>
               <Input
                 id="editDutyDescription"

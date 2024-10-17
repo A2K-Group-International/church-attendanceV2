@@ -44,9 +44,9 @@ const DutyFormModal = ({ isOpen, onRequestClose, onSubmit }) => {
     <Dialog open={isOpen} onOpenChange={onRequestClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader className="space-y-3">
-          <DialogTitle className="text-2xl font-semibold">Add Duty</DialogTitle>
+          <DialogTitle className="text-2xl font-semibold">Add Rota</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Fill out the details for the new duty.
+            Fill out the details for the new Rota.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
@@ -54,7 +54,7 @@ const DutyFormModal = ({ isOpen, onRequestClose, onSubmit }) => {
             {/* Duty Name */}
             <div className="space-y-2">
               <Label htmlFor="dutyName" className="text-sm font-medium">
-                Duty Name
+                Rota Name
               </Label>
               <Input
                 id="dutyName"
@@ -70,7 +70,7 @@ const DutyFormModal = ({ isOpen, onRequestClose, onSubmit }) => {
             {/* Duty Description */}
             <div className="space-y-2">
               <Label htmlFor="dutyDescription" className="text-sm font-medium">
-                Duty Description
+                Rota Description
               </Label>
               <Input
                 id="dutyDescription"
@@ -109,7 +109,7 @@ const DutyFormModal = ({ isOpen, onRequestClose, onSubmit }) => {
                 Cancel
               </Button>
             </DialogClose>
-            <Button type="submit">Add Duty</Button>
+            <Button type="submit">Add Rota</Button>
           </DialogFooter>
         </form>
       </DialogContent>
