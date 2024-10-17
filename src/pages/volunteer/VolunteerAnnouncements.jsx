@@ -22,6 +22,7 @@ import AnnouncementEdit from "../../components/volunteer/post/AnnouncementEdit";
 
 export default function VolunteerAnnouncements() {
   const [groupId, setGroupId] = useState(null);
+  const [userId, setUserId] = useState(null);
   const [groupData, setGroupData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -59,6 +60,7 @@ export default function VolunteerAnnouncements() {
 
     try {
       setGroupId(userData.group_id);
+      setUserId(userData.user_id);
       const { data: groupData, error: groupError } = await supabase
         .from("group_list")
         .select("*")
@@ -73,6 +75,46 @@ export default function VolunteerAnnouncements() {
       setLoading(false); // Ensure loading is set to false
     }
   }, [userData]);
+  const handleReaction = async (postId, reaction) => {
+    try {
+      // Check if the user has already reacted to the post
+      const { data, error } = await supabase
+        .from("reactions")
+        .select("*")
+        .eq("post_id", postId)
+        .eq("user_id", userId); // Assuming you have userId available
+
+      if (error) throw error;
+
+      if (data.length > 0) {
+        // User has already reacted
+        const existingReaction = data[0];
+
+        if (existingReaction.reaction_type === reaction) {
+          // Remove reaction if it's the same as the clicked one
+          await supabase
+            .from("reactions")
+            .delete()
+            .eq("reaction_id", existingReaction.reaction_id);
+        } else {
+          // Update reaction if it's different
+          await supabase
+            .from("reactions")
+            .update({ reaction_type: reaction })
+            .eq("reaction_id", existingReaction.reaction_id);
+        }
+      } else {
+        // User has not reacted yet, insert a new reaction
+        await supabase
+          .from("reactions")
+          .insert([
+            { post_id: postId, user_id: userId, reaction_type: reaction },
+          ]);
+      }
+    } catch (error) {
+      console.error("Error handling reaction:", error);
+    }
+  };
 
   // Helper function to retrieve public URL with retries
   const getPublicUrlWithRetry = async (
@@ -321,13 +363,13 @@ export default function VolunteerAnnouncements() {
               <div className="space-y-4">
                 {filteredAnnouncements.slice(0, visibleCount).map((post) => (
                   <AnnouncementCard
+                    handleReaction={handleReaction}
                     key={post.post_id}
-                    post={post}
+                    post={post} // This contains all announcement data including reactions
                     userId={userData.user_id}
                     onEdit={() => {
-                      // Fix the onEdit handler
-                      setAnnouncementToEdit(post); // Set the announcement to edit
-                      setIsEditDialogOpen(true); // Open the edit dialog
+                      setAnnouncementToEdit(post);
+                      setIsEditDialogOpen(true);
                     }}
                     onDelete={handleDelete}
                   />

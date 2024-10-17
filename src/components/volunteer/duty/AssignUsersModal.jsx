@@ -40,10 +40,10 @@ const AssignUsersModal = ({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader className="space-y-3">
           <DialogTitle className="text-2xl font-semibold">
-            Assign Users to Duty: {duty.duty_name}
+            Assign Users to Rota: {duty.duty_name}
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Select users to assign to this duty.
+            Select users to assign to this Rota.
           </DialogDescription>
         </DialogHeader>
         <div className="mt-4 max-h-60 overflow-y-auto">

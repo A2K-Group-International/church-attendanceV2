@@ -3,7 +3,10 @@ import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { FaThumbsUp, FaHeart, FaStar, FaEllipsisV } from "react-icons/fa";
 import { Separator } from "../../../shadcn/separator";
+import useReactions from "@/api/useReactions";
+
 import PropTypes from "prop-types";
+import useUserData from "@/api/useUserData";
 
 const ConfirmationDialog = ({ isOpen, onClose, onConfirm }) => {
   if (!isOpen) return null;
@@ -36,7 +39,16 @@ const AnnouncementCard = ({
   onDelete,
   userId,
 }) => {
-  const [selectedReaction, setSelectedReaction] = useState(null);
+  const { reactions, loading, fetchReactions, userReaction } = useReactions(
+    post.post_id,
+    userId,
+  ); // Destructure reactions and loading
+  console.log("user's Reaction: " + userReaction);
+
+  const skeletonStyle = "w-6 h-4 bg-gray-300 animate-pulse rounded";
+
+  // Remove this line
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -72,10 +84,18 @@ const AnnouncementCard = ({
     return initials.toUpperCase();
   };
 
-  const handleIconClick = (reaction) => {
-    const newReaction = selectedReaction === reaction ? null : reaction;
-    setSelectedReaction(newReaction);
-    handleReaction(post.post_id, newReaction); // Call the handleReaction function passed from the parent
+  const handleIconClick = async (reaction) => {
+    const newReaction = userReaction === reaction ? null : reaction; // Use userReaction instead
+    console.log(
+      `Post ID: ${post.post_id}, Selected Reaction: ${newReaction || "none"}`,
+    );
+
+    try {
+      await handleReaction(post.post_id, newReaction);
+      await fetchReactions(); // Fetch reactions again to get updated counts
+    } catch (error) {
+      console.error("Error handling reaction:", error);
+    }
   };
 
   const renderPostContent = (content) => {
@@ -181,24 +201,50 @@ const AnnouncementCard = ({
         </div>
       </div>
       <Separator className="my-4" />
-      {/* Reaction Icons */}
       <div className="mt-4 flex items-center justify-between">
         <div className="flex space-x-4">
-          <FaThumbsUp
-            className={`cursor-pointer ${selectedReaction === "like" ? "text-blue-500" : "text-gray-400"}`}
-            size={24}
-            onClick={() => handleIconClick("like")}
-          />
-          <FaHeart
-            className={`cursor-pointer ${selectedReaction === "love" ? "text-red-500" : "text-gray-400"}`}
-            size={24}
-            onClick={() => handleIconClick("love")}
-          />
-          <FaStar
-            className={`cursor-pointer ${selectedReaction === "celebrate" ? "text-yellow-500" : "text-gray-400"}`}
-            size={24}
-            onClick={() => handleIconClick("celebrate")}
-          />
+          <div className="flex items-center space-x-1">
+            <FaThumbsUp
+              className={`cursor-pointer ${userReaction === "like" ? "text-blue-500" : "text-gray-400"}`}
+              size={24}
+              onClick={() => handleIconClick("like")}
+            />
+            <span className="text-gray-600 dark:text-gray-300">
+              {loading ? (
+                <div className={skeletonStyle}></div>
+              ) : (
+                reactions?.like || 0
+              )}
+            </span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <FaHeart
+              className={`cursor-pointer ${userReaction === "love" ? "text-red-500" : "text-gray-400"}`}
+              size={24}
+              onClick={() => handleIconClick("love")}
+            />
+            <span className="text-gray-600 dark:text-gray-300">
+              {loading ? (
+                <div className={skeletonStyle}></div>
+              ) : (
+                reactions?.love || 0
+              )}
+            </span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <FaStar
+              className={`cursor-pointer ${userReaction === "celebrate" ? "text-yellow-500" : "text-gray-400"}`}
+              size={24}
+              onClick={() => handleIconClick("celebrate")}
+            />
+            <span className="text-gray-600 dark:text-gray-300">
+              {loading ? (
+                <div className={skeletonStyle}></div>
+              ) : (
+                reactions?.celebrate || 0
+              )}
+            </span>
+          </div>
         </div>
         <Link
           to={`/volunteer-announcements-info/${post.post_id}`}
