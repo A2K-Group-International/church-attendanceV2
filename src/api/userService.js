@@ -289,6 +289,7 @@ export async function InsertRequestSubCategory(
         requester_last_name: requester_last_name,
         is_approved: false,
         sub_category_description: sub_category_description,
+        sub_category_status: "Pending"
       },
     ]);
 
@@ -363,7 +364,7 @@ export async function filterEvent(schedule_category) {
 
     // Add a filter for the category if provided
     if (schedule_category) {
-      query.eq("schedule_category", schedule_category); 
+      query.eq("schedule_category", schedule_category);
     }
 
     const { data, error } = await query;
