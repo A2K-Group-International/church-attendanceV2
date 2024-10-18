@@ -45,7 +45,6 @@ const AdminCalendar = () => {
     try {
       const fetchedEvents = await filterEvent(schedule_category);
       const transformedEvents = transformEvents(fetchedEvents);
-      console.log(transformedEvents);
       setEvents(transformedEvents);
     } catch (error) {
       console.error("Error fetching schedule:", error);
@@ -85,9 +84,7 @@ const AdminCalendar = () => {
   };
 
   //Handle select category
-
   const handleSelectCategory = (categoryName) => {
-    console.log(categoryName);
     setSelectedCategory(categoryName);
   };
 

@@ -115,6 +115,8 @@ export default function AddManualAttendance() {
   const date = new Date(filteredMassSchedule);
   const options = { year: "numeric", month: "long", day: "numeric" };
   const formattedDate = date.toLocaleDateString("en-GB", options);
+
+  
   return (
     <Dialog>
       <DialogTrigger asChild>

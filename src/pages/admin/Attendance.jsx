@@ -43,6 +43,7 @@ import { Input } from "../../shadcn/input";
 import downloadIcon from "../../assets/svg/download.svg";
 import DialogWalkInRegister from "../registration/DialogWalkInRegister";
 import { Icon } from "@iconify/react";
+import NewAttendanceRegister from "../../components/admin/Attendance/NewAttendanceRegister";
 
 // Headers for table
 const headers = [
@@ -570,12 +571,13 @@ export default function Attendance() {
           </Button>
         </div>
         <div className="sm:mb-2 sm:ml-8 sm:w-44">
-          <DialogWalkInRegister
+          <NewAttendanceRegister />
+          {/* <DialogWalkInRegister
             btnName="Add"
             title="Add manually"
             description="Add attendance manually"
             btnSubmit="Submit"
-          />
+          /> */}
         </div>
         <div className="rounded-lg bg-card shadow">
           {loading ? (
