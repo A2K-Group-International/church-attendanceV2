@@ -67,7 +67,7 @@ export default function AdminSidebar({ children }) {
               variant="outline"
               className="w-full" // Add full width for better layout
             >
-              Go to Volunteer Dashboard
+              Switch to Volunteer
             </Button>
             {/* Navigate to User Events Page Button */}
             <Button
@@ -75,7 +75,7 @@ export default function AdminSidebar({ children }) {
               variant="outline"
               className="w-full" // Add full width for better layout
             >
-              Go to User Events Page
+              Switch to Parishioner
             </Button>
             <Logout />
           </div>

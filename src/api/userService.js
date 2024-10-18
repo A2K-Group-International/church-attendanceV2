@@ -379,9 +379,9 @@ export async function filterEvent(schedule_category) {
 }
 
 export async function insertSingleAttendee(
-  applicant_name,
-  applicant_last_name,
-  applicant_telephone,
+  attendee_first_name,
+  attendee_last_name,
+  telephone,
   selected_event,
   selected_time,
   selected_event_date,
@@ -389,13 +389,14 @@ export async function insertSingleAttendee(
   try {
     const { data, error } = await supabase.from("new_attendance").insert([
       {
-        applicant_name: applicant_name,
-        applicant_last_name: applicant_last_name,
-        applicant_telephone: applicant_telephone,
+        attendee_first_name: attendee_first_name,
+        attendee_last_name: attendee_last_name,
+        telephone: telephone,
         selected_event: selected_event,
         selected_time: selected_time,
         selected_event_date: selected_event_date,
         attendance_type: "single",
+        has_attended: false,
       },
     ]);
 
@@ -403,6 +404,38 @@ export async function insertSingleAttendee(
       throw error;
     }
     return data; // Return data for any additional processing
+  } catch (error) {
+    console.error("Error inserting attendance:", error.message);
+    return { error: error.message };
+  }
+}
+
+export async function insertFamilyAttendee(
+  main_applicant_first_name,
+  main_applicant_last_name,
+  telephone,
+  selected_event,
+  selected_event_date,
+  selected_time,
+  attendee,
+) {
+  try {
+    const { error: dataError } = await supabase.from("new_attendance").insert(
+      attendee.map((child) => ({
+        main_applicant_first_name: main_applicant_first_name,
+        main_applicant_last_name: main_applicant_last_name,
+        telephone: telephone,
+        attendee_first_name: child.first_name,
+        attendee_last_name: child.last_name,
+        has_attended: false,
+        selected_event: selected_event,
+        selected_event_date: selected_event_date,
+        selected_time: selected_time,
+        attendance_type: "Family",
+      })),
+    );
+
+    if (dataError) throw dataError;
   } catch (error) {
     console.error("Error inserting attendance:", error.message);
     return { error: error.message };

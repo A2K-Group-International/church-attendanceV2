@@ -39,7 +39,7 @@ export default function CreatePoll() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Create Poll</Button>
+        <Button>New Poll</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
