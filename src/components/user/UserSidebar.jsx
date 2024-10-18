@@ -11,6 +11,7 @@ import { useUser } from "../../authentication/useUser"; // Import useUser to get
 import useUserData from "../../api/useUserData"; // Import useUserData to fetch user data
 
 const userLinks = [
+  { link: "/user-announcements", label: "Announcements", icon: CalendarIcon },
   { link: "/events-page", label: "Events", icon: CalendarIcon },
   { link: "/family", label: "Family", icon: FamilyIcon },
 ];
@@ -35,7 +36,7 @@ export default function UserSidebar({ children }) {
   };
 
   return (
-    <div className="flex h-screen w-full">
+    <div className="flex h-screen w-full overflow-y-clip">
       {/* Large screens */}
       <div className="hidden lg:block lg:w-64 lg:shrink-0 lg:border-r lg:bg-gray-100 dark:lg:bg-gray-800">
         <div className="flex h-full flex-col justify-between px-4 py-6">
