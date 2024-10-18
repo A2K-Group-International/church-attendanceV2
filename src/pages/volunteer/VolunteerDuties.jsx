@@ -112,19 +112,30 @@ const VolunteerDuties = () => {
     fetchDuties();
   }, [userData?.group_id]); // Refetch when group_id becomes available
 
-  // Handle adding a new duty
   const handleAddDuty = async (newDuty) => {
     try {
-      const { dutyName, dutyDescription, dutyDueDate } = newDuty;
+      const {
+        dutyName,
+        dutyDescription,
+        dutyStartTime,
+        dutyEndTime,
+        selectedDays, // Get the selected days
+      } = newDuty;
 
-      const { data, error } = await supabase.from("duties_list").insert([
-        {
-          duty_name: dutyName,
-          duty_description: dutyDescription,
-          duty_due_date: dutyDueDate,
-          group_id: userData.group_id, // Include group_id when adding the duty
-        },
-      ]);
+      // Create a single duty object to insert
+      const dutyToInsert = {
+        duty_name: dutyName,
+        duty_description: dutyDescription,
+        duty_start_time: dutyStartTime,
+        duty_end_time: dutyEndTime,
+        recurrence_pattern: "weekly", // Set the recurrence pattern to weekly
+        recurrence_days: selectedDays, // Use selectedDays directly (no need to wrap in an array)
+        group_id: userData.group_id, // Include group_id when adding the duty
+      };
+
+      const { data, error } = await supabase
+        .from("duties_list")
+        .insert([dutyToInsert]); // Insert a single duty
 
       if (error) throw error;
 
@@ -132,10 +143,12 @@ const VolunteerDuties = () => {
       fetchDuties(); // Refresh the duties list after adding
     } catch (error) {
       console.error("Error adding duty:", error.message);
+      // Optionally, set an error state to display a message in the UI
     } finally {
       setIsAddModalOpen(false); // Close the modal after submission
     }
   };
+
   const handleRemoveUser = async (dutyId, userId) => {
     try {
       const { error } = await supabase
