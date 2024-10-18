@@ -21,7 +21,7 @@ const DeleteDutyModal = ({ isOpen, onRequestClose, onConfirm, duty }) => {
             Delete Duty
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Are you sure you want to delete the duty "
+            Are you sure you want to delete the Rota "
             <strong>{duty.duty_name}</strong>"? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>

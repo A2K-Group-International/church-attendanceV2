@@ -14,21 +14,23 @@ const useAnnouncements = (groupId) => {
     setError(null);
 
     try {
-      const { data, error } = await supabase
-        .from("post_data")
-        .select("*")
-        .eq("post_group_id", groupId)
-        .order("created_at", { ascending: false });
+      // Fetch announcements
+      const { data: announcementsData, error: announcementsError } =
+        await supabase
+          .from("post_data")
+          .select("*")
+          .eq("post_group_id", groupId)
+          .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (announcementsError) throw announcementsError;
 
-      setAnnouncements(data);
+      setAnnouncements(announcementsData);
     } catch (err) {
       setError("Error fetching announcements. Please try again.");
       console.error("Error fetching announcements:", err);
     } finally {
       setLoading(false);
-      console.log("external fetch!");
+      console.log("External fetch completed!");
     }
   }, [groupId]);
 
