@@ -9,43 +9,49 @@ import {
 } from "../../../shadcn/select";
 import { Button } from "@/shadcn/button";
 import SingleRegistrationForm from "./SingleRegistrationForm";
+import FamilyRegistrationForm from "./FamilyRegistrationForm";
 
 export default function NewAttendanceRegister() {
   const [tab, setTab] = useState("");
-  const [showForm, setShowForm] = useState(false);
+  const [showSingleForm, setShowSingleForm] = useState(false);
+  const [showFamilyForm, setShowFamilyForm] = useState(false);
 
   const handleSubmit = () => {
     if (tab === "single") {
-      setShowForm(true);
-    } else {
-      setShowForm(false);
+      setShowSingleForm(true);
+    } else if (tab === "family") {
+      setShowFamilyForm(true);
     }
   };
 
   const resetForm = () => {
     setTab("");
-    setShowForm(false);
+    setShowSingleForm(false);
+    setShowFamilyForm(false);
   };
 
   return (
     <Modal onOpenChange={resetForm} BtnName="Add" ModalTitle="Add New Attendee">
-      <h2>Please select the type of attendee</h2>
-      <Select onValueChange={(value) => setTab(value)}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="single">Single</SelectItem>
-          <SelectItem value="familyk">Family</SelectItem>
-          <SelectItem value="colleague">Colleague/Friend</SelectItem>
-        </SelectContent>
-      </Select>
-      {!showForm && (
-        <div className="text-end">
-          <Button onClick={handleSubmit}>Submit</Button>
-        </div>
+      {!showSingleForm && !showFamilyForm && (
+        <>
+          <h2>Please select the type of attendee</h2>
+          <Select onValueChange={(value) => setTab(value)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="single">Single</SelectItem>
+              <SelectItem value="family">Family</SelectItem>
+              <SelectItem value="colleague">Colleague/Friend</SelectItem>
+            </SelectContent>
+          </Select>
+          <div className="text-end">
+            <Button onClick={handleSubmit}>Next</Button>
+          </div>
+        </>
       )}
-      {showForm && <SingleRegistrationForm />}
+      {showSingleForm && <SingleRegistrationForm />}
+      {showFamilyForm && <FamilyRegistrationForm />}
     </Modal>
   );
 }

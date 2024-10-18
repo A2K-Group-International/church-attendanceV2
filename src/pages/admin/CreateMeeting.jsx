@@ -39,7 +39,7 @@ export default function CreateMeeting() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Create Meeting</Button>
+        <Button>New Meeting</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

@@ -72,10 +72,6 @@ export default function SingleRegistrationForm() {
     } catch (error) {
       console.error("Error inserting attendance", error);
     }
-    console.log("form data:", data);
-    console.log("Selected Event Time:", selectedEventTime);
-    console.log("Selected Event:", selectedEvent);
-    console.log("Event Date:", eventDate);
   };
 
   const fetchedEvents = async () => {
@@ -101,7 +97,7 @@ export default function SingleRegistrationForm() {
         onSubmit={handleSubmit(onSubmit)}
         className="no-scrollbar h-64 overflow-scroll"
       >
-        <div className="grid w-full items-center gap-4">
+        <div className="grid w-full items-center gap-4 p-2">
           <div className="flex flex-col space-y-1.5">
             <Label htmlFor="name">Upcoming Events</Label>
             <Select
@@ -200,7 +196,7 @@ export default function SingleRegistrationForm() {
           </div>
         </div>
         <div className="mt-2 text-end">
-          <Button type="submit">Next</Button>
+          <Button type="submit">Submit</Button>
         </div>
       </form>
     </InformationCard>

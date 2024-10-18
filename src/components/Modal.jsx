@@ -14,7 +14,7 @@ export default function Modal({ BtnName, ModalTitle, onOpenChange, children }) {
       <DialogTrigger asChild>
         <Button>{BtnName}</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-[40rem]">
         <DialogHeader>
           <DialogTitle>{ModalTitle}</DialogTitle>
           <DialogDescription className="sr-only"></DialogDescription>

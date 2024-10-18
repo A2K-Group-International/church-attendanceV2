@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import supabase from "../../api/supabase";
 import moment from "moment"; // Import Moment.js
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import Table from "../../components/Table";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import { Button } from "../../shadcn/button";
@@ -566,11 +566,11 @@ export default function AdminNewSchedule() {
               }}
             >
               <DialogTrigger asChild>
-                <Button>Create Event</Button>
+                <Button>New Event</Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[700px]">
                 <DialogHeader>
-                  <DialogTitle>Create Event</DialogTitle>
+                  <DialogTitle>New Event</DialogTitle>
                   <DialogDescription>
                     Schedule an upcoming event.
                   </DialogDescription>
@@ -777,7 +777,6 @@ export default function AdminNewSchedule() {
             <CreatePoll />
           </div>
         </header>
-
         {loading ? (
           <Spinner />
         ) : error ? (
