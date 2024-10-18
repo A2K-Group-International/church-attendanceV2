@@ -9,7 +9,6 @@ import {
 } from "../../../shadcn/select";
 import { Button } from "@/shadcn/button";
 import SingleRegistrationForm from "./SingleRegistrationForm";
-import moment from "moment";
 
 export default function NewAttendanceRegister() {
   const [tab, setTab] = useState("");
@@ -46,7 +45,6 @@ export default function NewAttendanceRegister() {
           <Button onClick={handleSubmit}>Submit</Button>
         </div>
       )}
-
       {showForm && <SingleRegistrationForm />}
     </Modal>
   );

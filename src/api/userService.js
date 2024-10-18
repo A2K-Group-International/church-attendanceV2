@@ -94,51 +94,51 @@ export async function insertNewSchedule(schedule, time) {
   }
 }
 
-const signUp = async (email, password, userData) => {
-  setSignUpLoading(true);
-  try {
-    const { data: user, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+// const signUp = async (email, password, userData) => {
+//   setSignUpLoading(true);
+//   try {
+//     const { data: user, error: signUpError } = await supabase.auth.signUp({
+//       email,
+//       password,
+//     });
 
-    if (signUpError) {
-      throw signUpError;
-    }
+//     if (signUpError) {
+//       throw signUpError;
+//     }
 
-    const { error: insertError } = await supabase.from("user_list").insert([
-      {
-        user_uuid: user.user.id,
-        user_name: userData.name,
-        user_role: "user",
-        user_email: email,
-        user_password: password,
-        user_contact: userData.contact,
-      },
-    ]);
+//     const { error: insertError } = await supabase.from("user_list").insert([
+//       {
+//         user_uuid: user.user.id,
+//         user_name: userData.name,
+//         user_role: "user",
+//         user_email: email,
+//         user_password: password,
+//         user_contact: userData.contact,
+//       },
+//     ]);
 
-    if (insertError) {
-      throw insertError;
-    }
+//     if (insertError) {
+//       throw insertError;
+//     }
 
-    const { error: updateError } = await supabase
-      .from("account_pending")
-      .update({ registered: true })
-      .eq("id", userData.id);
+//     const { error: updateError } = await supabase
+//       .from("account_pending")
+//       .update({ registered: true })
+//       .eq("id", userData.id);
 
-    if (updateError) {
-      throw updateError;
-    }
+//     if (updateError) {
+//       throw updateError;
+//     }
 
-    fetchData();
+//     fetchData();
 
-    return user;
-  } catch (error) {
-    console.error("Error during sign-up:", error);
-  } finally {
-    setSignUpLoading(false);
-  }
-};
+//     return user;
+//   } catch (error) {
+//     console.error("Error during sign-up:", error);
+//   } finally {
+//     setSignUpLoading(false);
+//   }
+// };
 
 // Fetch Approved category
 export async function fetchCategory() {
@@ -289,7 +289,7 @@ export async function InsertRequestSubCategory(
         requester_last_name: requester_last_name,
         is_approved: false,
         sub_category_description: sub_category_description,
-        sub_category_status: "Pending"
+        sub_category_status: "Pending",
       },
     ]);
 
@@ -375,5 +375,36 @@ export async function filterEvent(schedule_category) {
   } catch (error) {
     console.error("Error fetching events:", error.message);
     throw new Error("Failed to load events.");
+  }
+}
+
+export async function insertSingleAttendee(
+  applicant_name,
+  applicant_last_name,
+  applicant_telephone,
+  selected_event,
+  selected_time,
+  selected_event_date,
+) {
+  try {
+    const { data, error } = await supabase.from("new_attendance").insert([
+      {
+        applicant_name: applicant_name,
+        applicant_last_name: applicant_last_name,
+        applicant_telephone: applicant_telephone,
+        selected_event: selected_event,
+        selected_time: selected_time,
+        selected_event_date: selected_event_date,
+        attendance_type: "single",
+      },
+    ]);
+
+    if (error) {
+      throw error;
+    }
+    return data; // Return data for any additional processing
+  } catch (error) {
+    console.error("Error inserting attendance:", error.message);
+    return { error: error.message };
   }
 }
