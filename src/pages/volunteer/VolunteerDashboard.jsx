@@ -9,13 +9,19 @@ const VolunteerDashboard = () => {
 
   return (
     <VolunteerSidebar>
-      <div className="flex">
+      <div className="flex h-screen">
+        {" "}
+        {/* Use full height for the dashboard */}
         {/* Left side: Duties list */}
-        <div className="w-1/3 p-4">
+        <div className="flex w-1/3 flex-col p-4">
+          {" "}
+          {/* Set the DutiesList to use flex column */}
           <DutiesList userId={userData?.user_id} />
         </div>
         {/* Right side: Placeholder for Calendar */}
-        <div className="w-2/3 p-4">
+        <div className="flex w-2/3 flex-col p-4">
+          {" "}
+          {/* Set the calendar area to use flex column */}
           <h2 className="mb-4 text-xl font-bold">Calendar Placeholder</h2>
           <div className="h-full rounded-lg border border-gray-300 p-4">
             {/* Here you can add your calendar component or placeholder */}

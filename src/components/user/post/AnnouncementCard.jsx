@@ -249,12 +249,6 @@ const AnnouncementCard = ({
             </span>
           </div>
         </div>
-        <Link
-          to={`/volunteer-announcements-info/${post.post_id}`}
-          className="text-blue-500 hover:underline"
-        >
-          Read more
-        </Link>
       </div>
       {/* Confirmation Dialog */}
       <ConfirmationDialog

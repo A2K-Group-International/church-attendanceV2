@@ -26,7 +26,6 @@ const useReactions = (postId, userId) => {
         if (reaction.user_id === userId) {
           setUserReaction(reaction.reaction_type); // Set the user's reaction if found
         }
-        console.log(userReaction);
 
         return counts;
       }, {});

@@ -78,7 +78,9 @@ const DutiesList = ({ userId }) => {
       : duties.filter((duty) => duty.duty_status === filter);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex h-full flex-col">
+      {" "}
+      {/* Set the component to be a flex container */}
       <h1 className="mb-4 text-xl font-bold">Current Rotas</h1>
       {/* Status Filter */}
       <div className="mb-4">
@@ -99,7 +101,9 @@ const DutiesList = ({ userId }) => {
       </div>
       {error && <p className="text-red-600">{error}</p>}{" "}
       {/* Show error message */}
-      <div className="flex flex-col space-y-4">
+      <div className="flex flex-1 flex-col space-y-4 overflow-y-auto">
+        {" "}
+        {/* Add scrollable container with flex-1 */}
         {loading ? (
           <Spinner /> // Show loading spinner
         ) : filteredDuties.length > 0 ? (

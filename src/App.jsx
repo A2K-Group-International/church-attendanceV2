@@ -6,6 +6,7 @@ import Attendance from "./pages/admin/Attendance";
 import UsersPage from "./pages/admin/UserPage";
 import Schedule from "./pages/admin/Schedule";
 import AdminCalendar from "./pages/admin/AdminCalendar";
+import UserAnnouncements from "./pages/user/UserAnnouncements";
 import EventsPage from "./pages/user/EventsPage";
 import FamilyPage from "./pages/user/FamilyPage";
 import EventInfo from "./pages/user/EventInfo";
@@ -24,12 +25,10 @@ import VolunteerUpload from "./pages/volunteer/VolunteerUpload";
 import VolunteerRequests from "./pages/volunteer/VolunteerRequests";
 import { Toaster } from "./shadcn/toaster";
 
-
-
 function App() {
   return (
     <Router>
-       <Toaster/>
+      <Toaster />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route
@@ -109,6 +108,14 @@ function App() {
           element={
             <ProtectedRoute>
               <EventInfo />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user-announcements"
+          element={
+            <ProtectedRoute>
+              <UserAnnouncements />
             </ProtectedRoute>
           }
         />
