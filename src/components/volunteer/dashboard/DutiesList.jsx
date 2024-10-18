@@ -79,7 +79,7 @@ const DutiesList = ({ userId }) => {
 
   return (
     <div className="flex flex-col">
-      <h1 className="mb-4 text-xl font-bold">Current Duties</h1>
+      <h1 className="mb-4 text-xl font-bold">Current Rotas</h1>
       {/* Status Filter */}
       <div className="mb-4">
         <label htmlFor="statusFilter" className="mr-2">
@@ -111,7 +111,7 @@ const DutiesList = ({ userId }) => {
             />
           ))
         ) : (
-          <p>No duties assigned.</p> // Show message if no duties
+          <p>No Rotas assigned.</p> // Show message if no duties
         )}
       </div>
     </div>
