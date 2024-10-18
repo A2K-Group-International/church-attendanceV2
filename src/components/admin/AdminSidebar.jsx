@@ -120,7 +120,7 @@ export default function AdminSidebar({ children }) {
                       variant="outline"
                       className="w-full"
                     >
-                      Go to Volunteer Dashboard
+                      Switch to Volunteer
                     </Button>
                     {/* Navigate to User Events Page Button for Small Screens */}
                     <Button
@@ -128,7 +128,7 @@ export default function AdminSidebar({ children }) {
                       variant="outline"
                       className="w-full"
                     >
-                      Go to User Events Page
+                      Switch to Parishioner
                     </Button>
                     <Logout />
                   </div>

@@ -1,74 +1,77 @@
-import React, { useState } from "react";
-import ConfirmationModal from "./ConfirmationModal"; // Import the confirmation modal
+import React from "react";
 
-const DashboardDutyCard = ({ duty, onSetStatus }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newStatus, setNewStatus] = useState("");
-
-  // Function to open the modal with the new status
-  const handleOpenModal = (status) => {
-    setNewStatus(status);
-    setIsModalOpen(true);
+const DashboardDutyCard = ({ duty }) => {
+  // Helper function to format time to HH:MM
+  const formatTime = (timeString) => {
+    if (!timeString) return "Not set"; // Return default if no time is set
+    const date = new Date(`1970-01-01T${timeString}`); // Parse time assuming it’s in HH:mm:ss
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
-  // Function to confirm status change
-  const handleConfirm = async () => {
-    await onSetStatus(duty.duties_id, newStatus); // Call the function passed as a prop
-    setIsModalOpen(false); // Close the modal
+  // Helper function to display days with different colors
+  const renderRecurrenceDays = () => {
+    const allDays = ["Su", "M", "Tu", "W", "Th", "F", "Sa"]; // Custom days of the week
+    const selectedDays = duty.recurrence_days || []; // Assuming recurrence_days is an array of selected days
+
+    // Map full day names to their respective short forms
+    const dayMap = {
+      Sunday: "Su",
+      Monday: "M",
+      Tuesday: "Tu",
+      Wednesday: "W",
+      Thursday: "Th",
+      Friday: "F",
+      Saturday: "Sa",
+    };
+
+    return (
+      <div className="mb-4 flex space-x-1">
+        {allDays.map((day) => {
+          const isSelected = selectedDays.includes(
+            Object.keys(dayMap).find((key) => dayMap[key] === day),
+          ); // Check if the day is selected
+          return (
+            <span
+              key={day}
+              className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                isSelected
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-300 text-gray-700"
+              }`}
+            >
+              {day}
+            </span>
+          );
+        })}
+      </div>
+    );
   };
 
   return (
     <div className="rounded-lg border border-gray-300 bg-white p-6 shadow-md transition-shadow duration-300 hover:shadow-lg">
       <h2 className="mb-2 text-xl font-bold text-gray-800">{duty.duty_name}</h2>
       <p className="mb-3 text-gray-700">{duty.duty_description}</p>
+
       <p className="mb-4 text-sm text-gray-500">
         <strong>Due Date:</strong>{" "}
-        {new Date(duty.duty_due_date).toLocaleDateString()}
+        {duty.duty_date
+          ? new Date(duty.duty_date).toLocaleDateString()
+          : "Not set"}
       </p>
 
-      {/* Display Duty Status */}
-      <p
-        className={`mb-3 text-sm font-semibold ${
-          duty.duty_status === "Completed"
-            ? "text-green-600"
-            : duty.duty_status === "In Progress"
-              ? "text-blue-600"
-              : "text-gray-600"
-        }`}
-      >
-        <strong>Status:</strong> {duty.duty_status}
+      {/* Display Duty Start and End Time */}
+      <p className="mb-3 text-sm text-gray-500">
+        <strong>Start Time:</strong> {formatTime(duty.duty_start_time)}
+      </p>
+      <p className="mb-4 text-sm text-gray-500">
+        <strong>End Time:</strong> {formatTime(duty.duty_end_time)}
       </p>
 
-      {/* Buttons to set status */}
-      <div className="flex space-x-2">
-        <button
-          onClick={() => handleOpenModal("Not Started")}
-          className="rounded bg-gray-400 px-4 py-2 text-white hover:bg-gray-500"
-        >
-          Not Started
-        </button>
-        <button
-          onClick={() => handleOpenModal("In Progress")}
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-        >
-          In Progress
-        </button>
-        <button
-          onClick={() => handleOpenModal("Completed")}
-          className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
-        >
-          Completed
-        </button>
+      {/* Display Recurrence Days */}
+      <div>
+        <strong>Recurrence Days:</strong>
+        {renderRecurrenceDays()}
       </div>
-
-      {/* Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onConfirm={handleConfirm}
-        dutyName={duty.duty_name}
-        newStatus={newStatus}
-      />
     </div>
   );
 };
