@@ -28,7 +28,6 @@ export default function VolunteerUploadPage() {
   const [groupName, setGroupName] = useState("");
 
   const { userData } = useUserData();
-  console.log(uploadedImages);
 
   const fetchGroupInfo = useCallback(async () => {
     if (!userData) return;
@@ -101,10 +100,9 @@ export default function VolunteerUploadPage() {
   // Fetch uploaded images and files
   const fetchUploadedContent = async () => {
     if (!groupName) return; // Ensure groupName is available
-    setLoadingFetch(true);
+    setLoadingFetch(true); // Start loading
     try {
       const fetchData = async (folder) => {
-        // Include groupName in the folder path
         const { data: files, error } = await supabase.storage
           .from("Uploaded files")
           .list(`${groupName}/${folder}`);
@@ -132,7 +130,7 @@ export default function VolunteerUploadPage() {
     } catch (err) {
       console.error("Error fetching content:", err);
     } finally {
-      setLoadingFetch(false);
+      setLoadingFetch(false); // Stop loading
     }
   };
 
@@ -243,13 +241,17 @@ export default function VolunteerUploadPage() {
             <div className="flex h-96 flex-col lg:w-1/3">
               <h2 className="mb-2 text-xl font-semibold">📸 Uploaded Images</h2>
               <div className="flex-grow overflow-auto rounded-md border">
-                <UploadedImagesSection
-                  images={uploadedImages}
-                  onImageSelect={setSelectedImage}
-                  onRename={(item) => openRenameModal(item, "Images")}
-                  onDelete={handleDelete}
-                  loadingDelete={loadingDelete}
-                />
+                {loadingFetch ? (
+                  <p className="py-4 text-center">Loading images...</p> // You can replace this with a spinner if you have one.
+                ) : (
+                  <UploadedImagesSection
+                    images={uploadedImages}
+                    onImageSelect={setSelectedImage}
+                    onRename={(item) => openRenameModal(item, "Images")}
+                    onDelete={handleDelete}
+                    loadingDelete={loadingDelete}
+                  />
+                )}
               </div>
             </div>
 
@@ -273,12 +275,16 @@ export default function VolunteerUploadPage() {
           </div>
 
           {/* Uploaded Files Section */}
-          <UploadedFilesSection
-            files={uploadedFiles}
-            onRename={(item) => openRenameModal(item, "Files")}
-            onDelete={handleDelete}
-            loadingDelete={loadingDelete}
-          />
+          {loadingFetch ? (
+            <p className="py-4 text-center">Loading files...</p> // Again, replace with a spinner if available.
+          ) : (
+            <UploadedFilesSection
+              files={uploadedFiles}
+              onRename={(item) => openRenameModal(item, "Files")}
+              onDelete={handleDelete}
+              loadingDelete={loadingDelete}
+            />
+          )}
         </div>
 
         {/* Rename Modal */}
