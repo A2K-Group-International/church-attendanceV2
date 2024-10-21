@@ -35,8 +35,7 @@ const ConfirmationDialog = ({ isOpen, onClose, onConfirm }) => {
 const AnnouncementCard = ({
   post,
   handleReaction,
-  onEdit,
-  onDelete,
+
   userId,
 }) => {
   const { reactions, loading, fetchReactions, userReaction } = useReactions(
@@ -279,8 +278,7 @@ AnnouncementCard.propTypes = {
     edited: PropTypes.bool.isRequired, // Add edited to PropTypes
   }).isRequired,
   handleReaction: PropTypes.func.isRequired,
-  onEdit: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
+
   userId: PropTypes.number.isRequired,
 };
 

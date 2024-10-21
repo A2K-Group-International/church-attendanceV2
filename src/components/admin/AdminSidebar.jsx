@@ -17,6 +17,7 @@ const adminLinks = [
   { link: "/admin-dashboard", label: "Dashboard", icon: DashboardIcon },
   { link: "/attendance", label: "Attendance", icon: CheckListIcon },
   { link: "/groups", label: "Groups", icon: PersonIcon },
+  { link: "/admin-rotas", label: "Rotas", icon: PersonIcon },
   { link: "/schedule", label: "Schedule", icon: CalendarIcon },
   { link: "/admin-calendar", label: "Calendar", icon: CalendarIcon },
   { link: "/volunteers", label: "Request(s)", icon: RequestIcon },
