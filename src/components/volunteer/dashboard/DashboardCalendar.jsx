@@ -79,12 +79,12 @@ const DashboardCalendar = ({ duties }) => {
   return (
     <FullCalendar
       plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]} // Include necessary plugins
-      initialView="dayGridMonth" // Set the initial view
+      initialView="timeGridWeek" // Set the default view to week view
       events={events} // Pass the formatted events
       headerToolbar={{
         left: "prev,next today",
         center: "title",
-        right: "dayGridMonth,timeGridWeek,timeGridDay", // Include week and day views
+        right: "dayGridMonth,timeGridWeek,timeGridDay", // Include month and day views
       }}
       editable={true} // Allow event editing
       eventClick={(info) => {
