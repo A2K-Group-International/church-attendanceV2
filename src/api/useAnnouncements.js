@@ -8,19 +8,20 @@ const useAnnouncements = (groupId) => {
   const [error, setError] = useState(null);
 
   const fetchAnnouncements = useCallback(async () => {
-    if (!groupId) return;
-
     setLoading(true);
     setError(null);
+    console.log(groupId);
 
     try {
-      // Fetch announcements
+      // Fetch announcements based on groupId or fetch all if no groupId is provided
+      let query = supabase.from("post_data").select("*");
+
+      if (groupId) {
+        query = query.eq("post_group_id", groupId);
+      }
+
       const { data: announcementsData, error: announcementsError } =
-        await supabase
-          .from("post_data")
-          .select("*")
-          .eq("post_group_id", groupId)
-          .order("created_at", { ascending: false });
+        await query.order("created_at", { ascending: false });
 
       if (announcementsError) throw announcementsError;
 
