@@ -571,7 +571,7 @@ export default function Attendance() {
           </Button>
         </div>
         <div className="sm:mb-2 sm:ml-8 sm:w-44">
-          <NewAttendanceRegister />
+          <NewAttendanceRegister BtnName="Add"/>
           {/* <DialogWalkInRegister
             btnName="Add"
             title="Add manually"

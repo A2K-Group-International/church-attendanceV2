@@ -26,7 +26,7 @@ const formSchema = z.object({
   selected_event: z.number().int().positive("Event selection is required."),
 });
 
-export default function FamilyRegistrationForm() {
+export default function FamilyRegistrationForm({label, attendees, btnAdd}) {
   const [eventList, setEventList] = useState([]); // Store event data
   const [eventTimeList, setEventTimeList] = useState([]); // Store event times
   const [selectedEvent, setSelectedEvent] = useState(""); // Store selected event
@@ -183,7 +183,7 @@ export default function FamilyRegistrationForm() {
           </div>
 
           {/* Parent/Carer Information */}
-          <Label>Parent/Carer Information</Label>
+          <Label>{label} Information</Label>
           <div className="flex flex-col gap-2 md:flex-row">
             <Input
               {...register("firstName")}
@@ -212,7 +212,7 @@ export default function FamilyRegistrationForm() {
           </div>
 
           {/* Children Information */}
-          <Label>Children Information</Label>
+          <Label>{attendees} Information</Label>
           {children.map((child, index) => (
             <div key={index} className="flex flex-col gap-2 md:flex-row">
               <Input
@@ -237,7 +237,7 @@ export default function FamilyRegistrationForm() {
             </div>
           ))}
           <Button type="button" onClick={handleAddChild} className="mt-2">
-            Add Child
+            {btnAdd}
           </Button>
         </div>
 
