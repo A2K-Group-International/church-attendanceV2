@@ -41,7 +41,6 @@ import {
 import { Label } from "../../shadcn/label";
 import { Input } from "../../shadcn/input";
 import downloadIcon from "../../assets/svg/download.svg";
-import DialogWalkInRegister from "../registration/DialogWalkInRegister";
 import { Icon } from "@iconify/react";
 import NewAttendanceRegister from "../../components/admin/Attendance/NewAttendanceRegister";
 
@@ -109,14 +108,14 @@ export default function Attendance() {
         // Prepare a query to fetch all unique event dates
         const { data: uniqueDatesData, error: uniqueDatesError } =
           await supabase
-            .from("attendance_pending")
-            .select("schedule_date", { count: "exact" });
+            .from("new_attendance")
+            .select("selected_event_date", { count: "exact" });
 
         if (uniqueDatesError) throw uniqueDatesError;
 
         // Extract unique dates with events
         const uniqueDates = [
-          ...new Set(uniqueDatesData.map((item) => item.schedule_date)),
+          ...new Set(uniqueDatesData.map((item) => item.selected_event_date)),
         ];
 
         // If the selected date is not in the unique dates, do not proceed
@@ -130,9 +129,9 @@ export default function Attendance() {
 
         // Prepare the main query to fetch data for the selected date
         let query = supabase
-          .from("attendance_pending")
+          .from("new_attendance")
           .select("*", { count: "exact" })
-          .eq("schedule_date", formattedSelectedDate) // Filter by selected date
+          .eq("selected_event_date", formattedSelectedDate) // Filter by selected date
           .order("id", { ascending: false }) // Order by ID in descending order
           .range(
             (currentPage - 1) * itemsPerPage,
@@ -141,7 +140,7 @@ export default function Attendance() {
 
         // Fetch or filter by preferred time
         if (time) {
-          query = query.eq("preferred_time", time);
+          query = query.eq("selected_time", time);
         }
 
         // Fetch or filter by status
@@ -165,14 +164,16 @@ export default function Attendance() {
         // Format the fetched data
         const formattedData = fetchedData.map((item) => ({
           ...item,
-          formattedDate: moment(item.schedule_date).format("DD MMMM YYYY"), // Format the date using Moment.js
+          formattedDate: moment(item.selected_event_date).format(
+            "DD MMMM YYYY",
+          ), // Format the date using Moment.js
         }));
 
         // Fetch all times and events, grouping by event
         const { data: allData, error: allDataError } = await supabase
-          .from("attendance_pending")
-          .select("preferred_time, selected_event")
-          .eq("schedule_date", formattedSelectedDate) // Filter by the specific date
+          .from("new_attendance")
+          .select("selected_time, selected_event")
+          .eq("selected_event_date", formattedSelectedDate) // Filter by the specific date
           .order("id", { ascending: false }); // Ensure you're fetching data for the selected date
 
         if (allDataError) throw allDataError;
@@ -191,7 +192,7 @@ export default function Attendance() {
         const uniqueTimes =
           eventName && eventTimesMap[eventName]
             ? [...eventTimesMap[eventName]]
-            : [...new Set(allData.map((item) => item.preferred_time))];
+            : [...new Set(allData.map((item) => item.selected_time))];
 
         // Extract unique events
         const uniqueEvent = [
@@ -293,7 +294,7 @@ export default function Attendance() {
     try {
       // Update attendance status in the database
       const { error } = await supabase
-        .from("attendance_pending")
+        .from("new_attendance")
         .update({ has_attended: checked })
         .eq("id", itemId);
 
@@ -353,9 +354,9 @@ export default function Attendance() {
       aria-label="Toggle attendance status"
     />,
     index + 1 + (currentPage - 1) * itemsPerPage,
-    `${item.children_first_name} ${item.children_last_name}`,
-    `${item.guardian_first_name} ${item.guardian_last_name}`,
-    item.guardian_telephone,
+    `${item.attendee_first_name} ${item.attendee_last_name}`,
+    `${item.main_applicant_first_name} ${item.main_applicant_last_name}`,
+    item.telephone,
     item.has_attended ? "Attended" : "Pending",
     <DropdownMenu key={item.id}>
       <DropdownMenuTrigger asChild>
@@ -485,7 +486,10 @@ export default function Attendance() {
   ]);
 
   return (
-    <AdminSidebar titlePage="Attendance" descriptionPage="Manage and track attendance records.">
+    <AdminSidebar
+      titlePage="Attendance"
+      descriptionPage="Manage and track attendance records."
+    >
       <main className="mx-auto max-w-7xl p-4 lg:p-8">
         <div className="mb-2 md:flex md:justify-between">
           <div className="mb-8">
@@ -571,7 +575,7 @@ export default function Attendance() {
           </Button>
         </div>
         <div className="sm:mb-2 sm:ml-8 sm:w-44">
-          <NewAttendanceRegister BtnName="Add"/>
+          <NewAttendanceRegister BtnName="Add" />
           {/* <DialogWalkInRegister
             btnName="Add"
             title="Add manually"

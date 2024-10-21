@@ -26,6 +26,9 @@ import VolunteerClass from "./pages/volunteer/VolunteerClass";
 import VolunteerUpload from "./pages/volunteer/VolunteerUpload";
 import VolunteerRequests from "./pages/volunteer/VolunteerRequests";
 import { Toaster } from "./shadcn/toaster";
+import NewSchedule from "./pages/admin/EventPage";
+import EventPage from "./pages/admin/EventPage";
+import MeetingPage from "./pages/admin/MeetingPage";
 
 function App() {
   return (
@@ -82,10 +85,18 @@ function App() {
           }
         />
         <Route
-          path="/schedule"
+          path="/event"
           element={
             <ProtectedRoute>
-              <Schedule />
+              <EventPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/meeting"
+          element={
+            <ProtectedRoute>
+              <MeetingPage />
             </ProtectedRoute>
           }
         />

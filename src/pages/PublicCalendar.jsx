@@ -228,7 +228,7 @@ export default function PublicCalendar() {
           <DialogHeader>
             <DialogTitle className="sr-only">Events</DialogTitle>
             <DialogDescription className="sr-only">Events</DialogDescription>
-            <CalendarCategoriesBtn /> 
+            <CalendarCategoriesBtn />
             <FullCalendar
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
               initialView="dayGridMonth"
