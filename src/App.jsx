@@ -8,6 +8,7 @@ import Schedule from "./pages/admin/Schedule";
 import AdminRotas from "./pages/admin/AdminRotas";
 import AdminCalendar from "./pages/admin/AdminCalendar";
 import UserAnnouncements from "./pages/user/UserAnnouncements";
+import UserAnnouncementsInfo from "./pages/user/UserAnnouncementsInfo";
 import EventsPage from "./pages/user/EventsPage";
 import FamilyPage from "./pages/user/FamilyPage";
 import EventInfo from "./pages/user/EventInfo";
@@ -165,6 +166,14 @@ function App() {
           element={
             <ProtectedRoute>
               <VolunteerAnnouncementsInfo />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user-announcements-info/:postId"
+          element={
+            <ProtectedRoute>
+              <UserAnnouncementsInfo />
             </ProtectedRoute>
           }
         />

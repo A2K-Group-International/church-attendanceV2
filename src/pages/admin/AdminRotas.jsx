@@ -51,6 +51,7 @@ const AdminRotas = () => {
       setError(null);
 
       let dutiesData = [];
+
       if (userId) {
         // Fetch duties by user (user_assignments -> duties_list)
         const { data: assignments, error: assignmentError } = await supabase
@@ -83,6 +84,14 @@ const AdminRotas = () => {
 
         if (dutiesError) throw dutiesError;
         dutiesData = duties;
+      } else {
+        // Fetch all duties when neither group nor user is selected
+        const { data: duties, error: dutiesError } = await supabase
+          .from("duties_list")
+          .select("*");
+
+        if (dutiesError) throw dutiesError;
+        dutiesData = duties;
       }
 
       setDuties(dutiesData || []); // Update duties (empty if no data found)
@@ -103,16 +112,16 @@ const AdminRotas = () => {
   useEffect(() => {
     if (selectedGroup) {
       fetchUsers(selectedGroup);
+    } else {
+      setUsers([]); // Clear users when no group is selected
+      setSelectedUser(null); // Reset user when group changes
+      fetchDuties(null); // Fetch all duties when group is cleared
     }
   }, [selectedGroup]);
 
   // Fetch duties when a user or group is selected
   useEffect(() => {
-    if (selectedUser) {
-      fetchDuties(null, selectedUser);
-    } else if (selectedGroup) {
-      fetchDuties(selectedGroup);
-    }
+    fetchDuties(selectedGroup, selectedUser);
   }, [selectedUser, selectedGroup]);
 
   return (
