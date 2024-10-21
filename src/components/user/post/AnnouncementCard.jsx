@@ -131,14 +131,6 @@ const AnnouncementCard = ({
 
         {post.post_user_id === userId && ( // Check if the current user is the post owner
           <div className="relative ml-2">
-            <button
-              onClick={toggleMenu}
-              className="focus:outline-none"
-              aria-haspopup="true"
-              aria-expanded={menuOpen}
-            >
-              <FaEllipsisV />
-            </button>
             {menuOpen && (
               <div className="menu absolute right-0 z-10 mt-2 w-48 rounded-md bg-white shadow-lg">
                 <button
@@ -249,12 +241,6 @@ const AnnouncementCard = ({
             </span>
           </div>
         </div>
-        <Link
-          to={`/volunteer-announcements-info/${post.post_id}`}
-          className="text-blue-500 hover:underline"
-        >
-          Read more
-        </Link>
       </div>
       {/* Confirmation Dialog */}
       <ConfirmationDialog
