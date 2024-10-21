@@ -7,6 +7,8 @@ import NavigationItem from "../NavigationItem";
 import FamilyIcon from "../../assets/svg/family.svg";
 import CalendarIcon from "../../assets/svg/calendarIcon.svg";
 import HamburgerIcon from "../../assets/svg/hamburgerIcon.svg";
+import RequestIcon from "../../assets/svg/requestIcon.svg";
+import BlackBoardIcon from "../../assets/svg/blackboard.svg";
 import { useUser } from "../../authentication/useUser"; // Import useUser to get the current user
 import useUserData from "../../api/useUserData"; // Import useUserData to fetch user data
 
@@ -14,6 +16,8 @@ const userLinks = [
   { link: "/user-announcements", label: "Announcements", icon: CalendarIcon },
   { link: "/events-page", label: "Events", icon: CalendarIcon },
   { link: "/family", label: "Family", icon: FamilyIcon },
+  { link: "#", label: "Classes", icon: BlackBoardIcon },
+  { link: "#", label: "Request", icon: RequestIcon },
 ];
 
 export default function UserSidebar({ children }) {

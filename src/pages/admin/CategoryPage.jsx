@@ -24,7 +24,6 @@ export default function CategoryPage() {
     }
   };
 
-
   useEffect(() => {
     fetchCategories();
 
@@ -46,19 +45,24 @@ export default function CategoryPage() {
     };
   }, []);
 
-  if (loading) return <Spinner />;
   if (error) return <p>{error}</p>;
 
   return (
     <RequestPage>
-      <div className="flex items-center gap-x-5">
-        <AddNewCategory />
-        <CategoryRequestHistory />
-      </div>
-      <div className="flex flex-col gap-y-2">
-        <CategoryData categories={categories} />
-        <RequestCategory categories={categories} />
-      </div>
+      {loading ? (
+        <Spinner />
+      ) : (
+        <>
+          <div className="flex items-center gap-x-5">
+            <AddNewCategory />
+            <CategoryRequestHistory />
+          </div>
+          <div className="flex flex-col gap-y-2">
+            <CategoryData categories={categories} />
+            <RequestCategory categories={categories} />
+          </div>
+        </>
+      )}
     </RequestPage>
   );
 }
