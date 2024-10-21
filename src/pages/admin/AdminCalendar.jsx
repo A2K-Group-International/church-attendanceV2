@@ -50,14 +50,14 @@ const AdminCalendar = () => {
       console.error("Error fetching schedule:", error);
       setError("Failed to load schedule.");
     }
-  }, []); // No dependencies needed, since the function doesn't depend on external state
+  }, []); 
 
   useEffect(() => {
     // Fetch all events initially or based on the selected category
     if (selectedCategory) {
       fetchSchedule(selectedCategory);
     } else {
-      fetchSchedule(); // This should be modified to handle fetching all events
+      fetchSchedule(); 
     }
   }, [selectedCategory, fetchSchedule]);
 
