@@ -463,8 +463,8 @@ export default function VolunteerEvents() {
             {/* Request Button */}
             {/* <BtnVolunteerRequestCategory /> */}
             {/* Create poll */}
-            <CreateMeeting />
-            <CreatePoll />
+            {/* <CreateMeeting />
+            <CreatePoll /> */}
           </div>
 
           {/* Edit Event Dialog */}
