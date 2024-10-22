@@ -356,7 +356,9 @@ export default function Attendance() {
     index + 1 + (currentPage - 1) * itemsPerPage,
     `${item.attendee_first_name} ${item.attendee_last_name}`,
     `${item.main_applicant_first_name} ${item.main_applicant_last_name}`,
-    item.telephone,
+    <a key={item.id} href={`tel: ${item.telephone}`} className="text-blue-500">
+      {item.telephone}
+    </a>,
     item.has_attended ? "Attended" : "Pending",
     <DropdownMenu key={item.id}>
       <DropdownMenuTrigger asChild>

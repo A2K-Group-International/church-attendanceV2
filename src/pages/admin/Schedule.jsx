@@ -58,6 +58,8 @@ import { fetchCategory, fetchSubCategory } from "../../api/userService";
 import CreateMeeting from "./CreateMeeting";
 import { Textarea } from "../../shadcn/textarea";
 import CreatePoll from "./CreatePoll";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const headers = ["Event Name", "Date", "Time", "Description"];
 
@@ -748,7 +750,7 @@ export default function AdminNewSchedule() {
                             mode="single"
                             selected={
                               selectedDate ? selectedDate.toDate() : null
-                            } // Convert to Date object for Calendar
+                            } 
                             onSelect={handleDateSelect}
                             initialFocus
                           />

@@ -773,8 +773,8 @@ export default function AdminNewSchedule() {
                 </form>
               </DialogContent>
             </Dialog>
-            <CreateMeeting />
-            <CreatePoll />
+            {/* <CreateMeeting />
+            <CreatePoll /> */}
           </div>
         </header>
 
