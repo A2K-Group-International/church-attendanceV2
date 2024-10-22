@@ -3,11 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "../../../shadcn/button";
 import VolunteerSidebar from "../VolunteerSidebar";
 
-const buttonLinks = [
-  { link: "/volunteer-schedule", label: "Event" },
-  { link: "#", label: "Meeting" },
-  { link: "#", label: "Poll" },
-];
+const buttonLinks = [{ link: "/volunteer-schedule", label: "Event" }];
 
 export default function ScheduleLinks({ children }) {
   return (
