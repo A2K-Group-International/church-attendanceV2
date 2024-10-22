@@ -63,6 +63,7 @@ import CreatePoll from "./CreatePoll";
 const headers = ["Event Name", "Date", "Time", "Description"];
 
 export default function EventPage() {
+  console.log("hello?");
   const [time, setTime] = useState([]); // event time data
   const [selectedDate, setSelectedDate] = useState(null); // event date data
   const [isSubmitted, setIsSubmitted] = useState(false); // for disabling the button submission
@@ -597,264 +598,251 @@ export default function EventPage() {
 
   return (
     <ScheduleLinks>
-          <div className="mt-2 flex gap-x-2">
-            <Dialog
-              open={isDialogOpen}
-              onOpenChange={(open) => {
-                if (open) {
-                  resetForm(); // Call your form reset function here
-                }
-                setIsDialogOpen(open);
-              }}
-            >
-              <DialogTrigger asChild>
-                <Button>New Event</Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[700px]">
-                <DialogHeader>
-                  <DialogTitle>New Event</DialogTitle>
-                  <DialogDescription>
-                    Schedule an upcoming event.
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Event Name</Label>
-                    <Input
-                      id="name"
-                      {...register("name", { required: true })}
-                    />
-                    {errors.name && (
-                      <p className="text-sm text-red-500">
-                        Event name is required
-                      </p>
-                    )}
-                  </div>
+      <div className="mt-2 flex gap-x-2">
+        <Dialog
+          open={isDialogOpen}
+          onOpenChange={(open) => {
+            if (open) {
+              resetForm(); // Call your form reset function here
+            }
+            setIsDialogOpen(open);
+          }}
+        >
+          <DialogTrigger asChild>
+            <Button>New Event</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[700px]">
+            <DialogHeader>
+              <DialogTitle>New Event</DialogTitle>
+              <DialogDescription>Schedule an upcoming event.</DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Event Name</Label>
+                <Input id="name" {...register("name", { required: true })} />
+                {errors.name && (
+                  <p className="text-sm text-red-500">Event name is required</p>
+                )}
+              </div>
 
-                  {/* Event Category */}
-                  <div className="space-y-2">
-                    <Label htmlFor="Event Category">Event Category</Label>
-                    <div className="flex gap-x-2">
-                      <div>
-                        <Select
-                          onValueChange={(value) => {
-                            const selectedCategory = categoryData.find(
-                              (item) => item.category_id === value,
-                            );
-                            if (selectedCategory) {
-                              setSelectedCategoryName(
-                                selectedCategory.category_name,
-                              ); // Set the selected category name
-                              setValue("schedule_category", value); // Set the category_id in the form
-                              fetchSubCategories(value); // Passing the selected category ID
-                            }
-                          }}
-                        >
-                          <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Select Category">
-                              {selectedCategoryName || "Select Category"}
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {categoryData.map((item) => (
-                              <SelectItem
-                                key={item.category_id}
-                                value={item.category_id}
-                              >
-                                {item.category_name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {errors.schedule_category && (
-                          <p className="text-sm text-red-500">
-                            {errors.schedule_category.message}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        {selectedCategoryName &&
-                          selectedSubCategory.length > 0 && (
-                            <Select
-                              onValueChange={(value) => {
-                                setValue("schedule_sub_category", value);
-                              }}
-                            >
-                              <SelectTrigger className="w-[180px] text-start">
-                                <SelectValue placeholder="Sub category" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {selectedSubCategory.map((item) => (
-                                  <SelectItem
-                                    key={item.sub_category_id}
-                                    value={item.sub_category_name}
-                                  >
-                                    {item.sub_category_name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          )}
-                        {errors.schedule_sub_category && (
-                          <p className="text-sm text-red-500">
-                            {errors.schedule_sub_category.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Schedule Privacy */}
-                  <div className="space-y-2">
-                    <Label htmlFor="schedule_privacy">Schedule Privacy</Label>
+              {/* Event Category */}
+              <div className="space-y-2">
+                <Label htmlFor="Event Category">Event Category</Label>
+                <div className="flex gap-x-2">
+                  <div>
                     <Select
                       onValueChange={(value) => {
-                        setValue("schedule_privacy", value);
+                        const selectedCategory = categoryData.find(
+                          (item) => item.category_id === value,
+                        );
+                        if (selectedCategory) {
+                          setSelectedCategoryName(
+                            selectedCategory.category_name,
+                          ); // Set the selected category name
+                          setValue("schedule_category", value); // Set the category_id in the form
+                          fetchSubCategories(value); // Passing the selected category ID
+                        }
                       }}
                     >
                       <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select privacy" />
+                        <SelectValue placeholder="Select Category">
+                          {selectedCategoryName || "Select Category"}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="public">Public</SelectItem>
-                        <SelectItem value="private">Private</SelectItem>
+                        {categoryData.map((item) => (
+                          <SelectItem
+                            key={item.category_id}
+                            value={item.category_id}
+                          >
+                            {item.category_name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
-                    {errors.schedule_privacy && (
+                    {errors.schedule_category && (
                       <p className="text-sm text-red-500">
-                        {errors.schedule_privacy.message}
+                        {errors.schedule_category.message}
                       </p>
                     )}
                   </div>
+                  <div>
+                    {selectedCategoryName && selectedSubCategory.length > 0 && (
+                      <Select
+                        onValueChange={(value) => {
+                          setValue("schedule_sub_category", value);
+                        }}
+                      >
+                        <SelectTrigger className="w-[180px] text-start">
+                          <SelectValue placeholder="Sub category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {selectedSubCategory.map((item) => (
+                            <SelectItem
+                              key={item.sub_category_id}
+                              value={item.sub_category_name}
+                            >
+                              {item.sub_category_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {errors.schedule_sub_category && (
+                      <p className="text-sm text-red-500">
+                        {errors.schedule_sub_category.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
 
-                  <div className="flex gap-x-5">
-                    <div className="space-y-2">
-                      <Label htmlFor="schedule">Date</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="w-full justify-start"
-                          >
-                            {selectedDate
-                              ? selectedDate.format("MMMM Do YYYY") // Format date using Moment.js
-                              : "Please select a date"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={
-                              selectedDate ? selectedDate.toDate() : null
-                            } // Convert to Date object for Calendar
-                            onSelect={handleDateSelect}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      {isSubmitted && !selectedDate && (
-                        <p className="text-sm text-red-500">Date is required</p>
-                      )}
-                    </div>
+              {/* Schedule Privacy */}
+              <div className="space-y-2">
+                <Label htmlFor="schedule_privacy">Schedule Privacy</Label>
+                <Select
+                  onValueChange={(value) => {
+                    setValue("schedule_privacy", value);
+                  }}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select privacy" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="public">Public</SelectItem>
+                    <SelectItem value="private">Private</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.schedule_privacy && (
+                  <p className="text-sm text-red-500">
+                    {errors.schedule_privacy.message}
+                  </p>
+                )}
+              </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="time">Time</Label>
-                      {time.map((t, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center space-x-2"
-                        >
-                          <Input
-                            type="time"
-                            value={t}
-                            step="00:15"
-                            onChange={(e) =>
-                              handleChangeTime(index, e.target.value)
-                            }
-                            className="flex-grow"
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => handleRemoveTimeInput(index)}
-                            className="shrink-0"
-                          >
-                            Remove
-                          </Button>
-                        </div>
-                      ))}
+              <div className="flex gap-x-5">
+                <div className="space-y-2">
+                  <Label htmlFor="schedule">Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
+                        {selectedDate
+                          ? selectedDate.format("MMMM Do YYYY") // Format date using Moment.js
+                          : "Please select a date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate ? selectedDate.toDate() : null} // Convert to Date object for Calendar
+                        onSelect={handleDateSelect}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  {isSubmitted && !selectedDate && (
+                    <p className="text-sm text-red-500">Date is required</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="time">Time</Label>
+                  {time.map((t, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <Input
+                        type="time"
+                        value={t}
+                        step="00:15"
+                        onChange={(e) =>
+                          handleChangeTime(index, e.target.value)
+                        }
+                        className="flex-grow"
+                      />
                       <Button
                         type="button"
-                        onClick={handleAddTimeInput}
-                        className="w-full"
+                        variant="outline"
+                        onClick={() => handleRemoveTimeInput(index)}
+                        className="shrink-0"
                       >
-                        Add Time
+                        Remove
                       </Button>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      as="textarea"
-                      rows={3}
-                      {...register("description")}
-                      className="w-full"
-                      placeholder="Event description (optional)"
-                    />
-                  </div>
+                  ))}
+                  <Button
+                    type="button"
+                    onClick={handleAddTimeInput}
+                    className="w-full"
+                  >
+                    Add Time
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  as="textarea"
+                  rows={3}
+                  {...register("description")}
+                  className="w-full"
+                  placeholder="Event description (optional)"
+                />
+              </div>
 
-                  <DialogFooter className="gap-y-2">
-                    <DialogClose asChild>
-                      <Button type="button" onClick={resetForm}>
-                        Cancel
-                      </Button>
-                    </DialogClose>
-                    <Button type="submit">Create</Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
-            {/* <CreateMeeting />
+              <DialogFooter className="gap-y-2">
+                <DialogClose asChild>
+                  <Button type="button" onClick={resetForm}>
+                    Cancel
+                  </Button>
+                </DialogClose>
+                <Button type="submit">Create</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+        {/* <CreateMeeting />
             <CreatePoll /> */}
-          </div>
-        {loading ? (
-          <Spinner />
-        ) : error ? (
-          <div className="text-red-500">{error}</div>
-        ) : (
-          <>
-            <Table headers={headers} rows={rows} />
-            <Pagination>
-              <PaginationContent>
-                <PaginationPrevious
-                  onClick={() =>
-                    currentPage > 1 && setCurrentPage(currentPage - 1)
-                  }
-                >
-                  Previous
-                </PaginationPrevious>
-                {[...Array(totalPages)].map((_, index) => (
-                  <PaginationItem key={index}>
-                    <PaginationLink
-                      onClick={() => setCurrentPage(index + 1)}
-                      active={currentPage === index + 1}
-                    >
-                      {index + 1}
-                    </PaginationLink>
-                  </PaginationItem>
-                ))}
-                <PaginationNext
-                  onClick={() =>
-                    currentPage < totalPages && setCurrentPage(currentPage + 1)
-                  }
-                >
-                  Next
-                </PaginationNext>
-              </PaginationContent>
-            </Pagination>
-          </>
-        )}
+      </div>
+      {loading ? (
+        <Spinner />
+      ) : error ? (
+        <div className="text-red-500">{error}</div>
+      ) : (
+        <>
+          <Table headers={headers} rows={rows} />
+          <Pagination>
+            <PaginationContent>
+              <PaginationPrevious
+                onClick={() =>
+                  currentPage > 1 && setCurrentPage(currentPage - 1)
+                }
+              >
+                Previous
+              </PaginationPrevious>
+              {[...Array(totalPages)].map((_, index) => (
+                <PaginationItem key={index}>
+                  <PaginationLink
+                    onClick={() => setCurrentPage(index + 1)}
+                    active={currentPage === index + 1}
+                  >
+                    {index + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              <PaginationNext
+                onClick={() =>
+                  currentPage < totalPages && setCurrentPage(currentPage + 1)
+                }
+              >
+                Next
+              </PaginationNext>
+            </PaginationContent>
+          </Pagination>
+        </>
+      )}
     </ScheduleLinks>
   );
 }

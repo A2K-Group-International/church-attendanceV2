@@ -22,6 +22,7 @@ const volunteerLinks = [
     icon: ChurchIcon,
   },
   { link: "/volunteer-dashboard", label: "Dashboard", icon: DashboardIcon },
+  { link: "/volunteer-main-calendar", label: "Calendar", icon: CalendarIcon },
   { link: "/volunteer-duties", label: "Rota", icon: PersonIcon },
   { link: "/volunteer-schedule", label: "Schedule", icon: CalendarIcon },
   { link: "/volunteer-upload", label: "Upload", icon: UploadIcon },
