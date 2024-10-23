@@ -8,14 +8,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shadcn/tabs";
 export default function VolunteerClass() {
   return (
     <VolunteerSidebar>
-      <main className="h-screen overflow-y-scroll rounded-md">
+      <main className="h-screen overflow-y-scroll">
         <Tabs
           defaultValue="Announcement"
           className="flex w-full flex-grow flex-col"
         >
           <TabsList className="flex w-full justify-start rounded-none">
             <TabsTrigger className="flex-1" value="Announcement">
-              Announcements
+              Highlights
             </TabsTrigger>
             <TabsTrigger className="flex-1" value="Contents">
               Contents

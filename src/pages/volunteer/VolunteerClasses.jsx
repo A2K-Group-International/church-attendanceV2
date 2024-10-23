@@ -324,8 +324,8 @@ export default function VolunteerClasses() {
 
   return (
     <VolunteerSidebar>
-      <main className="h-screen overflow-y-scroll rounded-md p-8 shadow-md">
-        <div className="mb-4 flex flex-grow justify-between">
+      <main className="h-screen overflow-y-scroll p-8">
+        <div className="mb-4 flex justify-between">
           <Title>Your Classes</Title>
           <div className="flex gap-2">
             <Dialog open={isJoinDialogOpen} onOpenChange={setIsJoinDialogOpen}>
