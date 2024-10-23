@@ -13,10 +13,10 @@ import { Button } from "@/shadcn/button";
 import UserCalendar from "@/components/user/UserCalendar";
 import QrReader from "react-qr-scanner";
 import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogTrigger,
-} from "../../shadcn/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "../../shadcn/dialog";
 import qrScannerIcon from "../../assets/svg/qrScanner.svg";
 
 export default function Eventspage() {
@@ -106,22 +106,22 @@ export default function Eventspage() {
         </div>
         <div className="mt-2 flex">
           <UserCalendar />
-          <AlertDialog>
-            <AlertDialogTrigger asChild className="ml-2">
+          <Dialog>
+            <DialogTrigger asChild className="ml-2">
               <Button>
                 <img src={qrScannerIcon} alt="" />
               </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent className="mt-2">
+            </DialogTrigger>
+            <DialogContent className="mt-2 p-2">
               <QrReader
                 onDecode={handleScan}
                 onError={handleError}
-                facingMode="environment"
+                facingMode="front"
               />
               {scanResult && <p>Scanned Code: {scanResult}</p>}
               {error && <p>Error: {error.message}</p>}
-            </AlertDialogContent>
-          </AlertDialog>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div className="no-scrollbar mt-8 grid h-screen grid-cols-1 gap-4 overflow-scroll md:grid-cols-2 lg:grid-cols-3">
