@@ -30,6 +30,7 @@ import { Toaster } from "./shadcn/toaster";
 import NewSchedule from "./pages/admin/EventPage";
 import EventPage from "./pages/admin/EventPage";
 import MeetingPage from "./pages/admin/MeetingPage";
+import ParishionerRequest from "./pages/user/ParishionerRequest";
 
 function App() {
   return (
@@ -66,6 +67,14 @@ function App() {
           element={
             <ProtectedRoute>
               <UsersPage />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/parishioner-request"
+          element={
+            <ProtectedRoute>
+              <ParishionerRequest />
             </ProtectedRoute>
           }
         />

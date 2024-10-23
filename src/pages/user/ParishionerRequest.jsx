@@ -1,18 +1,19 @@
+import UserSidebar from "@/components/user/UserSidebar";
 import { Link } from "react-router-dom";
+import { Button } from "../../shadcn/button";
 
-import { Button } from "../../../shadcn/button";
-import VolunteerSidebar from "../VolunteerSidebar";
+const buttonLinks = [
+  { link: "#", label: "Mass Intentions" },
+  { link: "#", label: "Facilities" },
+];
 
-const buttonLinks = [{ link: "/volunteer-schedule", label: "Event" }, { link: "#", label: "Meeting" }];
-
-export default function ScheduleLinks({ children }) {
+export default function ParishionerRequest({ children }) {
   return (
-    <VolunteerSidebar>
+    <UserSidebar>
       <main className="mx-auto max-w-7xl p-4 lg:p-8">
         <div className="mb-2 md:flex md:justify-between">
           <div className="mb-8">
-            <h1 className="mb-2 text-3xl font-bold">Volunter Event Schedule</h1>
-            <p className="text-muted-foreground">Manage Schedules.</p>
+            <h1 className="mb-2 text-3xl font-bold">Request(s)</h1>
           </div>
         </div>
         <div className="flex gap-x-3">
@@ -24,6 +25,6 @@ export default function ScheduleLinks({ children }) {
         </div>
         <div className="py-5">{children}</div>
       </main>
-    </VolunteerSidebar>
+    </UserSidebar>
   );
 }

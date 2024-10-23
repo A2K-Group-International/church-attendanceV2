@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
-import { filterEvent } from "../api/userService";
+import { filterEvent } from "../../api/userService";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { Button } from "../shadcn/button";
+import { Button } from "../../shadcn/button";
 import {
   Dialog,
   DialogContent,
@@ -12,19 +12,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../shadcn/dialog";
+} from "../../shadcn/dialog";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "../shadcn/sheet";
+} from "../../shadcn/sheet";
 import moment from "moment";
-import CalendarCategoriesBtn from "../components/admin/Calendar/CalendarCategoriesBtn";
-import NewAttendanceRegister from "@/components/admin/Attendance/NewAttendanceRegister";
+import CalendarCategoriesBtn from "../../components/admin/Calendar/CalendarCategoriesBtn";
 
-export default function PublicCalendar() {
+export default function UserCalendar() {
   //Attend form states
   const [eventName, setEventName] = useState("");
   const [eventSchedule, setEventSchedule] = useState("");
@@ -137,7 +136,7 @@ export default function PublicCalendar() {
     <>
       <Dialog>
         <DialogTrigger asChild>
-          <Button>See all events</Button>
+          <Button>Calendar</Button>
         </DialogTrigger>
         <DialogContent className="no-scrollbar max-w-6xl overflow-scroll">
           <DialogHeader>
@@ -175,9 +174,7 @@ export default function PublicCalendar() {
             <DialogDescription>
               {eventDialog.description}
               <p>{`${moment(eventDialog.time).format("dddd")}, ${moment(eventDialog.time).format("MMMM Do h:mm")}`}</p>
-              <div className="mt-2">
-                <NewAttendanceRegister BtnName="Attend" />
-              </div>
+              <div className="mt-2"></div>
             </DialogDescription>
           </DialogHeader>
         </DialogContent>

@@ -9,6 +9,8 @@ import {
   CardTitle,
   CardDescription,
 } from "../../shadcn/card";
+import { Button } from "@/shadcn/button";
+import UserCalendar from "@/components/user/UserCalendar";
 
 export default function Eventspage() {
   const [eventItems, setEventItems] = useState([]);
@@ -80,12 +82,14 @@ export default function Eventspage() {
         <div>
           <h1 className="text-2xl font-bold">Events</h1>
           <p className="text-gray-500 dark:text-gray-400">
-            Latest updates and announcements about upcoming events at the
-            church.
+            Latest upcoming events at the church.
           </p>
         </div>
+        <div className="mt-2">
+          <UserCalendar />
+        </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="no-scrollbar mt-8 grid h-screen grid-cols-1 gap-4 overflow-scroll md:grid-cols-2 lg:grid-cols-3">
           {eventItems.map((item) => (
             <Card
               key={item.id}

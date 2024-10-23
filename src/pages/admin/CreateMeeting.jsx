@@ -15,6 +15,7 @@ import {
   DialogTrigger,
 } from "../../shadcn/dialog";
 import supabase from "../../api/supabase";
+import MeetingCalendar from "../../components/admin/schedule/MeetingCalendar";
 
 // Schema for form validation using Zod
 const meetingSchema = z.object({
@@ -47,7 +48,7 @@ export default function CreateMeeting() {
         data
           .filter((user) => user.user_role === "volunteer")
           .map((user) => ({
-            value: user.user_uuid,
+            value: `${user.user_name} ${user.user_last_name}`,
             label: `${user.user_name} ${user.user_last_name}`,
           })),
       );
@@ -203,6 +204,7 @@ export default function CreateMeeting() {
           </DialogHeader>
         </DialogContent>
       </Dialog>
+      <MeetingCalendar />
 
       {/* Display Meeting Data in a Table */}
       <div className="mt-8">

@@ -431,7 +431,7 @@ export async function insertFamilyAttendee(
         selected_event: selected_event,
         selected_event_date: selected_event_date,
         selected_time: selected_time,
-        attendance_type: "Family",
+        attendance_type: "family",
       })),
     );
 
