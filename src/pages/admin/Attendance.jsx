@@ -261,13 +261,19 @@ export default function Attendance() {
       const itemToEdit = data.find((item) => item.id === id);
       if (itemToEdit) {
         setEditId(id);
-        setValue("guardian_first_name", itemToEdit.guardian_first_name);
-        setValue("guardian_last_name", itemToEdit.guardian_last_name);
-        setValue("guardian_telephone", itemToEdit.guardian_telephone);
+        setValue(
+          "main_applicant_first_name",
+          itemToEdit.main_applicant_first_name,
+        );
+        setValue(
+          "main_applicant_last_name",
+          itemToEdit.main_applicant_first_name,
+        );
+        setValue("telephone", itemToEdit.telephone);
         // setValue("selectedEvent", itemToEdit.selected_event);
         // setValue("preferredTime", itemToEdit.preferred_time); For future update in attendance where they can edit event and time
-        setValue("children_first_name", itemToEdit.children_first_name);
-        setValue("children_last_name", itemToEdit.children_last_name);
+        setValue("attendee_first_name", itemToEdit.attendee_first_name);
+        setValue("attendee_last_name", itemToEdit.attendee_last_name);
       }
     } catch (error) {
       console.log("Error updating", error);
@@ -277,7 +283,7 @@ export default function Attendance() {
   const handleDelete = async (id) => {
     try {
       const { error } = await supabase
-        .from("attendance_pending")
+        .from("new_attendance")
         .delete()
         .eq("id", id);
 
@@ -375,37 +381,39 @@ export default function Attendance() {
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Edit</AlertDialogTitle>
+                <AlertDialogDescription className="sr-only">
+                  Edit Attendance Form
+                </AlertDialogDescription>
               </AlertDialogHeader>
               <form
                 onSubmit={handleSubmit(onSubmit)}
                 className="flex flex-col gap-2"
               >
                 <div>
-                  <Label>Guardian First Name</Label>
+                  <Label>Applicant First Name</Label>
                   <Input
-                    {...register("guardian_first_name", {
+                    {...register("main_applicant_first_name", {
                       required: "First name is required",
                     })}
-                    placeholder="Guardian First Name"
+                    placeholder="First Name"
                   />
-                  {errors.guardian_first_name && (
+                  {errors.main_applicant_first_name && (
                     <p className="text-red-500">
-                      {errors.guardian_first_name.message}
+                      {errors.main_applicant_first_name.message}
                     </p>
                   )}
                 </div>
-
                 <div>
-                  <Label>Guardian Last Name</Label>
+                  <Label>Applicant Last Name</Label>
                   <Input
-                    {...register("guardian_last_name", {
+                    {...register("main_applicant_last_name", {
                       required: "Last name is required",
                     })}
-                    placeholder="Guardian Last Name"
+                    placeholder="Last Name"
                   />
-                  {errors.guardian_last_name && (
+                  {errors.main_applicant_last_name && (
                     <p className="text-red-500">
-                      {errors.guardian_last_name.message}
+                      {errors.main_applicant_last_name.message}
                     </p>
                   )}
                 </div>
@@ -413,25 +421,23 @@ export default function Attendance() {
                 <div>
                   <Label>Telephone</Label>
                   <Input
-                    {...register("guardian_telephone", {
+                    {...register("telephone", {
                       required: "Telephone is required",
                     })}
                     placeholder="Telephone"
                   />
-                  {errors.guardian_telephone && (
-                    <p className="text-red-500">
-                      {errors.guardian_telephone.message}
-                    </p>
+                  {errors.telephone && (
+                    <p className="text-red-500">{errors.telephone.message}</p>
                   )}
                 </div>
 
                 <div>
-                  <Label>Children First Name</Label>
+                  <Label>Attendee First Name</Label>
                   <Input
-                    {...register("children_first_name", {
+                    {...register("attendee_first_name", {
                       required: "First name is required",
                     })}
-                    placeholder="Children First Name"
+                    placeholder="Attendee First Name"
                   />
                   {errors.children_first_name && (
                     <p className="text-red-500">
@@ -441,16 +447,16 @@ export default function Attendance() {
                 </div>
 
                 <div>
-                  <Label>Children Last Name</Label>
+                  <Label>Attendee Last Name</Label>
                   <Input
-                    {...register("children_last_name", {
+                    {...register("attendee_last_name", {
                       required: "Last name is required",
                     })}
-                    placeholder="Children Last Name"
+                    placeholder="Last Name"
                   />
-                  {errors.children_last_name && (
+                  {errors.attendee_last_name && (
                     <p className="text-red-500">
-                      {errors.children_last_name.message}
+                      {errors.attendee_last_name.message}
                     </p>
                   )}
                 </div>
