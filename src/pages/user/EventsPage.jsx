@@ -116,7 +116,7 @@ export default function Eventspage() {
               <QrReader
                 onDecode={handleScan}
                 onError={handleError}
-                facingMode="rear"
+                facingMode={{ exact: "environment" }}
               />
               {scanResult && <p>Scanned Code: {scanResult}</p>}
               {error && <p>Error: {error.message}</p>}
