@@ -8,7 +8,7 @@ import DutyFormModal from "../../components/volunteer/duty/DutyFormModal"; // Mo
 import EditDutyModal from "../../components/volunteer/duty/EditDutyModal"; // Modal component for editing duties
 import DeleteDutyModal from "../../components/volunteer/duty/DeleteDutyModal"; // Modal component for deleting duties
 import AssignUsersModal from "../../components/volunteer/duty/AssignUsersModal"; // Import AssignUsersModal
-
+import OverviewModal from "../../components/volunteer/duty/OverviewModal";
 import { Button } from "../../shadcn/button"; // Import Shadcn Button component
 import useUserData from "../../api/useUserData"; // Hook to get logged-in user data
 
@@ -20,6 +20,8 @@ const VolunteerDuties = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // State to control Edit Duty modal
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // State to control Delete Duty modal
   const [selectedDuty, setSelectedDuty] = useState(null); // Duty selected for editing or deleting
+
+  const [isOverviewModalOpen, setIsOverviewModalOpen] = useState(false); // State for Overview modal
 
   const [users, setUsers] = useState([]); // State to store group users
   const [isAssignUsersModalOpen, setIsAssignUsersModalOpen] = useState(false);
@@ -261,13 +263,23 @@ const VolunteerDuties = () => {
       <main className="mx-auto max-w-7xl p-4 lg:p-8">
         {/* Header Section */}
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Volunteer Rota Management</h1>
-          <Button
-            onClick={() => setIsAddModalOpen(true)} // Open Add Duty modal
-            className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-          >
-            Add Rota
-          </Button>
+          <h1 className="text-3xl font-bold">Rota Management</h1>
+          <div className="flex items-center space-x-2">
+            {" "}
+            {/* Added a flex container for buttons */}
+            <Button
+              onClick={() => setIsAddModalOpen(true)} // Open Add Duty modal
+              className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+            >
+              Add Rota
+            </Button>
+            <Button
+              onClick={() => setIsOverviewModalOpen(true)} // Correctly passing a function
+              className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+            >
+              Overview
+            </Button>
+          </div>
         </div>
 
         {/* Duty Cards Layout */}
@@ -337,6 +349,11 @@ const VolunteerDuties = () => {
           users={users} // Pass the fetched users to the modal
         />
       )}
+      <OverviewModal
+        isOpen={isOverviewModalOpen}
+        onRequestClose={() => setIsOverviewModalOpen(false)}
+        duties={duties} // Pass the loaded duties
+      />
     </VolunteerSidebar>
   );
 };
