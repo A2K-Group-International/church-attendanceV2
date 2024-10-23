@@ -16,6 +16,7 @@ const userLinks = [
   { link: "/user-announcements", label: "Announcements", icon: CalendarIcon },
   { link: "/events-page", label: "Events", icon: CalendarIcon },
   { link: "/family", label: "Family", icon: FamilyIcon },
+  { link: "/parishioner-request", label: "Request", icon: RequestIcon },
   { link: "/parishioner-classes", label: "Classes", icon: BlackBoardIcon },
   { link: "#", label: "Request", icon: RequestIcon },
 ];
