@@ -18,14 +18,14 @@ export default function UserAnnouncements() {
   const [searchQuery, setSearchQuery] = useState("");
   const [visibleCount, setVisibleCount] = useState(10); // For pagination
 
-  const { user } = useUser();
   const { userData, loading: userLoading, error: userError } = useUserData();
+
   const {
     announcements,
     loading: announcementsLoading,
     error: announcementsError,
     fetchAnnouncements,
-  } = useAnnouncements(groupId);
+  } = useAnnouncements(groupId, "public");
 
   const fetchGroupInfo = useCallback(async () => {
     if (!userData) return;

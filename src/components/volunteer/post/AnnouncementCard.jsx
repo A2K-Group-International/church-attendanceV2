@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
-import { FaThumbsUp, FaHeart, FaStar, FaEllipsisV } from "react-icons/fa";
+import {
+  FaThumbsUp,
+  FaHeart,
+  FaStar,
+  FaEllipsisV,
+  FaGlobe,
+  FaLock,
+} from "react-icons/fa";
+
 import { Separator } from "../../../shadcn/separator";
 import useReactions from "@/api/useReactions";
 
@@ -129,41 +137,51 @@ const AnnouncementCard = ({
           {post.post_header}
         </h2>
 
-        {post.post_user_id === userId && ( // Check if the current user is the post owner
-          <div className="relative ml-2">
-            <button
-              onClick={toggleMenu}
-              className="focus:outline-none"
-              aria-haspopup="true"
-              aria-expanded={menuOpen}
-            >
-              <FaEllipsisV />
-            </button>
-            {menuOpen && (
-              <div className="menu absolute right-0 z-10 mt-2 w-48 rounded-md bg-white shadow-lg">
-                <button
-                  onClick={() => {
-                    onEdit(post.post_id);
-                    setMenuOpen(false); // Close menu after action
-                  }}
-                  className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => {
-                    setIsDeleteDialogOpen(true); // Open confirmation dialog
-                    setMenuOpen(false); // Close menu after action
-                  }}
-                  className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-                >
-                  Delete
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+        {/* Public/Private Icon */}
+        <div className="flex items-center space-x-2">
+          {post.public ? (
+            <FaGlobe title="Public" className="text-green-500" />
+          ) : (
+            <FaLock title="Private" className="text-red-500" />
+          )}
+
+          {post.post_user_id === userId && ( // Check if the current user is the post owner
+            <div className="relative ml-2">
+              <button
+                onClick={toggleMenu}
+                className="focus:outline-none"
+                aria-haspopup="true"
+                aria-expanded={menuOpen}
+              >
+                <FaEllipsisV />
+              </button>
+              {menuOpen && (
+                <div className="menu absolute right-0 z-10 mt-2 w-48 rounded-md bg-white shadow-lg">
+                  <button
+                    onClick={() => {
+                      onEdit(post.post_id);
+                      setMenuOpen(false); // Close menu after action
+                    }}
+                    className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsDeleteDialogOpen(true); // Open confirmation dialog
+                      setMenuOpen(false); // Close menu after action
+                    }}
+                    className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
+
       {/* Post Content */}
       <p className="mb-4 text-gray-700 dark:text-gray-300">
         {renderPostContent(post.post_content)}

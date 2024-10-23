@@ -5,8 +5,15 @@ import { format } from "date-fns";
 import Reactions from "./Reactions"; // Import the Reactions component
 import { Separator } from "../../../shadcn/separator"; // Import the Separator component
 import PropTypes from "prop-types";
+import useReactions from "@/api/useReactions";
 
 const PostDetails = ({ post, userData, getInitials, handleReaction }) => {
+  // to be added
+  // const { reactions, loading, fetchReactions, userReaction } = useReactions(
+  //   post.post_id,
+  //   userId,
+  // ); // Destructure reactions and loading
+  // console.log(reactions);
   return (
     <div className="flex flex-col rounded-lg bg-white p-6 shadow-md dark:bg-gray-800">
       {/* Post Header */}
@@ -47,10 +54,10 @@ const PostDetails = ({ post, userData, getInitials, handleReaction }) => {
           </span>
         </div>
       </div>
-      <Separator className="my-4" />
+      {/* <Separator className="my-4" /> */}
 
       {/* Reactions */}
-      <Reactions postId={post.post_id} handleReaction={handleReaction} />
+      {/* <Reactions postId={post.post_id} handleReaction={handleReaction} /> */}
     </div>
   );
 };
