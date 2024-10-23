@@ -11,11 +11,20 @@ import {
 } from "../../shadcn/card";
 import { Button } from "@/shadcn/button";
 import UserCalendar from "@/components/user/UserCalendar";
+import QrReader from "react-qr-scanner";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogTrigger,
+} from "../../shadcn/alert-dialog";
+import qrScannerIcon from "../../assets/svg/qrScanner.svg";
 
 export default function Eventspage() {
   const [eventItems, setEventItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [scanResult, setScanResult] = useState(null);
+  const [error, setError] = useState(null);
 
   const formatTime = (timeStr) => {
     if (!timeStr) return "Invalid time";
@@ -65,6 +74,16 @@ export default function Eventspage() {
     navigate(`/event-info/${event.id}`);
   };
 
+  const handleScan = (data) => {
+    if (data) {
+      setScanResult(data);
+    }
+  };
+
+  const handleError = (err) => {
+    setError(err);
+  };
+
   if (loading) {
     return (
       <UserSidebar>
@@ -85,8 +104,24 @@ export default function Eventspage() {
             Latest upcoming events at the church.
           </p>
         </div>
-        <div className="mt-2">
+        <div className="mt-2 flex">
           <UserCalendar />
+          <AlertDialog>
+            <AlertDialogTrigger asChild className="ml-2">
+              <Button>
+                <img src={qrScannerIcon} alt="" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="mt-2">
+              <QrReader
+                onDecode={handleScan}
+                onError={handleError}
+                facingMode="environment"
+              />
+              {scanResult && <p>Scanned Code: {scanResult}</p>}
+              {error && <p>Error: {error.message}</p>}
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
 
         <div className="no-scrollbar mt-8 grid h-screen grid-cols-1 gap-4 overflow-scroll md:grid-cols-2 lg:grid-cols-3">
