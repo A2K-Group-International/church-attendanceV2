@@ -11,12 +11,35 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import supabase from "@/api/supabase";
+import { useState, useEffect } from "react";
 
-export default function MeetingCalendar({ ...props }) {
+export default function MeetingCalendar() {
+  const [meetings, setMeetings] = useState([]);
+
+  const fetchMeeting = async () => {
+    try {
+      const { data, error } = await supabase.from("meetings").select("*");
+      if (error) throw error;
+      setMeetings(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchMeeting();
+  }, []);
+
+  const events = meetings.map((item) => ({
+    title: item.meeting_title,
+    date: item.date,
+  }));
+
   return (
     <Dialog>
       <DialogTrigger className="ml-2" asChild>
-        <Button>View Calendar</Button>
+        <Button>Calendar</Button>
       </DialogTrigger>
       <DialogContent className="max-w-5xl">
         <DialogHeader>
@@ -31,10 +54,10 @@ export default function MeetingCalendar({ ...props }) {
             center: "title",
             right: "dayGridMonth,timeGridWeek,timeGridDay",
           }}
-        //   events={}
-        //   dateClick={}
-        //   eventClick={}
-        //   eventDidMount={}
+          events={events}
+          //   dateClick={}
+          //   eventClick={}
+          //   eventDidMount={}
           editable={true}
           height={850}
           eventTimeFormat={{

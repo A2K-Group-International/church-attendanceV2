@@ -619,7 +619,7 @@ export default function EventPage() {
           open={isDialogOpen}
           onOpenChange={(open) => {
             if (open) {
-              resetForm(); // Call your form reset function here
+              resetForm(); 
             }
             setIsDialogOpen(open);
           }}
