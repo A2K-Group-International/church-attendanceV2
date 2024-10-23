@@ -24,6 +24,7 @@ import {
 } from "@tanstack/react-query";
 import { useToast } from "@/shadcn/use-toast";
 import useUserData from "@/api/useUserData";
+import UserSidebar from "@/components/user/UserSidebar";
 
 export default function ParishionerClasses() {
   const { userData } = useUserData();
@@ -322,7 +323,7 @@ export default function ParishionerClasses() {
   console.log("data i am getting", data);
 
   return (
-    <VolunteerSidebar>
+    <UserSidebar>
       <main className="h-screen overflow-y-scroll p-8">
         <div className="mb-4 flex justify-between">
           <Title>Your Classes</Title>
@@ -423,6 +424,6 @@ export default function ParishionerClasses() {
           />
         )}
       </main>
-    </VolunteerSidebar>
+    </UserSidebar>
   );
 }

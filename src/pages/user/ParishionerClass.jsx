@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shadcn/tabs";
 
 export default function ParishionerClass() {
   return (
-    <VolunteerSidebar>
+    <UserSidebar>
       <main className="h-screen overflow-y-scroll">
         <Tabs
           defaultValue="Announcement"
@@ -42,6 +42,6 @@ export default function ParishionerClass() {
           </TabsContent>
         </Tabs>
       </main>
-    </VolunteerSidebar>
+    </UserSidebar>
   );
 }
