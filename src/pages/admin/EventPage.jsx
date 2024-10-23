@@ -93,35 +93,6 @@ export default function EventPage() {
     watch,
   } = useForm(); // react-hook-forms
 
-  const fetchGroupInfo = useCallback(async () => {
-    if (!userData) return;
-
-    // Check if userData.group_id is null or undefined
-    if (userData.group_id == null) {
-      console.log("NO GROUP");
-      setError("You are not a member of any group. Please contact an admin.");
-      setLoading(false); // Stop loading immediately
-      return; // Exit early
-    }
-
-    try {
-      setGroupId(userData.group_id);
-      setUserId(userData.user_id);
-      const { data: groupData, error: groupError } = await supabase
-        .from("group_list")
-        .select("*")
-        .eq("group_id", userData.group_id);
-
-      if (groupError) throw groupError;
-      setGroupData(groupData);
-    } catch (err) {
-      setError("Error fetching group information. Please try again.");
-      console.error("Error fetching group information:", err);
-    } finally {
-      setLoading(false); // Ensure loading is set to false
-    }
-  }, [userData]);
-
   const onSubmit = async (data) => {
     setIsSubmitted(true);
 
@@ -229,13 +200,8 @@ export default function EventPage() {
   }, [currentPage, itemsPerPage]);
 
   useEffect(() => {
-    fetchGroupInfo;
     fetchEvents();
-  }, [currentPage, fetchEvents, userData]);
-  useEffect(() => {
-    console.log("hello");
-    fetchGroupInfo;
-  }, [userData]);
+  }, [currentPage, fetchEvents]);
 
   // Format the time
   const formatTime = (timeString) => {
