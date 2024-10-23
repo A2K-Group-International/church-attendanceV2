@@ -20,6 +20,7 @@ import {
   DialogTrigger,
   DialogClose,
 } from "../../shadcn/dialog";
+
 import {
   Popover,
   PopoverContent,
@@ -63,10 +64,15 @@ import { fetchCategory, fetchSubCategory } from "../../api/userService";
 import CreateMeeting from "./CreateMeeting";
 import { Textarea } from "../../shadcn/textarea";
 import CreatePoll from "./CreatePoll";
+import { useNavigate } from "react-router-dom";
 
 const headers = ["Event Name", "Date", "Time", "Description"];
 
 export default function EventPage() {
+  const navigate = useNavigate();
+  const handleNavigation = () => {
+    navigate("/admin-calendar");
+  };
   const [time, setTime] = useState([]); // event time data
   const [selectedDate, setSelectedDate] = useState(null); // event date data
   const [isSubmitted, setIsSubmitted] = useState(false); // for disabling the button submission
@@ -806,6 +812,7 @@ export default function EventPage() {
             </form>
           </DialogContent>
         </Dialog>
+        <Button onClick={handleNavigation}>Overview</Button>
 
         {/* <CreateMeeting />
             <CreatePoll /> */}
