@@ -25,6 +25,7 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/shadcn/dialog";
+import Comments from "@/components/Comments";
 
 export default function VolunteerClassAnnouncement() {
   const queryClient = useQueryClient();
@@ -63,10 +64,10 @@ export default function VolunteerClassAnnouncement() {
 
   const fetchClassAnnouncements = async () => {
     const { data: announcements, error: announcementError } = await supabase
-    .from("volunteer_announcements")
-    .select("*")
-    .eq("class_id", id)
-    .order("created_at", { ascending: false });
+      .from("volunteer_announcements")
+      .select("*")
+      .eq("class_id", id)
+      .order("created_at", { ascending: false });
 
     if (announcementError)
       throw new Error(announcementError.message || "Unknown error occurred");
@@ -120,23 +121,7 @@ export default function VolunteerClassAnnouncement() {
   });
 
   const createAnnouncement = async (inputData) => {
-    const { data, error } = await supabase
-      .from("volunteer_announcements")
-      .insert([
-        {
-          postBy: userData.user_name,
-          title: inputData.input.title,
-          content: inputData.input.content,
-          class_id: id,
-          user_id: userData.user_id,
-        },
-      ])
-      .select("id");
-
-    if (error) throw new Error(error.message || "Unknown error occurred");
-    // console.log("data added", data[0].id);
-
-    if (inputData.files) {
+ 
       const uploadPromises = inputData.files.map(async (filewithpreview) => {
         console.log("this is each files before uploading", filewithpreview);
         const { data, error } = await supabase.storage
@@ -157,6 +142,22 @@ export default function VolunteerClassAnnouncement() {
 
       const uploadedFiles = await Promise.all(uploadPromises);
 
+      const { data,error } = await supabase
+        .from("volunteer_announcements")
+        .insert([
+          {
+            postBy: userData.user_name,
+            title: inputData.input.title,
+            content: inputData.input.content,
+            class_id: id,
+            user_id: userData.user_id,
+          },
+        ])
+        .select("id");
+
+      if (error) throw new Error(error.message || "Unknown error occurred");
+      // console.log("data added", data[0].id);
+
       const insertFilePromises = uploadedFiles.map(async (file) => {
         const { error } = await supabase.from("announcement_files").insert([
           {
@@ -172,7 +173,7 @@ export default function VolunteerClassAnnouncement() {
 
       // Wait for file insertions to complete
       await Promise.all(insertFilePromises);
-    }
+    
 
     // Create the announcement
 
@@ -207,7 +208,7 @@ export default function VolunteerClassAnnouncement() {
 
     const { error } = await supabase
       .from("volunteer_announcements")
-      .delete() 
+      .delete()
       .eq("id", currentId);
 
     if (error) throw new Error(error.message || "File insert error");
@@ -303,7 +304,6 @@ export default function VolunteerClassAnnouncement() {
     deleteMutation.mutate(fileData);
   };
 
-
   const renderFiles = (file, index) => {
     if (file.filetype.startsWith("image")) {
       // Render image
@@ -332,24 +332,31 @@ export default function VolunteerClassAnnouncement() {
     } else if (file.filetype.startsWith("application")) {
       // Render download link
       return (
-        <div key={index} className="flex items-center justify-center">
+        <div key={index} className="flex p-3 m-2 rounded-md border gap-2 items-center justify-center">
           <a
             href={file.fileURL.publicUrl}
-            className="mx-2 w-full cursor-pointer snap-start text-start underline hover:cursor-pointer lg:w-[35rem]"
+            className=" w-fit cursor-pointer underline hover:cursor-pointer"
             download
           >
             {file.filename}
           </a>
         </div>
       );
+    }else{
+      <a
+      href={file.fileURL.publicUrl}
+      className="mx-2 w-full cursor-pointer  underline hover:cursor-pointer lg:w-[35rem]"
+      download
+    >
+      {file.filename}
+    </a>
     }
     return null;
   };
   // console.log("data", currentId);
-  
 
-  if(isLoading){
-    return(<p>Loading...</p>)
+  if (isLoading) {
+    return <p>Loading...</p>;
   }
 
   return (
@@ -360,18 +367,18 @@ export default function VolunteerClassAnnouncement() {
       >
         <Input
           className="mb-2"
-          placeholder="Title of Announcement"
+          placeholder="Title of Highlight"
           {...register("title", { required: true })}
         />
         <Textarea
           className="mb-2"
-          placeholder="Create an Announcement for your class."
+          placeholder="Create a highlight for your class."
           {...register("content", { required: true })}
         />
         <div className="mb-2 flex flex-col gap-2">
           {files.map((file, index) => (
             <div
-              className="p-2 hover:bg-slate-200 flex items-center gap-2 rounded-md border"
+              className="flex items-center gap-2 rounded-md border p-2 hover:bg-slate-200"
               key={index}
             >
               <div
@@ -385,7 +392,7 @@ export default function VolunteerClassAnnouncement() {
                     className="h-12 w-12 rounded-md"
                   />
                 )}
-                <div className=" p-2 h-10 flex items-center">
+                <div className="flex h-10 items-center p-2">
                   <p>{file.file.name}</p>
                   {/* <p>{file.file.type}</p> */}
                 </div>
@@ -457,8 +464,8 @@ export default function VolunteerClassAnnouncement() {
                     <Dialog
                       open={isDialogOpen}
                       onOpenChange={(isOpen) => {
-                        setCurrentId(values.id)
-                        setIsDialogOpen(isOpen)
+                        setCurrentId(values.id);
+                        setIsDialogOpen(isOpen);
                       }}
                     >
                       <DialogTrigger>
@@ -471,12 +478,12 @@ export default function VolunteerClassAnnouncement() {
                       <DialogContent className="rounded-md">
                         <DialogHeader>
                           <DialogTitle className="text-2xl">
-                            Delete Announcement
+                            Delete Highlight
                           </DialogTitle>
                           <Separator />
                         </DialogHeader>
                         <DialogDescription>
-                          Are you sure you want to delete announcement?
+                          Are you sure you want to delete highlight?
                         </DialogDescription>
                         <DialogFooter className="mx-2 flex gap-2 sm:justify-between">
                           <Button
@@ -515,7 +522,7 @@ export default function VolunteerClassAnnouncement() {
                       <DialogContent className="rounded-md">
                         <DialogHeader>
                           <DialogTitle className="text-2xl">
-                            Edit Announcement
+                            Edit Highlight
                           </DialogTitle>
                           <Separator />
                         </DialogHeader>
@@ -528,13 +535,13 @@ export default function VolunteerClassAnnouncement() {
                           <Label htmlFor="title">Title</Label>
                           <Input
                             {...registerEdit("edittitle", { required: true })}
-                            placeholder="Title of Announcement"
+                            placeholder="Title of Highlight"
                             className="mt-1"
                           />
-                          <Label htmlFor="content">Announcement</Label>
+                          <Label htmlFor="content">Highlight</Label>
                           <Textarea
                             {...registerEdit("editcontent", { required: true })}
-                            placeholder="Put your announcement here"
+                            placeholder="Put your highlight here"
                             className="mt-1 resize-none"
                           />
                         </form>
@@ -567,14 +574,10 @@ export default function VolunteerClassAnnouncement() {
                     values.files.map((file, index) => renderFiles(file, index))}
                 </div>
               </div>
-              <Separator className="my-3" />
-              <div className="flex gap-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="" />
-                  <AvatarFallback>{getInitial("Volunteer")}</AvatarFallback>
-                </Avatar>
-                <Input placeholder="Add comment" />
-              </div>
+              <Separator className="mt-3" />
+
+              <Comments post_id={values.id}/>
+
             </div>
           </div>
         ))
