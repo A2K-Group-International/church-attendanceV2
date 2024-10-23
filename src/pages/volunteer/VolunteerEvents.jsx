@@ -1,79 +1,190 @@
+import ScheduleLinks from "../../components/volunteer/schedule/ScheduleLinks";
 import { useState, useEffect, useCallback } from "react";
-import supabase from "../../api/supabase"; // Adjust this import path as necessary
-import VolunteerSidebar from "../../components/volunteer/VolunteerSidebar"; // Adjust import as needed
-import { useUser } from "../../authentication/useUser"; // Adjust this import path as necessary
-import Table from "../../components/Table"; // Import your table component
-import Spinner from "../../components/Spinner"; // Import your spinner component
-import { Button } from "../../shadcn/button"; // Adjust as necessary
+import supabase from "../../api/supabase";
+import moment from "moment";
+import QRCode from "react-qr-code";
+import { useForm } from "react-hook-form";
+import Table from "../../components/Table";
+import AdminSidebar from "../../components/admin/AdminSidebar";
+import { Button } from "../../shadcn/button";
+import { Input } from "../../shadcn/input";
+import { Label } from "../../shadcn/label";
+import { Calendar } from "../../shadcn/calendar";
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
   DialogClose,
-} from "../../shadcn/dialog"; // Adjust import as necessary
-import { Popover, PopoverTrigger, PopoverContent } from "../../shadcn/popover"; // Adjust import as necessary
-import { Calendar } from "../../shadcn/calendar";
-import { Input } from "../../shadcn/input"; // Adjust import as necessary
-import { Label } from "../../shadcn/label";
-import { Pagination } from "../../shadcn/pagination"; // Adjust as necessary
-import { format } from "date-fns"; // For date formatting
-import BtnVolunteerRequestCategory from "../../components/volunteer/BtnVolunteerRequestCategory";
-import CreatePoll from "../admin/CreatePoll";
-import CreateMeeting from "../admin/CreateMeeting";
+} from "../../shadcn/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "../../components/ui/popover";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "../../shadcn/pagination"; // Adjusted imports for pagination
+import Spinner from "../../components/Spinner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../shadcn/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../shadcn/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../../shadcn/alert-dialog";
+import { Icon } from "@iconify/react";
+import { fetchCategory, fetchSubCategory } from "../../api/userService";
+// import CreateMeeting from "./CreateMeeting";
+import { Textarea } from "../../shadcn/textarea";
+import useUserData from "@/api/useUserData";
 
-const headers = ["Event Name", "Date", "Time", "Description", "Actions"]; // Added "Actions" column
+const headers = ["Event Name", "Date", "Time", "Description"];
 
-export default function VolunteerEvents() {
-  const [userId, setUserId] = useState(null);
-  const [events, setEvents] = useState([]);
-  const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [itemsPerPage] = useState(10); // Set items per page
-  const [isDialogOpen, setIsDialogOpen] = useState(false); // Dialog visibility state
-  const [selectedDate, setSelectedDate] = useState(null); // State for selected date
-  const [times, setTimes] = useState([{ hour: "", minute: "" }]); // Initial time state
-  const [newEvent, setNewEvent] = useState({
-    name: "",
-    description: "",
-  });
-  const [formSubmitted, setFormSubmitted] = useState(false); // Track form submission state
+export default function EventPage() {
+  const { userData } = useUserData(); // Destructure userData directly
 
-  // States for editing
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [eventToEdit, setEventToEdit] = useState(null);
+  const [time, setTime] = useState([]); // event time data
+  const [selectedDate, setSelectedDate] = useState(null); // event date data
+  const [isSubmitted, setIsSubmitted] = useState(false); // for disabling the button submission
+  const [events, setEvents] = useState([]); // Event data
+  const [currentPage, setCurrentPage] = useState(1); // Pagination
+  const [totalPages, setTotalPages] = useState(0); // pagination
+  const [loading, setLoading] = useState(false); // Loading handling
+  const [error, setError] = useState(null); // Error Handling
+  const [isDialogOpen, setIsDialogOpen] = useState(false); // Dialog Open/Close
+  const [editId, setEditId] = useState(null); // Get the current ID of Event
+  const [categoryData, setCategoryData] = useState([]); // List of category
+  const [selectedCategory, setSelectedCategory] = useState(""); // If selected category, show sub category
+  const [selectedSubCategory, setSelectedSubCategory] = useState([]);
+  const [selectedCategoryName, setSelectedCategoryName] = useState("");
+  const [qrCodeValue, setQrCodeValue] = useState(""); // QR Code value
+  const itemsPerPage = 8;
 
-  const { user } = useUser(); // Assuming useUser returns the current authenticated user
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors },
+    watch,
+  } = useForm(); // react-hook-forms
 
-  const fetchUserId = useCallback(async () => {
-    if (!user) return; // If user is not available, exit early
+  const onSubmit = async (data) => {
+    setIsSubmitted(true);
+
+    if (!selectedDate) {
+      console.error("Date is required.");
+      return;
+    }
+
+    if (!data.schedule_privacy) {
+      console.error("Schedule privacy is required.");
+      return;
+    }
 
     try {
-      const { data, error } = await supabase
-        .from("user_list")
-        .select("user_id")
-        .eq("user_uuid", user.id) // Assuming 'user_uuid' matches 'user.id'
-        .single();
+      if (editId) {
+        // Update existing event
+        const { error } = await supabase
+          .from("schedule")
+          .update({
+            name: data.name,
+            schedule_date: selectedDate.format("YYYY-MM-DD"),
+            time: time,
+            schedule_privacy: data.schedule_privacy,
+            description: data.description,
+            schedule_category: selectedCategoryName,
+            schedule_sub_category: data.schedule_sub_category,
+          })
+          .eq("id", editId);
 
-      if (error) throw error;
+        if (error) throw error;
+        alert("Event updated successfully!");
+      } else {
+        // Insert new event
+        const { error } = await supabase.from("schedule").insert([
+          {
+            name: data.name,
+            schedule_date: selectedDate.format("YYYY-MM-DD"),
+            time: time,
+            schedule_privacy: data.schedule_privacy,
+            description: data.description,
+            schedule_category: selectedCategoryName,
+            schedule_sub_category: data.schedule_sub_category,
+            creator_id: userData?.user_id,
+            group_id: userData?.group_id,
+          },
+        ]);
 
-      setUserId(data.user_id); // Assuming user_id is in the fetched data
+        if (error) {
+          console.error("Error inserting data:", error.message);
+          alert(
+            "An error occurred while creating the event. Please try again.",
+          );
+        } else {
+          alert("Event created successfully!");
+        }
+      }
+
+      resetForm(); // Reset the form after successful operation
+      setIsDialogOpen(false);
+      fetchEvents();
     } catch (err) {
-      setError("Error fetching user ID. Please try again.");
-      console.error("Error fetching user ID:", err);
+      console.error("Unexpected error:", err);
     }
-  }, [user]);
+  };
+
+  const resetForm = () => {
+    reset();
+    setTime([]);
+    setSelectedCategoryName("");
+    setSelectedDate(null);
+    setIsSubmitted(false);
+    setEditId(null); // Reset editId when resetting the form
+  };
+
+  const handleDateSelect = (date) => {
+    setSelectedDate(moment(date));
+    setValue("schedule", date);
+  };
 
   const fetchEvents = useCallback(async () => {
-    if (!userId) return; // If userId is not available, exit early
-
     setLoading(true);
-    setError(null);
+    setError(null); // Reset error state at the start
+
+    // Wait until userData is available
+    if (!userData || !userData.group_id) {
+      setLoading(false);
+      return; // Exit early if userData or group_id is not available
+    }
+
+    const groupId = userData.group_id; // Get groupId once it's confirmed available
 
     try {
       const {
@@ -82,57 +193,108 @@ export default function VolunteerEvents() {
         count,
       } = await supabase
         .from("schedule")
-        .select("*", { count: "exact" }) // Get the count for pagination
-        .eq("creator_id", userId) // Fetch events where creator_id matches userId
+        .select("*", { count: "exact" })
+        .eq("group_id", groupId) // Use groupId for filtering
         .range(
           (currentPage - 1) * itemsPerPage,
           currentPage * itemsPerPage - 1,
-        ); // Pagination range
+        );
 
       if (error) throw error;
 
-      setTotalPages(Math.ceil(count / itemsPerPage)); // Calculate total pages
-      setEvents(fetchedData); // Store fetched events
+      setTotalPages(Math.ceil(count / itemsPerPage));
+      setEvents(fetchedData);
     } catch (err) {
       setError("Error fetching events. Please try again.");
       console.error("Error fetching events:", err);
     } finally {
       setLoading(false);
     }
-  }, [userId, currentPage, itemsPerPage]);
+  }, [currentPage, itemsPerPage, userData]); // Add userData as a dependency if needed
 
   useEffect(() => {
-    fetchUserId(); // Fetch user ID when the component mounts or user changes
-  }, [fetchUserId]);
+    fetchEvents();
+  }, [currentPage, fetchEvents]);
 
-  useEffect(() => {
-    fetchEvents(); // Fetch events when userId is set or currentPage changes
-  }, [userId, currentPage, fetchEvents]);
-
-  // Generate hour and minute options
-  const generateTimeOptions = () => {
-    const hours = Array.from({ length: 24 }, (_, i) => i);
-    const minutes = Array.from({ length: 60 }, (_, i) => i).filter(
-      (i) => i % 15 === 0,
-    );
-    return { hours, minutes };
+  // Format the time
+  const formatTime = (timeString) => {
+    if (!timeString) return "N/A";
+    return moment(timeString, "HH:mm").format("hh:mm A"); // Use Moment.js to format time
   };
 
-  const { hours, minutes } = generateTimeOptions(); // Generate time options
+  //Delete Event
+  const handleDelete = async (id) => {
+    try {
+      const { error } = await supabase.from("schedule").delete().eq("id", id);
+
+      if (error) throw error;
+      //update local state to reflect the deletion
+      // setData((prevData) => prevData.filter((item) => item.id !== id));
+    } catch (error) {
+      console.error("Error Deleting event", error);
+    }
+  };
+
+  // Update Event
+  const handleEditBtn = async (id) => {
+    try {
+      const itemToEdit = events.find((item) => item.id === id);
+      if (itemToEdit) {
+        reset(); // Reset the entire form to initial values before editing
+        setValue("name", itemToEdit.name);
+        setSelectedDate(moment(itemToEdit.schedule_date)); // Set the date for Calendar
+        setValue("schedule_privacy", itemToEdit.schedule_privacy);
+        setValue("schedule_privacy", itemToEdit.schedule_category);
+        setValue("schedule_privacy", itemToEdit.schedule_sub_category);
+        setValue("description", itemToEdit.description || "");
+        if (itemToEdit.time && Array.isArray(itemToEdit.time)) {
+          // Map through the time array and format each time
+          const formattedTimes = itemToEdit.time.map((t) =>
+            moment.utc(t, "HH:mm:ssZ").format("HH:mm"),
+          );
+
+          setTime(formattedTimes);
+        }
+        setEditId(id); // Set the editId to the current event's id
+      }
+    } catch (error) {
+      console.error("Error Updating Event", error);
+    }
+  };
+
+  // Add more time
+  const handleAddTimeInput = () => {
+    setTime([...time, ""]);
+  };
+
+  // Remove time
+  const handleRemoveTimeInput = (index) => {
+    if (time.length > 1) {
+      const updatedTimes = time.filter((_, i) => i !== index);
+      setTime(updatedTimes); // Remove the specific time input field
+    }
+  };
+
+  // Function to change time
+  const handleChangeTime = (index, value) => {
+    const updatedTimes = [...time];
+    updatedTimes[index] = value;
+    setTime(updatedTimes);
+  };
+
+  // Generate QR Code
+  const handleGenerateQRCode = (value) => {
+    setQrCodeValue(value);
+  };
 
   const rows = events.map((event) => [
     event.name,
-    new Date(event.schedule).toLocaleDateString(), // Adjust to your date format
+    moment(event.schedule_date).format("MMMM Do YYYY"), // Format date using Moment.js
     event.time && event.time.length > 0
-      ? event.time
-          .map((t) => {
-            const [hour, minute] = t.split(":"); // Split hour and minute
-            return `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`; // Format as hh:mm
-          })
-          .join(", ")
+      ? event.time.map((t) => formatTime(t)).join(", ")
       : "N/A",
     <div
-      key={event.id}
+      key={event.name}
       style={{
         maxWidth: "200px",
         maxHeight: "100px",
@@ -142,477 +304,561 @@ export default function VolunteerEvents() {
     >
       {event.description || "N/A"}
     </div>,
-    <div key={`actions-${event.id}`} className="flex space-x-2">
-      <Button variant="secondary" onClick={() => openEditDialog(event)}>
-        Edit
-      </Button>
-      <Button variant="destructive" onClick={() => handleDelete(event.id)}>
-        Delete
-      </Button>
-    </div>,
+    <DropdownMenu key={event.id}>
+      <DropdownMenuTrigger asChild>
+        <button aria-label="Options">
+          <Icon icon="tabler:dots" width="2em" height="2em" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+          <AlertDialog>
+            <AlertDialogTrigger
+              onClick={() => handleGenerateQRCode(event.event_uuid)}
+            >
+              Generate QR Code
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Event Information</AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogDescription className="sr-only">
+                QR Code
+              </AlertDialogDescription>
+              <div
+                style={{
+                  height: "auto",
+                  margin: "0 auto",
+                  maxWidth: 256,
+                  width: "100%",
+                }}
+              >
+                <QRCode
+                  size={256}
+                  style={{ maxWidth: "100%", width: "100%" }}
+                  value={qrCodeValue}
+                  viewBox={`0 0 256 256`}
+                />
+              </div>
+              <h2>Event Name: {event.name}</h2>
+              <p>Date: {moment(event.schedule_date).format("MMMM Do YYYY")}</p>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Close</AlertDialogCancel>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+          <AlertDialog>
+            <AlertDialogTrigger onClick={() => handleEditBtn(event.id)}>
+              Edit
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Edit</AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogDescription className="sr-only">
+                Edit Event
+              </AlertDialogDescription>
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="flex flex-col gap-2"
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="name">Event Name</Label>
+                  <Input id="name" {...register("name", { required: true })} />
+                  {errors.name && (
+                    <p className="text-sm text-red-500">
+                      Event name is required
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="schedule">Date</Label>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
+                        {selectedDate
+                          ? selectedDate.format("MMMM Do YYYY") // Format date using Moment.js
+                          : "Please select a date"}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="w-auto p-5">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate ? selectedDate.toDate() : null}
+                        onSelect={handleDateSelect}
+                        initialFocus
+                      />
+                    </DialogContent>
+                  </Dialog>
+                  {isSubmitted && !selectedDate && (
+                    <p className="text-sm text-red-500">Date is required</p>
+                  )}
+                </div>
+
+                {/* Event Category */}
+                <div className="space-y-2">
+                  <Label htmlFor="Event Category">Event Category</Label>
+                  <div className="flex gap-x-2">
+                    <div>
+                      <Select
+                        value={watch("schedule_category")}
+                        onValueChange={(value) => {
+                          const selectedCategory = categoryData.find(
+                            (item) => item.category_id === value,
+                          );
+                          if (selectedCategory) {
+                            setSelectedCategoryName(
+                              selectedCategory.category_name,
+                            ); // Set the selected category name
+                            setValue("schedule_category", value); // Set the category_id in the form
+                            fetchSubCategories(value); // Passing the selected category ID
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Select Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categoryData.map((item) => (
+                            <SelectItem
+                              key={item.category_id}
+                              value={item.category_id}
+                            >
+                              {item.category_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {errors.schedule_category && (
+                        <p className="text-sm text-red-500">
+                          {errors.schedule_category.message}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      {selectedCategoryName &&
+                        selectedSubCategory.length > 0 && (
+                          <Select
+                            onValueChange={(value) => {
+                              setValue("schedule_sub_category", value);
+                            }}
+                          >
+                            <SelectTrigger className="w-[180px] text-start">
+                              <SelectValue placeholder="Sub category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {selectedSubCategory.map((item) => (
+                                <SelectItem
+                                  key={item.sub_category_id}
+                                  value={item.sub_category_name}
+                                >
+                                  {item.sub_category_name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      {errors.schedule_sub_category && (
+                        <p className="text-sm text-red-500">
+                          {errors.schedule_sub_category.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Input
+                    id="description"
+                    as="textarea"
+                    rows={3}
+                    {...register("description")}
+                    className="w-full"
+                    placeholder="Event description (optional)"
+                  />
+                </div>
+
+                {/* Schedule Privacy */}
+                <div className="space-y-2">
+                  <Label htmlFor="schedule_privacy">Schedule Privacy</Label>
+                  <Select
+                    value={watch("schedule_privacy")}
+                    onValueChange={(value) => {
+                      setValue("schedule_privacy", value);
+                    }}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select privacy" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="public">Public</SelectItem>
+                      <SelectItem value="private">Private</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.schedule_privacy && (
+                    <p className="text-sm text-red-500">
+                      {errors.schedule_privacy.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="time">Time</Label>
+                  {time.map((oldTime, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <Input
+                        type="time"
+                        value={oldTime}
+                        step="00:15"
+                        onChange={(e) =>
+                          handleChangeTime(index, e.target.value)
+                        }
+                        className="flex-grow"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => handleRemoveTimeInput(index)}
+                        className="shrink-0"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    onClick={handleAddTimeInput}
+                    className="w-full"
+                  >
+                    Add Time
+                  </Button>
+                </div>
+
+                <AlertDialogFooter className="mt-2">
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction type="submit">Save</AlertDialogAction>
+                </AlertDialogFooter>
+              </form>
+            </AlertDialogContent>
+          </AlertDialog>
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+          <AlertDialog>
+            <AlertDialogTrigger>Delete</AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete
+                  data.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => handleDelete(event.id)}>
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>,
   ]);
 
-  const handleAddTimeInput = () => {
-    setTimes((prev) => [...prev, { hour: "", minute: "" }]); // Add a new time input
-  };
-
-  const handleRemoveTimeInput = (index) => {
-    setTimes((prev) => prev.filter((_, i) => i !== index)); // Remove the time input at the specified index
-  };
-
-  const handleChangeTime = (index, type, value) => {
-    setTimes((prev) => {
-      const newTimes = [...prev];
-      newTimes[index][type] = value; // Update the hour or minute at the specified index
-      return newTimes;
-    });
-  };
-
-  const handleDateSelect = (date) => {
-    setSelectedDate(date); // Set the selected date
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setFormSubmitted(true); // Mark that the form has been submitted
-
-    // Add the logic to create a new event
-    if (!selectedDate) {
-      setError("Please select a date.");
-      return; // Prevent submission if date is not selected
-    }
-
-    // Filter out any time entries where either hour or minute is missing
-    const validTimes = times.filter((t) => t.hour && t.minute);
-
-    const eventTimes = validTimes.map(
-      (t) =>
-        `${t.hour.toString().padStart(2, "0")}:${t.minute.toString().padStart(2, "0")}`,
-    );
-
-    console.log("Constructed eventTimes:", eventTimes); // Debugging line
-
+  // Fetch Categories
+  const fetchCategories = async () => {
     try {
-      const { error } = await supabase.from("schedule").insert([
-        {
-          name: newEvent.name,
-          schedule: selectedDate,
-          time: eventTimes,
-          description: newEvent.description,
-          creator_id: userId,
-        },
-      ]);
-
-      if (error) throw error;
-
-      // Fetch events again to refresh the list
-      fetchEvents();
-      setIsDialogOpen(false); // Close the dialog
-      setNewEvent({ name: "", description: "" }); // Reset form
-      setTimes([{ hour: "", minute: "" }]); // Reset time inputs
-      setSelectedDate(null); // Reset date
-      setFormSubmitted(false); // Reset form submitted state
-    } catch (err) {
-      setError("Error creating event. Please try again.");
-      console.error("Error creating event:", err);
-    }
-  };
-
-  // Delete handler
-  const handleDelete = async (eventId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this event?",
-    );
-    if (!confirmDelete) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { error } = await supabase
-        .from("schedule")
-        .delete()
-        .eq("id", eventId); // Assuming 'id' is the primary key
-
-      if (error) throw error;
-
-      // Update local state by removing the deleted event
-      setEvents((prevEvents) =>
-        prevEvents.filter((event) => event.id !== eventId),
-      );
-    } catch (err) {
-      setError("Error deleting event. Please try again.");
-      console.error("Error deleting event:", err);
+      const data = await fetchCategory();
+      setCategoryData(data);
+    } catch (error) {
+      setError(error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Edit dialog functions
-  const openEditDialog = (event) => {
-    setEventToEdit({
-      ...event,
-      // Assuming 'schedule' is a Date string
-      selectedDate: new Date(event.schedule),
-      times: event.time
-        ? event.time.map((t) => {
-            const [hour, minute] = t.split(":");
-            return { hour, minute };
-          })
-        : [{ hour: "", minute: "" }],
-    });
-    setIsEditDialogOpen(true);
-  };
-
-  const handleEditChange = (field, value) => {
-    setEventToEdit((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleEditTimeChange = (index, type, value) => {
-    setEventToEdit((prev) => {
-      const newTimes = [...prev.times];
-      newTimes[index][type] = value; // Update the hour or minute at the specified index
-      return { ...prev, times: newTimes };
-    });
-  };
-
-  const handleEditAddTimeInput = () => {
-    setEventToEdit((prev) => ({
-      ...prev,
-      times: [...prev.times, { hour: "", minute: "" }],
-    }));
-  };
-
-  const handleEditRemoveTimeInput = (index) => {
-    setEventToEdit((prev) => ({
-      ...prev,
-      times: prev.times.filter((_, i) => i !== index),
-    }));
-  };
-
-  const handleEditSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    // Filter out any time entries where either hour or minute is missing
-    const validTimes = eventToEdit.times.filter((t) => t.hour && t.minute);
-
-    const eventTimes = validTimes.map(
-      (t) =>
-        `${t.hour.toString().padStart(2, "0")}:${t.minute.toString().padStart(2, "0")}`,
-    );
-
-    console.log("Constructed eventTimes for edit:", eventTimes); // Debugging line
-
+  const fetchSubCategories = async (categoryId) => {
     try {
-      const { error } = await supabase
-        .from("schedule")
-        .update({
-          name: eventToEdit.name,
-          schedule: eventToEdit.selectedDate,
-          time: eventTimes,
-          description: eventToEdit.description,
-        })
-        .eq("id", eventToEdit.id); // Update where id matches
-
-      if (error) throw error;
-
-      // Refresh events
-      fetchEvents();
-      setIsEditDialogOpen(false);
-      setEventToEdit(null);
-    } catch (err) {
-      setError("Error updating event. Please try again.");
-      console.error("Error updating event:", err);
+      const data = await fetchSubCategory(categoryId);
+      setSelectedSubCategory(data);
+    } catch (error) {
+      setError(error.message);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        await fetchCategories(); // Ensure categories are fetched first
+
+        // After categories are fetched, check if there's a selected category
+        if (selectedCategory) {
+          await fetchSubCategories(selectedCategory); // Fetch subcategories with the selected category ID
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error.message);
+      }
+    };
+
+    fetchData();
+  }, [selectedCategory]);
 
   return (
-    <VolunteerSidebar>
-      <main className="space-y-6 p-4 lg:p-8">
-        <header>
-          <h1 className="text-2xl font-bold">Volunteer Events</h1>
-          {/* Create Event Dialog */}
-          <div className="mt-2 flex items-center gap-2">
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>Create Event</Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Create Event</DialogTitle>
-                  <DialogDescription>
-                    Schedule an upcoming event.
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Event Name</Label>
-                    <Input
-                      id="name"
-                      value={newEvent.name}
-                      onChange={(e) =>
-                        setNewEvent({ ...newEvent, name: e.target.value })
-                      }
-                      required
-                    />
+    <ScheduleLinks>
+      <div className="mt-2 flex gap-x-2">
+        <Dialog
+          open={isDialogOpen}
+          onOpenChange={(open) => {
+            if (open) {
+              resetForm(); // Call your form reset function here
+            }
+            setIsDialogOpen(open);
+          }}
+        >
+          <DialogTrigger asChild>
+            <Button>New Event</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[700px]">
+            <DialogHeader>
+              <DialogTitle>New Event</DialogTitle>
+              <DialogDescription>Schedule an upcoming event.</DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Event Name</Label>
+                <Input id="name" {...register("name", { required: true })} />
+                {errors.name && (
+                  <p className="text-sm text-red-500">Event name is required</p>
+                )}
+              </div>
+
+              {/* Event Category */}
+              <div className="space-y-2">
+                <Label htmlFor="Event Category">Event Category</Label>
+                <div className="flex gap-x-2">
+                  <div>
+                    <Select
+                      onValueChange={(value) => {
+                        const selectedCategory = categoryData.find(
+                          (item) => item.category_id === value,
+                        );
+                        if (selectedCategory) {
+                          setSelectedCategoryName(
+                            selectedCategory.category_name,
+                          ); // Set the selected category name
+                          setValue("schedule_category", value); // Set the category_id in the form
+                          fetchSubCategories(value); // Passing the selected category ID
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select Category">
+                          {selectedCategoryName || "Select Category"}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categoryData.map((item) => (
+                          <SelectItem
+                            key={item.category_id}
+                            value={item.category_id}
+                          >
+                            {item.category_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.schedule_category && (
+                      <p className="text-sm text-red-500">
+                        {errors.schedule_category.message}
+                      </p>
+                    )}
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="schedule">Date</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start"
-                        >
-                          {selectedDate
-                            ? format(new Date(selectedDate), "P")
-                            : "Select date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent>
-                        <Calendar
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={handleDateSelect}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                  <div>
+                    {selectedCategoryName && selectedSubCategory.length > 0 && (
+                      <Select
+                        onValueChange={(value) => {
+                          setValue("schedule_sub_category", value);
+                        }}
+                      >
+                        <SelectTrigger className="w-[180px] text-start">
+                          <SelectValue placeholder="Sub category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {selectedSubCategory.map((item) => (
+                            <SelectItem
+                              key={item.sub_category_id}
+                              value={item.sub_category_name}
+                            >
+                              {item.sub_category_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {errors.schedule_sub_category && (
+                      <p className="text-sm text-red-500">
+                        {errors.schedule_sub_category.message}
+                      </p>
+                    )}
                   </div>
+                </div>
+              </div>
 
-                  {times.map((time, index) => (
-                    <div key={index} className="flex space-x-2">
-                      <div>
-                        <Label htmlFor={`hour-${index}`}>Hour</Label>
-                        <select
-                          id={`hour-${index}`}
-                          value={time.hour}
-                          onChange={(e) =>
-                            handleChangeTime(index, "hour", e.target.value)
-                          }
-                          required
-                        >
-                          <option value="">--</option>
-                          {hours.map((hour) => (
-                            <option key={hour} value={hour}>
-                              {hour.toString().padStart(2, "0")}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+              {/* Schedule Privacy */}
+              <div className="space-y-2">
+                <Label htmlFor="schedule_privacy">Schedule Privacy</Label>
+                <Select
+                  onValueChange={(value) => {
+                    setValue("schedule_privacy", value);
+                  }}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select privacy" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="public">Public</SelectItem>
+                    <SelectItem value="private">Private</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.schedule_privacy && (
+                  <p className="text-sm text-red-500">
+                    {errors.schedule_privacy.message}
+                  </p>
+                )}
+              </div>
 
-                      <div>
-                        <Label htmlFor={`minute-${index}`}>Minute</Label>
-                        <select
-                          id={`minute-${index}`}
-                          value={time.minute}
-                          onChange={(e) =>
-                            handleChangeTime(index, "minute", e.target.value)
-                          }
-                          required
-                        >
-                          <option value="">--</option>
-                          {minutes.map((minute) => (
-                            <option key={minute} value={minute}>
-                              {minute.toString().padStart(2, "0")}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+              <div className="flex gap-x-5">
+                <div className="space-y-2">
+                  <Label htmlFor="schedule">Date</Label>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
+                        {selectedDate
+                          ? selectedDate.format("MMMM Do YYYY")
+                          : "Please select a date"}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="w-auto p-5">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate ? selectedDate.toDate() : null}
+                        onSelect={handleDateSelect}
+                        initialFocus
+                      />
+                    </DialogContent>
+                  </Dialog>
+                  {isSubmitted && !selectedDate && (
+                    <p className="text-sm text-red-500">Date is required</p>
+                  )}
+                </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="time">Time</Label>
+                  {time.map((t, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <Input
+                        type="time"
+                        value={t}
+                        step="00:15"
+                        onChange={(e) =>
+                          handleChangeTime(index, e.target.value)
+                        }
+                        className="flex-grow"
+                      />
                       <Button
                         type="button"
+                        variant="outline"
                         onClick={() => handleRemoveTimeInput(index)}
+                        className="shrink-0"
                       >
                         Remove
                       </Button>
                     </div>
                   ))}
-
-                  <Button type="button" onClick={handleAddTimeInput}>
+                  <Button
+                    type="button"
+                    onClick={handleAddTimeInput}
+                    className="w-full"
+                  >
                     Add Time
                   </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  as="textarea"
+                  rows={3}
+                  {...register("description")}
+                  className="w-full"
+                  placeholder="Event description (optional)"
+                />
+              </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Input
-                      id="description"
-                      value={newEvent.description}
-                      onChange={(e) =>
-                        setNewEvent({
-                          ...newEvent,
-                          description: e.target.value,
-                        })
-                      }
-                      required
-                    />
-                  </div>
-
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button type="submit">Create Event</Button>
-                    </DialogClose>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
-            {/* Request Button */}
-            {/* <BtnVolunteerRequestCategory /> */}
-            {/* Create poll */}
-            {/* <CreateMeeting />
+              <DialogFooter className="gap-y-2">
+                <DialogClose asChild>
+                  <Button type="button" onClick={resetForm}>
+                    Cancel
+                  </Button>
+                </DialogClose>
+                <Button type="submit">Create</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+        {/* <CreateMeeting />
             <CreatePoll /> */}
-          </div>
-
-          {/* Edit Event Dialog */}
-          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Edit Event</DialogTitle>
-                <DialogDescription>
-                  Modify the details of the event.
-                </DialogDescription>
-              </DialogHeader>
-              {eventToEdit && (
-                <form onSubmit={handleEditSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-name">Event Name</Label>
-                    <Input
-                      id="edit-name"
-                      value={eventToEdit.name}
-                      onChange={(e) => handleEditChange("name", e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-schedule">Date</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start"
-                        >
-                          {eventToEdit.selectedDate
-                            ? format(new Date(eventToEdit.selectedDate), "P")
-                            : "Select date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent>
-                        <Calendar
-                          mode="single"
-                          selected={eventToEdit.selectedDate}
-                          onSelect={(date) =>
-                            setEventToEdit((prev) => ({
-                              ...prev,
-                              selectedDate: date,
-                            }))
-                          }
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-
-                  {eventToEdit.times.map((time, index) => (
-                    <div key={index} className="flex space-x-2">
-                      <div>
-                        <Label htmlFor={`edit-hour-${index}`}>Hour</Label>
-                        <select
-                          id={`edit-hour-${index}`}
-                          value={time.hour}
-                          onChange={(e) =>
-                            handleEditTimeChange(index, "hour", e.target.value)
-                          }
-                          required
-                        >
-                          <option value="">--</option>
-                          {hours.map((hour) => (
-                            <option key={hour} value={hour}>
-                              {hour.toString().padStart(2, "0")}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <Label htmlFor={`edit-minute-${index}`}>Minute</Label>
-                        <select
-                          id={`edit-minute-${index}`}
-                          value={time.minute}
-                          onChange={(e) =>
-                            handleEditTimeChange(
-                              index,
-                              "minute",
-                              e.target.value,
-                            )
-                          }
-                          required
-                        >
-                          <option value="">--</option>
-                          {minutes.map((minute) => (
-                            <option key={minute} value={minute}>
-                              {minute.toString().padStart(2, "0")}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <Button
-                        type="button"
-                        onClick={() => handleEditRemoveTimeInput(index)}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  ))}
-
-                  <Button type="button" onClick={handleEditAddTimeInput}>
-                    Add Time
-                  </Button>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-description">Description</Label>
-                    <Input
-                      id="edit-description"
-                      value={eventToEdit.description}
-                      onChange={(e) =>
-                        handleEditChange("description", e.target.value)
-                      }
-                      required
-                    />
-                  </div>
-
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button type="submit">Save Changes</Button>
-                    </DialogClose>
-                  </DialogFooter>
-                </form>
-              )}
-            </DialogContent>
-          </Dialog>
-        </header>
-
-        {loading ? (
-          <Spinner />
-        ) : error ? (
-          <p className="text-red-500">{error}</p>
-        ) : (
-          <>
-            <Table headers={headers} rows={rows} />
-            {totalPages > 1 && (
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
-            )}
-          </>
-        )}
-      </main>
-    </VolunteerSidebar>
+      </div>
+      {loading ? (
+        <Spinner />
+      ) : error ? (
+        <div className="text-red-500">{error}</div>
+      ) : (
+        <>
+          <Table headers={headers} rows={rows} />
+          <Pagination>
+            <PaginationContent>
+              <PaginationPrevious
+                onClick={() =>
+                  currentPage > 1 && setCurrentPage(currentPage - 1)
+                }
+              >
+                Previous
+              </PaginationPrevious>
+              {[...Array(totalPages)].map((_, index) => (
+                <PaginationItem key={index}>
+                  <PaginationLink
+                    onClick={() => setCurrentPage(index + 1)}
+                    active={currentPage === index + 1}
+                  >
+                    {index + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              <PaginationNext
+                onClick={() =>
+                  currentPage < totalPages && setCurrentPage(currentPage + 1)
+                }
+              >
+                Next
+              </PaginationNext>
+            </PaginationContent>
+          </Pagination>
+        </>
+      )}
+    </ScheduleLinks>
   );
 }

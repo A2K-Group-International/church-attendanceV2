@@ -28,7 +28,7 @@ export default function VolunteerClassContents() {
     };
   
   return (
-    <div className="flex w-full flex-col items-center justify-center gap-2">
+    <div className="flex p-2 w-full flex-col items-center justify-center gap-2">
     <div
       // key={index}
       className="w-full rounded-md border p-4 shadow-md lg:w-3/5"

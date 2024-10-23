@@ -1,6 +1,28 @@
 import { Separator } from "@/shadcn/separator";
 import kebab from "@/assets/svg/threeDots.svg";
 import { Popover, PopoverContent, PopoverTrigger } from "@/shadcn/popover";
+import { Label } from "@/shadcn/label";
+import { Input } from "@/shadcn/input";
+import { Textarea } from "@/shadcn/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/shadcn/select";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+import { Button } from "@/shadcn/button";
+import { Calendar } from "@/shadcn/calendar";
+import { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import supabase from "@/api/supabase";
+import { useMutation } from "@tanstack/react-query";
 
 const quizzesAndAssignments = [
   {
@@ -66,8 +88,105 @@ const quizzesAndAssignments = [
 ];
 
 export default function VolunteerAssignment() {
+  const [date, setDate] = useState("");
+  const { register, handleSubmit,control, reset, setValue,formState: { errors } } = useForm();
+
+  const addAssignment = async () => {
+    const { error: addError } = await supabase.from("assignment_list").insert([
+      {
+        title: input.title,
+        description: input.description,
+        due: date,
+        quiz_for: input.participant,
+      },
+    ]);
+
+    if (addError) {
+      throw new Error(addError.error || "Unknown error");
+    }
+  };
+
+  const addMutation = useMutation({
+    mutationFn: addAssignment,
+    mutationKey: ["assignments"],
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Assignment added successfully.",
+      });
+    },
+  });
+
+  const handleAddAssignment = (input) => {
+    console.log("inputsdfsdas",input);
+    // addMutation.mutate(input);
+  };
+  console.log(errors)
+
   return (
-    <div className="flex w-full flex-col items-center justify-center gap-2">
+    <div className="flex w-full flex-col items-center justify-center gap-2 p-2">
+      <form
+        onSubmit={handleSubmit(handleAddAssignment)}
+        className="w-full rounded-md border p-4 shadow-md lg:w-3/5"
+      >
+        <Label className="text-md font-bold">Title</Label>
+        <Input {...register("title", { required: true })} />
+        <Label className="text-md font-bold">Description</Label>
+        <Textarea
+          {...register("description", { required: true })}
+          className="mb-1"
+        />
+        <Label className="text-md font-bold">Quiz Link</Label>
+        <Input {...register("quizlink", { required: true })} className="mb-2" />
+        <div className="flex justify-between gap-2">
+        <Controller
+          name="participant"
+          control={control}
+          rules={{ required: true }}
+          render={({ field: { onChange, onBlur, value, ref } }) => (
+            <Select onValueChange={onChange} onBlur={onBlur} ref={ref} value={value}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Assignment For:" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Participants</SelectLabel>
+                  <SelectItem value="child">Children</SelectItem>
+                  <SelectItem value="parent">Parents</SelectItem>
+                  <SelectItem value="volunteer">Volunteers</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          )}
+        />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant={"outline"}
+                className={cn(
+                  "w-[280px] justify-start text-left font-normal",
+                  !date && "text-muted-foreground",
+                )}
+              >
+                <CalendarIcon />
+                {date ? format(date, "PPP") : <span>Pick due date</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={(newDate) => {
+                  setDate(newDate);
+                }}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+          <Button type="submit">Add Quiz</Button>
+        </div>
+      </form>
       {quizzesAndAssignments.map((quiz, index) => (
         <div
           key={index}

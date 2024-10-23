@@ -22,8 +22,18 @@ const volunteerLinks = [
     icon: ChurchIcon,
   },
   { link: "/volunteer-dashboard", label: "Dashboard", icon: DashboardIcon },
+  {
+    link: "/volunteer-schedule",
+    label: "Volunteer Events",
+    icon: CalendarIcon,
+  },
+  {
+    link: "/volunteer-main-calendar",
+    label: "Event Calendar",
+    icon: CalendarIcon,
+  },
   { link: "/volunteer-duties", label: "Rota", icon: PersonIcon },
-  { link: "/volunteer-schedule", label: "Schedule", icon: CalendarIcon },
+
   { link: "/volunteer-upload", label: "Upload", icon: UploadIcon },
   { link: "/volunteer-profile", label: "Profile", icon: PersonIcon },
   { link: "/volunteer-classes", label: "Classes", icon: blackboard },
