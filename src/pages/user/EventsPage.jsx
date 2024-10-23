@@ -12,12 +12,9 @@ import {
 import { Button } from "@/shadcn/button";
 import UserCalendar from "@/components/user/UserCalendar";
 import QrReader from "react-qr-scanner";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from "../../shadcn/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "../../shadcn/dialog";
 import qrScannerIcon from "../../assets/svg/qrScanner.svg";
+import { Scanner } from "@yudiel/react-qr-scanner";
 
 export default function Eventspage() {
   const [eventItems, setEventItems] = useState([]);
@@ -113,13 +110,11 @@ export default function Eventspage() {
               </Button>
             </DialogTrigger>
             <DialogContent className="mt-2 p-2">
-              <QrReader
-                onDecode={handleScan}
-                onError={handleError}
-                facingMode={{ exact: "environment" }}
+              <Scanner
+                facingMode="environment"
+                onScan={(result) => console.log(result)}
               />
-              {scanResult && <p>Scanned Code: {scanResult}</p>}
-              {error && <p>Error: {error.message}</p>}
+              ;
             </DialogContent>
           </Dialog>
         </div>
