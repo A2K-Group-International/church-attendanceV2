@@ -27,6 +27,47 @@ export default function VolunteerAnnouncementsInfo() {
   const [commentError, setCommentError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
+  const handleReaction = async (postId, reaction) => {
+    try {
+      // Check if the user has already reacted to the post
+      const { data, error } = await supabase
+        .from("reactions")
+        .select("*")
+        .eq("post_id", postId)
+        .eq("user_id", userId); // Assuming you have userId available
+
+      if (error) throw error;
+
+      if (data.length > 0) {
+        // User has already reacted
+        const existingReaction = data[0];
+
+        if (existingReaction.reaction_type === reaction) {
+          // Remove reaction if it's the same as the clicked one
+          await supabase
+            .from("reactions")
+            .delete()
+            .eq("reaction_id", existingReaction.reaction_id);
+        } else {
+          // Update reaction if it's different
+          await supabase
+            .from("reactions")
+            .update({ reaction_type: reaction })
+            .eq("reaction_id", existingReaction.reaction_id);
+        }
+      } else {
+        // User has not reacted yet, insert a new reaction
+        await supabase
+          .from("reactions")
+          .insert([
+            { post_id: postId, user_id: userId, reaction_type: reaction },
+          ]);
+      }
+    } catch (error) {
+      console.error("Error handling reaction:", error);
+    }
+  };
+
   const fetchPostDetails = useCallback(async () => {
     if (!userData) return;
 
@@ -156,6 +197,7 @@ export default function VolunteerAnnouncementsInfo() {
             post={post}
             userData={userData}
             getInitials={getInitials}
+            handleReaction={handleReaction}
           />
 
           {/* Comments Section */}

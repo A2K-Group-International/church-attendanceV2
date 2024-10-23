@@ -1,16 +1,23 @@
-import React, { useState } from "react"; // Import useState
+import React, { useState } from "react";
 import { Button } from "../../../shadcn/button";
-import { DialogFooter } from "../../../shadcn/dialog"; // Remove DialogClose here
+import { DialogFooter } from "../../../shadcn/dialog";
 import { Input } from "../../../shadcn/input";
 import { Textarea } from "../../../shadcn/textarea";
 import { Label } from "../../../shadcn/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../shadcn/select"; // Import ShadCN select
 
 const AnnouncementForm = ({
   newAnnouncement,
   setNewAnnouncement,
   handleSubmit,
   setUploadedImage,
-  error, // Add error prop to receive error messages
+  error,
 }) => {
   const [imagePreview, setImagePreview] = useState(null); // State for image preview
 
@@ -49,6 +56,7 @@ const AnnouncementForm = ({
           className="w-full"
         />
       </div>
+
       <div className="space-y-2">
         <Label htmlFor="post_content">Announcement Content</Label>
         <Textarea
@@ -65,12 +73,13 @@ const AnnouncementForm = ({
           className="h-40 w-full"
         />
       </div>
+
       <div className="space-y-2">
         <Label htmlFor="image_upload">Upload Image</Label>
         <Input
           type="file"
           id="image_upload"
-          accept="image/jpeg,image/png,image/gif" // Accept only image files
+          accept="image/jpeg,image/png,image/gif"
           onChange={handleImageUpload}
           className="w-full"
         />
@@ -84,9 +93,28 @@ const AnnouncementForm = ({
           </div>
         )}
       </div>
+
+      {/* Privacy option using ShadCN Select */}
+      <div className="space-y-2">
+        <Label htmlFor="announcement_privacy">Announcement Privacy</Label>
+        <Select
+          value={newAnnouncement.privacy}
+          onValueChange={(value) =>
+            setNewAnnouncement({ ...newAnnouncement, privacy: value })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select privacy" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="public">Public</SelectItem>
+            <SelectItem value="private">Private</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       <DialogFooter>
-        <Button type="submit">Post Announcement</Button>{" "}
-        {/* No DialogClose wrapping */}
+        <Button type="submit">Post Announcement</Button>
       </DialogFooter>
     </form>
   );
