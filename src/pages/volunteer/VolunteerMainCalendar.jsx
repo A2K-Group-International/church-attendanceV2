@@ -5,11 +5,14 @@ import timeGridPlugin from "@fullcalendar/timegrid"; // Import the TimeGrid plug
 import supabase from "@/api/supabase"; // Your Supabase client
 import VolunteerSidebar from "@/components/volunteer/VolunteerSidebar"; // Sidebar component
 import useUserData from "@/api/useUserData";
+import EventDialog from "@/components/volunteer/EventDialog"; // Dialog component
 
 const VolunteerMainCalendar = () => {
   const [events, setEvents] = useState([]); // State to store fetched events
   const [loading, setLoading] = useState(false); // Loading state
   const [error, setError] = useState(null); // Error state
+  const [selectedEvent, setSelectedEvent] = useState(null); // State for selected event
+  const [isDialogOpen, setIsDialogOpen] = useState(false); // State to control dialog visibility
 
   const { userData } = useUserData();
 
@@ -33,10 +36,9 @@ const VolunteerMainCalendar = () => {
 
       if (error) throw error;
 
-      console.log(fetchedData);
-
       // Transform data into the format required by FullCalendar
       const calendarEvents = fetchedData.map((event) => ({
+        id: event.id, // Add an ID for tracking the event
         title: event.name, // Set event title
         start: event.schedule_date, // Use schedule_date for start time
         end: event.schedule_date, // Set end time same as start time for all-day events
@@ -56,21 +58,35 @@ const VolunteerMainCalendar = () => {
     fetchEvents(); // Fetch events when the component mounts
   }, [fetchEvents]);
 
+  // Handle event click
+  const handleEventClick = (clickInfo) => {
+    setSelectedEvent({
+      title: clickInfo.event.title,
+      start: clickInfo.event.start.toLocaleString(),
+      end: clickInfo.event.end ? clickInfo.event.end.toLocaleString() : "",
+      description: clickInfo.event.extendedProps.description,
+    });
+    setIsDialogOpen(true);
+  };
+
+  // Close the dialog
+  const closeDialog = () => {
+    setIsDialogOpen(false);
+    setSelectedEvent(null);
+  };
+
   return (
     <VolunteerSidebar>
       <div className="flex h-screen">
         <div className="flex-1 overflow-auto p-4">
-          {" "}
-          {/* Added overflow-auto for scrolling */}
           {loading && <p>Loading events...</p>}
           {error && <p>{error}</p>}
           <div className="max-h-full max-w-full">
-            {" "}
-            {/* Set max width and height */}
             <FullCalendar
               plugins={[dayGridPlugin, timeGridPlugin]} // Include necessary plugins
               initialView="dayGridMonth" // Set the default view to Month view
               events={events} // Pass the fetched events
+              eventClick={handleEventClick} // Handle event click
               headerToolbar={{
                 left: "prev,next today", // Navigation buttons
                 center: "title", // Title in the center
@@ -79,6 +95,12 @@ const VolunteerMainCalendar = () => {
               style={{ height: "100%", maxHeight: "80vh" }} // Adjust max height to fit screen
             />
           </div>
+          {/* Dialog for selected event */}
+          <EventDialog
+            open={isDialogOpen}
+            onClose={closeDialog}
+            event={selectedEvent}
+          />
         </div>
       </div>
     </VolunteerSidebar>
