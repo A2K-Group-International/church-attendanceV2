@@ -25,6 +25,7 @@ import CategoryPage from "./pages/admin/CategoryPage";
 import VolunteerClasses from "./pages/volunteer/VolunteerClasses";
 import VolunteerClass from "./pages/volunteer/VolunteerClass";
 import VolunteerUpload from "./pages/volunteer/VolunteerUpload";
+import VolunteerMeetingPage from "./pages/volunteer/VolunteerMeetingPage";
 import VolunteerRequests from "./pages/volunteer/VolunteerRequests";
 import { Toaster } from "./shadcn/toaster";
 import NewSchedule from "./pages/admin/EventPage";
@@ -70,7 +71,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-         <Route
+        <Route
           path="/parishioner-request"
           element={
             <ProtectedRoute>
@@ -107,6 +108,14 @@ function App() {
           element={
             <ProtectedRoute>
               <MeetingPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer-meeting"
+          element={
+            <ProtectedRoute>
+              <VolunteerMeetingPage />
             </ProtectedRoute>
           }
         />
