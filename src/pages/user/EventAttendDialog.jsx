@@ -19,6 +19,7 @@ import {
 } from "../../shadcn/dialog";
 import supabase from "../../api/supabase";
 import { useUser } from "../../authentication/useUser";
+import moment from 'moment'
 
 export default function EventAttendDialog({ open, onClose, eventData }) {
   const user = useUser(); // Retrieve user data from the custom hook
@@ -118,24 +119,24 @@ export default function EventAttendDialog({ open, onClose, eventData }) {
       // Loop through each selected family member and insert data
       for (const member of selectedMembers) {
         const { data, error } = await supabase
-          .from("attendance_pending")
+          .from("new_attendance")
           .insert({
-            guardian_first_name:
+            main_applicant_first_name:
               member.guardian === false ? guardianData.user_name : "N/A",
-            guardian_last_name:
+            main_applicant_last_name:
               member.guardian === false ? guardianData.user_last_name : null,
-            guardian_telephone:
+            telephone:
               member.guardian === false ? guardianData.user_contact : "N/A",
-            children_first_name: member.family_first_name,
-            children_last_name: member.family_last_name,
+            attendee_first_name: member.family_first_name,
+            attendee_last_name: member.family_last_name,
             has_attended: false, // Default attendance status
-            preferred_time: selectedTime,
-            schedule_day: eventData.schedule, // Example: assuming schedule_day is part of eventData
+            selected_time: selectedTime,
+            selected_event_date: moment(eventData.schedule).format('YYYY-MM-DD'), // Example: assuming schedule_day is part of eventData
             attendance_type: null, // Modify if needed
-            attendance_code: eventData.attendance_code, // Assuming eventData has this field
-            children_age: member.family_age, // Assuming family member has an age field
+            // attendance_code: eventData.attendance_code, // Assuming eventData has this field
+            // children_age: member.family_age, // Assuming family member has an age field
             selected_event: eventData.name, // Event name from eventData
-            schedule_id: eventData.schedule_id, // Assuming eventData has a schedule ID field
+            // schedule_id: eventData.schedule_id, // Assuming eventData has a schedule ID field
           });
 
         if (error) {
