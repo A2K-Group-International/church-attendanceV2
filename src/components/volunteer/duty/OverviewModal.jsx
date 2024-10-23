@@ -2,8 +2,6 @@ import React from "react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogDescription,
   DialogFooter,
   DialogClose,
 } from "../../../shadcn/dialog"; // Import Shadcn Dialog components
@@ -38,14 +36,15 @@ const OverviewModal = ({ isOpen, onRequestClose, duties }) => {
         title: duty.duty_name,
         start: startTime, // Correctly set start date-time
         end: endTime, // Correctly set end date-time
-        allDay: false, // Set to true if it's an all-day event
+        allDay: false, // Set to false for time-based events
       };
     }),
   );
 
   return (
     <Dialog open={isOpen} onOpenChange={onRequestClose}>
-      <DialogContent className="sm:max-w-[800px]">
+      <DialogContent className="sm:max-w-[1000px]">
+        {/* Increased width */}
         {/* FullCalendar Section */}
         <div className="py-4">
           <FullCalendar
@@ -57,10 +56,19 @@ const OverviewModal = ({ isOpen, onRequestClose, duties }) => {
               center: "title",
               right: "timeGridWeek,timeGridDay", // Only week and day views
             }}
-            height="500px" // Adjust height as needed
+            height="600px" // Increased height for better visibility
+            eventTimeFormat={{
+              hour: "2-digit", // 2-digit hour
+              minute: "2-digit", // 2-digit minute
+              meridiem: "short", // Short AM/PM
+            }} // Format time to include AM/PM
+            slotLabelFormat={{
+              hour: "2-digit", // Display 2-digit hour
+              minute: "2-digit", // Display 2-digit minute
+              meridiem: "short", // Display AM/PM
+            }} // Ensure the time labels include AM/PM
           />
         </div>
-
         {/* Dialog Footer with Actions */}
         <DialogFooter className="flex justify-end">
           <DialogClose asChild>

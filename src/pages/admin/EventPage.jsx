@@ -20,6 +20,7 @@ import {
   DialogTrigger,
   DialogClose,
 } from "../../shadcn/dialog";
+
 import {
   Popover,
   PopoverContent,
@@ -63,10 +64,15 @@ import { fetchCategory, fetchSubCategory } from "../../api/userService";
 import CreateMeeting from "./CreateMeeting";
 import { Textarea } from "../../shadcn/textarea";
 import CreatePoll from "./CreatePoll";
+import { useNavigate } from "react-router-dom";
 
 const headers = ["Event Name", "Date", "Time", "Description"];
 
 export default function EventPage() {
+  const navigate = useNavigate();
+  const handleNavigation = () => {
+    navigate("/admin-calendar");
+  };
   const [time, setTime] = useState([]); // event time data
   const [selectedDate, setSelectedDate] = useState(null); // event date data
   const [isSubmitted, setIsSubmitted] = useState(false); // for disabling the button submission
@@ -92,35 +98,6 @@ export default function EventPage() {
     formState: { errors },
     watch,
   } = useForm(); // react-hook-forms
-
-  const fetchGroupInfo = useCallback(async () => {
-    if (!userData) return;
-
-    // Check if userData.group_id is null or undefined
-    if (userData.group_id == null) {
-      console.log("NO GROUP");
-      setError("You are not a member of any group. Please contact an admin.");
-      setLoading(false); // Stop loading immediately
-      return; // Exit early
-    }
-
-    try {
-      setGroupId(userData.group_id);
-      setUserId(userData.user_id);
-      const { data: groupData, error: groupError } = await supabase
-        .from("group_list")
-        .select("*")
-        .eq("group_id", userData.group_id);
-
-      if (groupError) throw groupError;
-      setGroupData(groupData);
-    } catch (err) {
-      setError("Error fetching group information. Please try again.");
-      console.error("Error fetching group information:", err);
-    } finally {
-      setLoading(false); // Ensure loading is set to false
-    }
-  }, [userData]);
 
   const onSubmit = async (data) => {
     setIsSubmitted(true);
@@ -229,13 +206,8 @@ export default function EventPage() {
   }, [currentPage, itemsPerPage]);
 
   useEffect(() => {
-    fetchGroupInfo;
     fetchEvents();
-  }, [currentPage, fetchEvents, userData]);
-  useEffect(() => {
-    console.log("hello");
-    fetchGroupInfo;
-  }, [userData]);
+  }, [currentPage, fetchEvents]);
 
   // Format the time
   const formatTime = (timeString) => {
@@ -840,6 +812,7 @@ export default function EventPage() {
             </form>
           </DialogContent>
         </Dialog>
+        <Button onClick={handleNavigation}>Overview</Button>
 
         {/* <CreateMeeting />
             <CreatePoll /> */}

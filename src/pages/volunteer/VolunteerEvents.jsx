@@ -12,6 +12,7 @@ import { Input } from "../../shadcn/input";
 import { Label } from "../../shadcn/label";
 import { Calendar } from "../../shadcn/calendar";
 import EventsOverviewModal from "../../components/volunteer/schedule/EventsOverviewModal";
+import CalendarDialog from "@/components/volunteer/schedule/CalendarDialog";
 import {
   Dialog,
   DialogContent,
@@ -905,8 +906,10 @@ export default function EventPage() {
           </Pagination>
         </>
       )}
-      <EventsOverviewModal
+      <CalendarDialog
+        userData={userData}
         isOpen={isEventsModalOpen}
+        onClose={() => setIsEventsModalOpen(false)}
         onRequestClose={() => setIsEventsModalOpen(false)}
         events={events} // Pass the array of event data
       />
