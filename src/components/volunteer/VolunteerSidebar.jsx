@@ -33,7 +33,6 @@ const volunteerLinks = [
     icon: CalendarIcon,
   },
   { link: "/volunteer-duties", label: "Rota", icon: PersonIcon },
-
   { link: "/volunteer-upload", label: "Upload", icon: UploadIcon },
   { link: "/volunteer-profile", label: "Profile", icon: PersonIcon },
   { link: "/volunteer-classes", label: "Classes", icon: blackboard },
@@ -65,15 +64,11 @@ export default function VolunteerSidebar({ children }) {
       <div className="hidden lg:block lg:w-64 lg:shrink-0 lg:border-r lg:bg-gray-100 dark:lg:bg-gray-800">
         <div className="flex h-full flex-col justify-between px-4 py-6">
           <div className="space-y-6">
-            {/* Welcome Message */}
-            {userData && (
-              <div className="mt-2 flex flex-col">
-                <span className="text-lg font-semibold">Welcome,</span>
-                <span className="text-xl font-bold">
-                  {userData.user_name} {userData.user_last_name}
-                </span>
-              </div>
-            )}
+            {/* Welcome Message Removed */}
+            <div className="mt-2 flex h-16 flex-col">
+              <span className="text-lg font-semibold">Welcome, Volunteer</span>
+            </div>
+
             <nav className="space-y-1">
               <ul>
                 {volunteerLinks.map(({ link, label, icon }) => (
@@ -132,15 +127,13 @@ export default function VolunteerSidebar({ children }) {
               <SheetContent side="right" className="w-64">
                 <div className="flex h-full flex-col justify-between px-4 py-6">
                   <div className="space-y-6">
-                    {/* Welcome Message for Small Screens */}
-                    {userData && (
-                      <div className="mt-2 flex flex-col">
-                        <span className="text-lg font-semibold">Welcome,</span>
-                        <span className="text-xl font-bold">
-                          {userData.user_name} {userData.user_last_name}
-                        </span>
-                      </div>
-                    )}
+                    {/* Welcome Message Removed for Small Screens */}
+                    <div className="mt-2 flex h-16 flex-col">
+                      <span className="text-lg font-semibold">
+                        Welcome, Volunteer
+                      </span>
+                    </div>
+
                     <nav className="space-y-1">
                       <ul>
                         {volunteerLinks.map(({ link, label, icon }) => (
