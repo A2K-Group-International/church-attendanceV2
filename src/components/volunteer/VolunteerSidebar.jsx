@@ -32,7 +32,7 @@ const volunteerLinks = [
     label: "Event Calendar",
     icon: CalendarIcon,
   },
-  { link: "/volunteer-duties", label: "Rota Managemnt", icon: PersonIcon },
+  { link: "/volunteer-duties", label: "Rota Management", icon: PersonIcon },
   { link: "/volunteer-upload", label: "Upload", icon: UploadIcon },
   { link: "/volunteer-profile", label: "Profile", icon: PersonIcon },
   { link: "/volunteer-classes", label: "Classes", icon: blackboard },

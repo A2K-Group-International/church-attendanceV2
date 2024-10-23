@@ -77,11 +77,15 @@ const VolunteerMainCalendar = () => {
 
   return (
     <VolunteerSidebar>
-      <div className="flex h-screen">
+      <div className="flex h-screen overflow-hidden">
+        {" "}
+        {/* Container for sidebar and calendar */}
         <div className="flex-1 overflow-auto p-4">
+          {" "}
+          {/* Content area */}
           {loading && <p>Loading events...</p>}
           {error && <p>{error}</p>}
-          <div className="max-h-full max-w-full">
+          <div className="h-full">
             <FullCalendar
               plugins={[dayGridPlugin, timeGridPlugin]} // Include necessary plugins
               initialView="dayGridMonth" // Set the default view to Month view
@@ -92,7 +96,7 @@ const VolunteerMainCalendar = () => {
                 center: "title", // Title in the center
                 right: "dayGridMonth,timeGridWeek,timeGridDay", // Month, week, and day views
               }}
-              style={{ height: "100%", maxHeight: "80vh" }} // Adjust max height to fit screen
+              style={{ height: "70vh", maxHeight: "80vh" }} // Limit height to fit screen better
             />
           </div>
           {/* Dialog for selected event */}

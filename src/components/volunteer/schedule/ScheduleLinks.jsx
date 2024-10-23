@@ -5,7 +5,7 @@ import VolunteerSidebar from "../VolunteerSidebar";
 
 const buttonLinks = [
   { link: "/volunteer-schedule", label: "Event" },
-  { link: "#", label: "Meeting" },
+  { link: "/volunteer-meeting", label: "Meeting" },
   { link: "#", label: "Poll" },
 ];
 
@@ -15,7 +15,9 @@ export default function ScheduleLinks({ children }) {
       <main className="mx-auto max-w-7xl p-4 lg:p-8">
         <div className="mb-2 md:flex md:justify-between">
           <div className="mb-8">
-            <h1 className="mb-2 text-3xl font-bold">Volunter Event Schedule</h1>
+            <h1 className="mb-2 text-3xl font-bold">
+              Volunteer Event Schedule
+            </h1>
             <p className="text-muted-foreground">Manage Schedules.</p>
           </div>
         </div>
