@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
+import moment from "moment"; // Import moment.js for date manipulation
 
 const DutyCard = ({
   duty,
@@ -33,11 +34,11 @@ const DutyCard = ({
     };
   }, []);
 
-  // Helper function to format time to HH:MM
+  // Helper function to format time to HH:MM AM/PM
   const formatTime = (timeString) => {
     if (!timeString) return "Not set"; // Return default if no time is set
-    const date = new Date(`1970-01-01T${timeString}Z`); // Assuming time is in HH:mm format
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const formattedTime = moment(timeString, "HH:mm").format("hh:mm A");
+    return formattedTime;
   };
 
   // Helper function to display days with different colors

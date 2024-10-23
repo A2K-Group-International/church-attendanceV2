@@ -1,8 +1,7 @@
-// api/useAnnouncements.js
 import { useState, useEffect, useCallback } from "react";
 import supabase from "./supabase";
 
-const useAnnouncements = (groupId) => {
+const useAnnouncements = (groupId, visibility) => {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -10,12 +9,18 @@ const useAnnouncements = (groupId) => {
   const fetchAnnouncements = useCallback(async () => {
     setLoading(true);
     setError(null);
-    console.log(groupId);
+    console.log(groupId, visibility);
 
     try {
-      // Fetch announcements based on groupId or fetch all if no groupId is provided
+      // Start the query for announcements
       let query = supabase.from("post_data").select("*");
 
+      // Check visibility and filter accordingly
+      if (visibility === "public") {
+        query = query.eq("public", true);
+      }
+
+      // Filter by groupId if specified
       if (groupId) {
         query = query.eq("post_group_id", groupId);
       }
@@ -33,7 +38,7 @@ const useAnnouncements = (groupId) => {
       setLoading(false);
       console.log("External fetch completed!");
     }
-  }, [groupId]);
+  }, [groupId, visibility]); // Add visibility as a dependency
 
   useEffect(() => {
     fetchAnnouncements();

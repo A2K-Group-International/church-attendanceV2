@@ -1,6 +1,7 @@
 import ScheduleLinks from "../../components/volunteer/schedule/ScheduleLinks";
 import { useState, useEffect, useCallback } from "react";
 import supabase from "../../api/supabase";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import moment from "moment";
 import QRCode from "react-qr-code";
 import { useForm } from "react-hook-form";
@@ -10,6 +11,8 @@ import { Button } from "../../shadcn/button";
 import { Input } from "../../shadcn/input";
 import { Label } from "../../shadcn/label";
 import { Calendar } from "../../shadcn/calendar";
+import EventsOverviewModal from "../../components/volunteer/schedule/EventsOverviewModal";
+import CalendarDialog from "@/components/volunteer/schedule/CalendarDialog";
 import {
   Dialog,
   DialogContent,
@@ -67,8 +70,9 @@ import useUserData from "@/api/useUserData";
 const headers = ["Event Name", "Date", "Time", "Description"];
 
 export default function EventPage() {
+  const navigate = useNavigate(); // Initialize the navigate function
   const { userData } = useUserData(); // Destructure userData directly
-
+  const [isEventsModalOpen, setIsEventsModalOpen] = useState(false); // event time data
   const [time, setTime] = useState([]); // event time data
   const [selectedDate, setSelectedDate] = useState(null); // event date data
   const [isSubmitted, setIsSubmitted] = useState(false); // for disabling the button submission
@@ -94,6 +98,40 @@ export default function EventPage() {
     formState: { errors },
     watch,
   } = useForm(); // react-hook-forms
+
+  const fetchGroupInfo = useCallback(async () => {
+    if (!userData) return;
+
+    // Check if userData.group_id is null or undefined
+    if (userData.group_id == null) {
+      console.log("NO GROUP");
+      setError("You are not a member of any group. Please contact an admin.");
+      setLoading(false); // Stop loading immediately
+      return; // Exit early
+    }
+
+    try {
+      setGroupId(userData.group_id);
+      setUserId(userData.user_id);
+      const { data: groupData, error: groupError } = await supabase
+        .from("group_list")
+        .select("*")
+        .eq("group_id", userData.group_id);
+
+      if (groupError) throw groupError;
+      setGroupData(groupData);
+    } catch (err) {
+      setError("Error fetching group information. Please try again.");
+      console.error("Error fetching group information:", err);
+    } finally {
+      setLoading(false); // Ensure loading is set to false
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    console.log("hello");
+    fetchGroupInfo;
+  }, [userData]);
 
   const onSubmit = async (data) => {
     setIsSubmitted(true);
@@ -159,6 +197,7 @@ export default function EventPage() {
       console.error("Unexpected error:", err);
     }
   };
+  console.log(events);
 
   const resetForm = () => {
     reset();
@@ -619,7 +658,7 @@ export default function EventPage() {
           open={isDialogOpen}
           onOpenChange={(open) => {
             if (open) {
-              resetForm(); // Call your form reset function here
+              resetForm();
             }
             setIsDialogOpen(open);
           }}
@@ -819,6 +858,14 @@ export default function EventPage() {
             </form>
           </DialogContent>
         </Dialog>
+        <Button
+          onClick={() => {
+            console.log("Navigating to Volunteer Main Calendar...");
+            setIsEventsModalOpen(true);
+          }}
+        >
+          Overview
+        </Button>
         {/* <CreateMeeting />
             <CreatePoll /> */}
       </div>
@@ -859,6 +906,13 @@ export default function EventPage() {
           </Pagination>
         </>
       )}
+      <CalendarDialog
+        userData={userData}
+        isOpen={isEventsModalOpen}
+        onClose={() => setIsEventsModalOpen(false)}
+        onRequestClose={() => setIsEventsModalOpen(false)}
+        events={events} // Pass the array of event data
+      />
     </ScheduleLinks>
   );
 }

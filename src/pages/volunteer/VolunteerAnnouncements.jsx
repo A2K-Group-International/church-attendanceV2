@@ -45,7 +45,7 @@ export default function VolunteerAnnouncements() {
     loading: announcementsLoading,
     error: announcementsError,
     fetchAnnouncements,
-  } = useAnnouncements(groupId);
+  } = useAnnouncements(groupId, null); // Fetch all announcements
 
   const fetchGroupInfo = useCallback(async () => {
     if (!userData) return;
@@ -211,6 +211,7 @@ export default function VolunteerAnnouncements() {
           group_name: groupName,
           user_name: `${userData.user_name} ${userData.user_last_name}`,
           uploaded_image: imageUrl, // Use the publicUrl variable here
+          public: newAnnouncement.privacy === "public", // Use the privacy field to set the "public" column
         },
       ]);
 

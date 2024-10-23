@@ -1,20 +1,23 @@
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogClose,
+} from "../../../shadcn/dialog"; // Import Shadcn Dialog components
+
 import React, { useEffect, useState, useCallback } from "react";
 import FullCalendar from "@fullcalendar/react"; // Import FullCalendar
 import dayGridPlugin from "@fullcalendar/daygrid"; // Import the DayGrid plugin for month view
 import timeGridPlugin from "@fullcalendar/timegrid"; // Import the TimeGrid plugin for week and day views
 import supabase from "@/api/supabase"; // Your Supabase client
-import VolunteerSidebar from "@/components/volunteer/VolunteerSidebar"; // Sidebar component
-import useUserData from "@/api/useUserData";
 import EventDialog from "@/components/volunteer/EventDialog"; // Dialog component
 
-const VolunteerMainCalendar = () => {
+const CalendarDialog = ({ isOpen, onClose, userData }) => {
   const [events, setEvents] = useState([]); // State to store fetched events
   const [loading, setLoading] = useState(false); // Loading state
   const [error, setError] = useState(null); // Error state
   const [selectedEvent, setSelectedEvent] = useState(null); // State for selected event
-  const [isDialogOpen, setIsDialogOpen] = useState(false); // State to control dialog visibility
-
-  const { userData } = useUserData();
+  const [isEventDialogOpen, setIsEventDialogOpen] = useState(false); // State to control event dialog visibility
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
@@ -30,7 +33,7 @@ const VolunteerMainCalendar = () => {
 
     try {
       const { data: fetchedData, error } = await supabase
-        .from("schedule") // Make sure to specify your table name
+        .from("schedule") // Specify your table name
         .select("*") // Fetch all columns
         .eq("group_id", groupId); // Use groupId for filtering
 
@@ -66,49 +69,46 @@ const VolunteerMainCalendar = () => {
       end: clickInfo.event.end ? clickInfo.event.end.toLocaleString() : "",
       description: clickInfo.event.extendedProps.description,
     });
-    setIsDialogOpen(true);
+    setIsEventDialogOpen(true);
   };
 
-  // Close the dialog
-  const closeDialog = () => {
-    setIsDialogOpen(false);
+  // Close the event dialog
+  const closeEventDialog = () => {
+    setIsEventDialogOpen(false);
     setSelectedEvent(null);
   };
 
   return (
-    <VolunteerSidebar>
-      <div className="flex h-screen overflow-hidden">
-        {" "}
-        {/* Container for sidebar and calendar */}
-        <div className="flex-1 overflow-auto p-4">
-          {" "}
-          {/* Content area */}
-          {loading && <p>Loading events...</p>}
-          {error && <p>{error}</p>}
-          <div className="h-full">
-            <FullCalendar
-              plugins={[dayGridPlugin, timeGridPlugin]} // Include necessary plugins
-              initialView="dayGridMonth" // Set the default view to Month view
-              events={events} // Pass the fetched events
-              eventClick={handleEventClick} // Handle event click
-              headerToolbar={{
-                left: "prev,next today", // Navigation buttons
-                center: "title", // Title in the center
-                right: "dayGridMonth,timeGridWeek,timeGridDay", // Month, week, and day views
-              }}
-              style={{ height: "70vh", maxHeight: "80vh" }} // Limit height to fit screen better
-            />
-          </div>
-          {/* Dialog for selected event */}
-          <EventDialog
-            open={isDialogOpen}
-            onClose={closeDialog}
-            event={selectedEvent}
-          />
-        </div>
-      </div>
-    </VolunteerSidebar>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="w-full max-w-4xl">
+        <h2 className="mb-4 text-xl font-semibold">Calendar</h2>
+        {loading && <p>Loading events...</p>}
+        {error && <p>{error}</p>}
+        <FullCalendar
+          plugins={[dayGridPlugin, timeGridPlugin]} // Include necessary plugins
+          initialView="dayGridMonth" // Set the default view to Month view
+          events={events} // Pass the fetched events
+          eventClick={handleEventClick} // Handle event click
+          headerToolbar={{
+            left: "prev,next today", // Navigation buttons
+            center: "title", // Title in the center
+            right: "dayGridMonth,timeGridWeek,timeGridDay", // Month, week, and day views
+          }}
+          style={{ height: "70vh", maxHeight: "80vh" }} // Limit height to fit screen better
+        />
+        <DialogFooter>
+          <DialogClose>Close</DialogClose>
+        </DialogFooter>
+      </DialogContent>
+
+      {/* Dialog for selected event */}
+      <EventDialog
+        open={isEventDialogOpen}
+        onClose={closeEventDialog}
+        event={selectedEvent}
+      />
+    </Dialog>
   );
 };
 
-export default VolunteerMainCalendar;
+export default CalendarDialog;

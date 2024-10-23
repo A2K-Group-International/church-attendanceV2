@@ -25,6 +25,7 @@ import CategoryPage from "./pages/admin/CategoryPage";
 import VolunteerClasses from "./pages/volunteer/VolunteerClasses";
 import VolunteerClass from "./pages/volunteer/VolunteerClass";
 import VolunteerUpload from "./pages/volunteer/VolunteerUpload";
+import VolunteerMeetingPage from "./pages/volunteer/VolunteerMeetingPage";
 import VolunteerRequests from "./pages/volunteer/VolunteerRequests";
 import { Toaster } from "./shadcn/toaster";
 import NewSchedule from "./pages/admin/EventPage";
@@ -32,6 +33,7 @@ import EventPage from "./pages/admin/EventPage";
 import MeetingPage from "./pages/admin/MeetingPage";
 import ParishionerClass from "./pages/user/ParishionerClass";
 import ParishionerClasses from "./pages/user/ParishionerClasses";
+import ParishionerRequest from "./pages/user/ParishionerRequest";
 
 function App() {
   return (
@@ -72,6 +74,14 @@ function App() {
           }
         />
         <Route
+          path="/parishioner-request"
+          element={
+            <ProtectedRoute>
+              <ParishionerRequest />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/volunteers"
           element={
             <ProtectedRoute>
@@ -100,6 +110,14 @@ function App() {
           element={
             <ProtectedRoute>
               <MeetingPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/volunteer-meeting"
+          element={
+            <ProtectedRoute>
+              <VolunteerMeetingPage />
             </ProtectedRoute>
           }
         />

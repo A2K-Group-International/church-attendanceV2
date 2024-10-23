@@ -45,15 +45,13 @@ export default function UserSidebar({ children }) {
       <div className="hidden lg:block lg:w-64 lg:shrink-0 lg:border-r lg:bg-gray-100 dark:lg:bg-gray-800">
         <div className="flex h-full flex-col justify-between px-4 py-6">
           <div className="space-y-6">
-            {/* Welcome Message */}
-            {userData && (
-              <div className="mt-2 flex flex-col">
-                <span className="text-lg font-semibold">Welcome,</span>
-                <span className="text-xl font-bold">
-                  {userData.user_name} {userData.user_last_name}
-                </span>
-              </div>
-            )}
+            {/* Welcome Message Removed */}
+            <div className="mt-2 flex h-16 flex-col">
+              <span className="text-lg font-semibold">
+                Welcome, Parishioner
+              </span>
+            </div>
+
             <nav className="space-y-1">
               <ul>
                 {userLinks.map(({ link, label, icon }) => (
@@ -71,7 +69,7 @@ export default function UserSidebar({ children }) {
               <Button
                 onClick={handleSwitchToVolunteer}
                 variant="outline"
-                className="w-full" // Add full width for better layout
+                className="w-full"
               >
                 Switch to Volunteer
               </Button>
@@ -82,7 +80,7 @@ export default function UserSidebar({ children }) {
               <Button
                 onClick={handleReturnToAdmin}
                 variant="outline"
-                className="w-full" // Add full width for better layout
+                className="w-full"
               >
                 Return to Admin
               </Button>
@@ -114,15 +112,11 @@ export default function UserSidebar({ children }) {
               <SheetContent side="right" className="w-64">
                 <div className="flex h-full flex-col justify-between px-4 py-6">
                   <div className="space-y-6">
-                    {/* Welcome Message for Small Screens */}
-                    {userData && (
-                      <div className="mt-2 flex flex-col">
-                        <span className="text-lg font-semibold">Welcome,</span>
-                        <span className="text-xl font-bold">
-                          {userData.user_name} {userData.user_last_name}
-                        </span>
-                      </div>
-                    )}
+                    {/* Welcome Message Removed for Small Screens */}
+                    <div className="mt-2 flex h-16 flex-col">
+                      <span className="text-lg font-semibold">Welcome,</span>
+                    </div>
+
                     <nav className="space-y-1">
                       <ul>
                         {userLinks.map(({ link, label, icon }) => (
@@ -140,7 +134,7 @@ export default function UserSidebar({ children }) {
                       <Button
                         onClick={handleSwitchToVolunteer}
                         variant="outline"
-                        className="w-full" // Add full width for better layout
+                        className="w-full"
                       >
                         Switch to Volunteer
                       </Button>
@@ -151,7 +145,7 @@ export default function UserSidebar({ children }) {
                       <Button
                         onClick={handleReturnToAdmin}
                         variant="outline"
-                        className="w-full" // Add full width for better layout
+                        className="w-full"
                       >
                         Return to Admin
                       </Button>
@@ -165,8 +159,7 @@ export default function UserSidebar({ children }) {
           </div>
         </header>
         {children}
-        {error && <div className="error-message">{error}</div>}{" "}
-        {/* Display error message if any */}
+        {error && <div className="error-message">{error}</div>}
       </div>
     </div>
   );
