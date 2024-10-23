@@ -30,6 +30,8 @@ import { Toaster } from "./shadcn/toaster";
 import NewSchedule from "./pages/admin/EventPage";
 import EventPage from "./pages/admin/EventPage";
 import MeetingPage from "./pages/admin/MeetingPage";
+import ParishionerClass from "./pages/user/ParishionerClass";
+import ParishionerClasses from "./pages/user/ParishionerClasses";
 
 function App() {
   return (
@@ -219,6 +221,22 @@ function App() {
           element={
             <ProtectedRoute>
               <VolunteerClasses />
+            </ProtectedRoute>
+          }
+        />
+          <Route
+          path="/parishioner-classes"
+          element={
+            <ProtectedRoute>
+              <ParishionerClasses />
+            </ProtectedRoute>
+          }
+        />
+              <Route
+          path="/parishioner-classes:id"
+          element={
+            <ProtectedRoute>
+              <ParishionerClasses />
             </ProtectedRoute>
           }
         />
