@@ -1,4 +1,3 @@
-// src/hooks/useUserData.js
 import { useEffect, useState } from "react";
 import supabase from "./supabase";
 import { useUser } from "../authentication/useUser";

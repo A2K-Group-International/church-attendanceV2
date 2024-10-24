@@ -218,100 +218,100 @@ export default function VolunteerUploadPage() {
   };
 
   return (
-    <VolunteerSidebar>
-      <main className="flex h-screen flex-col lg:flex-row">
-        {/* Main Content */}
-        <div className="w-full space-y-6 overflow-auto p-4 lg:w-3/4 lg:p-8">
-          <div>
-            <h1 className="text-2xl font-bold">{groupName} Files</h1>
-            {/* Display group name */}
-          </div>
-          {/* File Upload Section */}
-          <FileUploadSection
-            onFileSelect={handleFileSelect}
-            onUpload={handleUpload}
-            loading={loadingUpload}
-            uploadError={uploadError}
-            selectedFile={selectedFile} // Pass selectedFile state
-          />
+    // <VolunteerSidebar>
+    <main className="flex h-screen flex-col lg:flex-row">
+      {/* Main Content */}
+      <div className="w-full space-y-6 overflow-auto p-4 lg:w-3/4 lg:p-8">
+        <div>
+          <h1 className="text-2xl font-bold">{groupName} Files</h1>
+          {/* Display group name */}
+        </div>
+        {/* File Upload Section */}
+        <FileUploadSection
+          onFileSelect={handleFileSelect}
+          onUpload={handleUpload}
+          loading={loadingUpload}
+          uploadError={uploadError}
+          selectedFile={selectedFile} // Pass selectedFile state
+        />
 
-          {/* Main layout for images and viewer */}
-          <div className="flex flex-col lg:flex-row lg:space-x-4">
-            {/* Uploaded Images Section */}
-            <div className="flex h-96 flex-col lg:w-1/3">
-              <h2 className="mb-2 text-xl font-semibold">📸 Uploaded Images</h2>
-              <div className="flex-grow overflow-auto rounded-md border">
-                {loadingFetch ? (
-                  <p className="py-4 text-center">Loading images...</p> // You can replace this with a spinner if you have one.
-                ) : (
-                  <UploadedImagesSection
-                    images={uploadedImages}
-                    onImageSelect={setSelectedImage}
-                    onRename={(item) => openRenameModal(item, "Images")}
-                    onDelete={handleDelete}
-                    loadingDelete={loadingDelete}
-                  />
-                )}
-              </div>
-            </div>
-
-            {/* Image Viewer */}
-            <div className="flex h-96 flex-col lg:w-2/3">
-              <h2 className="mb-2 text-xl font-semibold">Image Viewer</h2>
-              <div className="flex-grow overflow-auto rounded-md border">
-                {selectedImage ? (
-                  <img
-                    src={selectedImage}
-                    alt={selectedImage.name}
-                    className="h-full w-full object-contain"
-                  />
-                ) : (
-                  <p className="text-center">
-                    No image selected. Please select an image to view.
-                  </p>
-                )}
-              </div>
+        {/* Main layout for images and viewer */}
+        <div className="flex flex-col lg:flex-row lg:space-x-4">
+          {/* Uploaded Images Section */}
+          <div className="flex h-96 flex-col lg:w-1/3">
+            <h2 className="mb-2 text-xl font-semibold">📸 Uploaded Images</h2>
+            <div className="flex-grow overflow-auto rounded-md border">
+              {loadingFetch ? (
+                <p className="py-4 text-center">Loading images...</p> // You can replace this with a spinner if you have one.
+              ) : (
+                <UploadedImagesSection
+                  images={uploadedImages}
+                  onImageSelect={setSelectedImage}
+                  onRename={(item) => openRenameModal(item, "Images")}
+                  onDelete={handleDelete}
+                  loadingDelete={loadingDelete}
+                />
+              )}
             </div>
           </div>
 
-          {/* Uploaded Files Section */}
-          {loadingFetch ? (
-            <p className="py-4 text-center">Loading files...</p> // Again, replace with a spinner if available.
-          ) : (
-            <UploadedFilesSection
-              files={uploadedFiles}
-              onRename={(item) => openRenameModal(item, "Files")}
-              onDelete={handleDelete}
-              loadingDelete={loadingDelete}
-            />
-          )}
+          {/* Image Viewer */}
+          <div className="flex h-96 flex-col lg:w-2/3">
+            <h2 className="mb-2 text-xl font-semibold">Image Viewer</h2>
+            <div className="flex-grow overflow-auto rounded-md border">
+              {selectedImage ? (
+                <img
+                  src={selectedImage}
+                  alt={selectedImage.name}
+                  className="h-full w-full object-contain"
+                />
+              ) : (
+                <p className="text-center">
+                  No image selected. Please select an image to view.
+                </p>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Rename Modal */}
-        <RenameModal
-          isOpen={!!renameItem}
-          onClose={() => setRenameItem(null)}
-          item={renameItem}
-          onRenameConfirm={handleRenameConfirm}
-          loadingRename={loadingRename}
-        />
+        {/* Uploaded Files Section */}
+        {loadingFetch ? (
+          <p className="py-4 text-center">Loading files...</p> // Again, replace with a spinner if available.
+        ) : (
+          <UploadedFilesSection
+            files={uploadedFiles}
+            onRename={(item) => openRenameModal(item, "Files")}
+            onDelete={handleDelete}
+            loadingDelete={loadingDelete}
+          />
+        )}
+      </div>
 
-        {/* Success Modal */}
-        <SuccessModal
-          isOpen={successModalOpen}
-          onClose={() => setSuccessModalOpen(false)}
-          message={successMessage}
-        />
+      {/* Rename Modal */}
+      <RenameModal
+        isOpen={!!renameItem}
+        onClose={() => setRenameItem(null)}
+        item={renameItem}
+        onRenameConfirm={handleRenameConfirm}
+        loadingRename={loadingRename}
+      />
 
-        {/* Delete Confirmation Modal */}
-        <DeleteConfirmationModal
-          isOpen={deleteModalOpen}
-          onClose={() => setDeleteModalOpen(false)}
-          onConfirm={confirmDelete}
-          item={deleteItem}
-          loadingDelete={loadingDelete}
-        />
-      </main>
-    </VolunteerSidebar>
+      {/* Success Modal */}
+      <SuccessModal
+        isOpen={successModalOpen}
+        onClose={() => setSuccessModalOpen(false)}
+        message={successMessage}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        item={deleteItem}
+        loadingDelete={loadingDelete}
+      />
+    </main>
+    // </VolunteerSidebar>
   );
 }

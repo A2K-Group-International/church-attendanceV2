@@ -53,23 +53,23 @@ const VolunteerDashboard = () => {
   }, [userData]); // Refetch when userData changes
 
   return (
-    <VolunteerSidebar>
-      <div className="flex h-screen">
-        {/* Left side: Duties list */}
-        <div className="flex w-1/3 flex-col p-4">
-          {/* Pass fetched duties, loading, and error to DutiesList */}
-          <DutiesList duties={duties} loading={loading} error={error} />
-        </div>
-        {/* Right side: Calendar */}
-        <div className="flex w-2/3 flex-col p-4">
-          <h2 className="mb-4 text-xl font-bold">Calendar</h2>
-          <div className="h-full rounded-lg border border-gray-300 p-4">
-            <DashboardCalendar duties={duties} />{" "}
-            {/* Pass duties to the calendar */}
-          </div>
+    // <VolunteerSidebar>
+    <div className="flex h-screen">
+      {/* Left side: Duties list */}
+      <div className="flex w-1/3 flex-col p-4">
+        {/* Pass fetched duties, loading, and error to DutiesList */}
+        <DutiesList duties={duties} loading={loading} error={error} />
+      </div>
+      {/* Right side: Calendar */}
+      <div className="flex w-2/3 flex-col p-4">
+        <h2 className="mb-4 text-xl font-bold">Calendar</h2>
+        <div className="h-full rounded-lg border border-gray-300 p-4">
+          <DashboardCalendar duties={duties} />{" "}
+          {/* Pass duties to the calendar */}
         </div>
       </div>
-    </VolunteerSidebar>
+    </div>
+    // </VolunteerSidebar>
   );
 };
 

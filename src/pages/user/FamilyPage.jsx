@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import supabase from "../../api/supabase";
-import UserSidebar from "../../components/user/UserSidebar";
+// Remove the sidebar import
+// import UserSidebar from "../../components/user/UserSidebar";
 import Table from "../../components/Table";
 import {
   Pagination,
@@ -207,159 +208,39 @@ export default function FamilyPage() {
   };
 
   return (
-    <UserSidebar>
-      <main className="mx-auto max-w-7xl p-4 lg:p-8">
-        <h1 className="text-2xl font-bold">Family Information</h1>
-        {successMessage && (
-          <div className="mb-4 rounded-md bg-green-100 p-4 text-green-600">
-            {successMessage}
-          </div>
-        )}
-        {error && (
-          <div className="mb-4 rounded-md bg-red-100 p-4 text-red-600">
-            {error}
-          </div>
-        )}
-        <div className="mb-4 mt-4">
-          <Dialog
-            open={addMemberDialogOpen}
-            onOpenChange={setAddMemberDialogOpen}
-          >
-            <DialogTrigger asChild>
-              <Button variant="primary" className="w-full">
-                Add Family Member
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Add Family Member</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleAddFamilyMember} className="space-y-4">
-                <div>
-                  <Label htmlFor="firstName" className="text-sm font-medium">
-                    First Name
-                  </Label>
-                  <Input
-                    id="firstName"
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="lastName" className="text-sm font-medium">
-                    Last Name
-                  </Label>
-                  <Input
-                    id="lastName"
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="contact" className="text-sm font-medium">
-                    Contact
-                  </Label>
-                  <Input
-                    id="contact"
-                    type="tel"
-                    value={contact}
-                    onChange={(e) => setContact(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="type" className="text-sm font-medium">
-                    Type
-                  </Label>
-                  <select
-                    id="type"
-                    value={type}
-                    onChange={(e) => setType(e.target.value)}
-                    className="w-full"
-                  >
-                    <option value="Adult">Adult</option>
-                    <option value="Child">Child</option>
-                  </select>
-                </div>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => setAddMemberDialogOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit">Add</Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+    <main className="mx-auto max-w-7xl p-4 lg:p-8">
+      <h1 className="text-2xl font-bold">Family Information</h1>
+      {successMessage && (
+        <div className="mb-4 rounded-md bg-green-100 p-4 text-green-600">
+          {successMessage}
         </div>
-        <Table headers={headers} rows={rows} loading={loading} />
-        <Pagination>
-          <PaginationPrevious
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          />
-          <PaginationContent>
-            {Array.from({ length: totalPages }, (_, index) => (
-              <PaginationItem
-                key={index + 1}
-                active={currentPage === index + 1}
-              >
-                <PaginationLink onClick={() => setCurrentPage(index + 1)}>
-                  {index + 1}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-          </PaginationContent>
-          <PaginationNext
-            disabled={currentPage === totalPages}
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-          />
-        </Pagination>
-
-        {/* Delete Confirmation Dialog */}
-        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Delete Family Member</DialogTitle>
-            </DialogHeader>
-            <p>Are you sure you want to delete this family member?</p>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button type="button" variant="outline">
-                  Cancel
-                </Button>
-              </DialogClose>
-              <Button variant="destructive" onClick={handleDeleteFamilyMember}>
-                Delete
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Edit Family Member Dialog */}
+      )}
+      {error && (
+        <div className="mb-4 rounded-md bg-red-100 p-4 text-red-600">
+          {error}
+        </div>
+      )}
+      <div className="mb-4 mt-4">
         <Dialog
-          open={editMemberDialogOpen}
-          onOpenChange={setEditMemberDialogOpen}
+          open={addMemberDialogOpen}
+          onOpenChange={setAddMemberDialogOpen}
         >
+          <DialogTrigger asChild>
+            <Button variant="primary" className="w-full">
+              Add Family Member
+            </Button>
+          </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Edit Family Member</DialogTitle>
+              <DialogTitle>Add Family Member</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleUpdateFamilyMember} className="space-y-4">
+            <form onSubmit={handleAddFamilyMember} className="space-y-4">
               <div>
-                <Label htmlFor="firstNameEdit" className="text-sm font-medium">
+                <Label htmlFor="firstName" className="text-sm font-medium">
                   First Name
                 </Label>
                 <Input
-                  id="firstNameEdit"
+                  id="firstName"
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
@@ -367,11 +248,11 @@ export default function FamilyPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="lastNameEdit" className="text-sm font-medium">
+                <Label htmlFor="lastName" className="text-sm font-medium">
                   Last Name
                 </Label>
                 <Input
-                  id="lastNameEdit"
+                  id="lastName"
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
@@ -379,11 +260,11 @@ export default function FamilyPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="contactEdit" className="text-sm font-medium">
+                <Label htmlFor="contact" className="text-sm font-medium">
                   Contact
                 </Label>
                 <Input
-                  id="contactEdit"
+                  id="contact"
                   type="tel"
                   value={contact}
                   onChange={(e) => setContact(e.target.value)}
@@ -391,32 +272,165 @@ export default function FamilyPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="typeEdit" className="text-sm font-medium">
+                <Label htmlFor="type" className="text-sm font-medium">
                   Type
                 </Label>
                 <select
-                  id="typeEdit"
+                  id="type"
                   value={type}
                   onChange={(e) => setType(e.target.value)}
-                  className="w-full"
                 >
                   <option value="Adult">Adult</option>
                   <option value="Child">Child</option>
+                  <option value="Senior">Senior</option>
                 </select>
               </div>
               <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setEditMemberDialogOpen(false)}
-                >
-                  Cancel
+                <DialogClose asChild>
+                  <Button
+                    variant="secondary"
+                    type="button"
+                    onClick={() => setAddMemberDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                </DialogClose>
+                <Button type="submit" variant="primary">
+                  Add
                 </Button>
-                <Button type="submit">Update</Button>
               </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
-      </main>
-    </UserSidebar>
+      </div>
+      <Table headers={headers} rows={rows} loading={loading} />
+      <Pagination>
+        <PaginationPrevious
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+        >
+          Previous
+        </PaginationPrevious>
+        <PaginationContent>
+          {Array.from({ length: totalPages }, (_, index) => (
+            <PaginationItem key={index + 1}>
+              <PaginationLink
+                onClick={() => setCurrentPage(index + 1)}
+                isCurrent={currentPage === index + 1}
+              >
+                {index + 1}
+              </PaginationLink>
+            </PaginationItem>
+          ))}
+        </PaginationContent>
+        <PaginationNext
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+        >
+          Next
+        </PaginationNext>
+      </Pagination>
+      <Dialog
+        open={editMemberDialogOpen}
+        onOpenChange={setEditMemberDialogOpen}
+      >
+        <DialogTrigger asChild>
+          <Button variant="primary">Edit Member</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Family Member</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleUpdateFamilyMember} className="space-y-4">
+            <div>
+              <Label htmlFor="firstName" className="text-sm font-medium">
+                First Name
+              </Label>
+              <Input
+                id="firstName"
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="lastName" className="text-sm font-medium">
+                Last Name
+              </Label>
+              <Input
+                id="lastName"
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="contact" className="text-sm font-medium">
+                Contact
+              </Label>
+              <Input
+                id="contact"
+                type="tel"
+                value={contact}
+                onChange={(e) => setContact(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="type" className="text-sm font-medium">
+                Type
+              </Label>
+              <select
+                id="type"
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+              >
+                <option value="Adult">Adult</option>
+                <option value="Child">Child</option>
+                <option value="Senior">Senior</option>
+              </select>
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button
+                  variant="secondary"
+                  type="button"
+                  onClick={() => setEditMemberDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button type="submit" variant="primary">
+                Update
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Family Member</DialogTitle>
+          </DialogHeader>
+          <p>Are you sure you want to delete this family member?</p>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={() => setDeleteDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button variant="destructive" onClick={handleDeleteFamilyMember}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </main>
   );
 }

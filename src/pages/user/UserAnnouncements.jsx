@@ -92,65 +92,65 @@ export default function UserAnnouncements() {
   };
 
   return (
-    <UserSidebar>
-      <main className="flex h-screen justify-center">
-        <div
-          className="w-full max-w-2xl space-y-6 overflow-y-auto p-4 lg:p-8"
-          style={{ maxHeight: "calc(100vh - 2rem)" }}
-        >
-          {loading ? (
-            <Spinner />
-          ) : (
-            <>
-              <header className="mb-4">
-                <h1 className="text-2xl font-bold">Announcements</h1>
-                {userData && (
-                  <p className="text-gray-600">
-                    Welcome, {userData.user_name} {userData.user_last_name}
-                  </p>
-                )}
-              </header>
+    // <UserSidebar>
+    <main className="flex h-screen justify-center">
+      <div
+        className="w-full max-w-2xl space-y-6 overflow-y-auto p-4 lg:p-8"
+        style={{ maxHeight: "calc(100vh - 2rem)" }}
+      >
+        {loading ? (
+          <Spinner />
+        ) : (
+          <>
+            <header className="mb-4">
+              <h1 className="text-2xl font-bold">Announcements</h1>
+              {userData && (
+                <p className="text-gray-600">
+                  Welcome, {userData.user_name} {userData.user_last_name}
+                </p>
+              )}
+            </header>
 
-              <GroupSelect
-                selectedGroupId={groupId}
-                setSelectedGroupId={setGroupId}
+            <GroupSelect
+              selectedGroupId={groupId}
+              setSelectedGroupId={setGroupId}
+            />
+
+            <div className="mt-4">
+              <Input
+                type="text"
+                placeholder="Search announcements..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="mb-4"
               />
+            </div>
 
-              <div className="mt-4">
-                <Input
-                  type="text"
-                  placeholder="Search announcements..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="mb-4"
+            <div className="space-y-4">
+              {filteredAnnouncements.slice(0, visibleCount).map((post) => (
+                <AnnouncementCard
+                  handleReaction={handleReaction}
+                  key={post.post_id}
+                  post={post}
+                  userId={userData.user_id}
                 />
-              </div>
+              ))}
+            </div>
 
-              <div className="space-y-4">
-                {filteredAnnouncements.slice(0, visibleCount).map((post) => (
-                  <AnnouncementCard
-                    handleReaction={handleReaction}
-                    key={post.post_id}
-                    post={post}
-                    userId={userData.user_id}
-                  />
-                ))}
-              </div>
+            {filteredAnnouncements.length > visibleCount && (
+              <Button onClick={loadMoreAnnouncements} className="mt-4">
+                Load More
+              </Button>
+            )}
 
-              {filteredAnnouncements.length > visibleCount && (
-                <Button onClick={loadMoreAnnouncements} className="mt-4">
-                  Load More
-                </Button>
-              )}
-
-              {error && <div className="text-red-500">{error}</div>}
-              {announcementsError && (
-                <div className="text-red-500">{announcementsError}</div>
-              )}
-            </>
-          )}
-        </div>
-      </main>
-    </UserSidebar>
+            {error && <div className="text-red-500">{error}</div>}
+            {announcementsError && (
+              <div className="text-red-500">{announcementsError}</div>
+            )}
+          </>
+        )}
+      </div>
+    </main>
+    // </UserSidebar>
   );
 }

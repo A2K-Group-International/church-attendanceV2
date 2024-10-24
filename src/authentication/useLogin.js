@@ -1,11 +1,13 @@
-import supabase from "../api/supabase";
-import { login as loginApi } from "../api/authService";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import supabase from "../api/supabase";
+import { login as loginApi } from "../api/authService";
+import { useUser } from "@/context/UserContext";
 
 export function useLogin() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { setUserData, setLoggedIn } = useUser(); // Access setUserData and setLoggedIn from UserContext
 
   const {
     mutateAsync: login,
@@ -18,10 +20,12 @@ export function useLogin() {
     },
     onSuccess: async (user) => {
       queryClient.setQueriesData([user], user);
+      setUserData(null); // Clear any previous user data on new login
 
+      // Fetch user details
       const { data: userData, error } = await supabase
         .from("user_list")
-        .select("*") // Fetch all fields
+        .select("*")
         .eq("user_uuid", user.id)
         .single();
 
@@ -30,10 +34,11 @@ export function useLogin() {
         return;
       }
 
-      // Save the entire userData object in the cache
-      queryClient.setQueriesData(["userData", user.id], userData); // Use a unique key
+      // Set user data and loggedIn state in context
+      setUserData(userData);
+      setLoggedIn(true); // Set loggedIn state to true
 
-      // Check user_role and navigate accordingly
+      // Navigate based on user role
       if (userData.user_role === "admin") {
         navigate("/admin-dashboard", { replace: true });
       } else if (userData.user_role === "user") {
