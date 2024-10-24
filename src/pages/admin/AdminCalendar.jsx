@@ -3,7 +3,6 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import AdminSidebar from "../../components/admin/AdminSidebar";
 import { filterEvent } from "../../api/userService";
 import moment from "moment-timezone";
 import {
@@ -40,7 +39,6 @@ const AdminCalendar = () => {
   const [sheetEventList, setSheetEventList] = useState([]);
 
   // Fetch events and transform into FullCalendar format
-
   const fetchSchedule = useCallback(async (schedule_category) => {
     try {
       const fetchedEvents = await filterEvent(schedule_category);
@@ -50,14 +48,14 @@ const AdminCalendar = () => {
       console.error("Error fetching schedule:", error);
       setError("Failed to load schedule.");
     }
-  }, []); 
+  }, []);
 
   useEffect(() => {
     // Fetch all events initially or based on the selected category
     if (selectedCategory) {
       fetchSchedule(selectedCategory);
     } else {
-      fetchSchedule(); 
+      fetchSchedule();
     }
   }, [selectedCategory, fetchSchedule]);
 
@@ -83,7 +81,7 @@ const AdminCalendar = () => {
     });
   };
 
-  //Handle select category
+  // Handle select category
   const handleSelectCategory = (categoryName) => {
     setSelectedCategory(categoryName);
   };
@@ -129,30 +127,28 @@ const AdminCalendar = () => {
   }, []);
 
   return (
-    <AdminSidebar>
-      <div className="p-5">
-        <CalendarCategoriesBtn onSelectCategory={handleSelectCategory} />
-        <FullCalendar
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          headerToolbar={{
-            left: "prev,next today",
-            center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay",
-          }}
-          events={events}
-          dateClick={handleDateClick}
-          eventClick={handleEventClick}
-          eventDidMount={handleEventMount}
-          editable={true}
-          height={850}
-          eventTimeFormat={{
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-          }}
-        />
-      </div>
+    <div className="p-5">
+      <CalendarCategoriesBtn onSelectCategory={handleSelectCategory} />
+      <FullCalendar
+        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+        initialView="dayGridMonth"
+        headerToolbar={{
+          left: "prev,next today",
+          center: "title",
+          right: "dayGridMonth,timeGridWeek,timeGridDay",
+        }}
+        events={events}
+        dateClick={handleDateClick}
+        eventClick={handleEventClick}
+        eventDidMount={handleEventMount}
+        editable={true}
+        height={850}
+        eventTimeFormat={{
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        }}
+      />
 
       {/* Event Modal */}
       <Dialog
@@ -193,7 +189,7 @@ const AdminCalendar = () => {
           </SheetHeader>
         </SheetContent>
       </Sheet>
-    </AdminSidebar>
+    </div>
   );
 };
 

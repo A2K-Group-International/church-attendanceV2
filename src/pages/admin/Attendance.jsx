@@ -494,165 +494,161 @@ export default function Attendance() {
   ]);
 
   return (
-    <AdminSidebar
-      titlePage="Attendance"
-      descriptionPage="Manage and track attendance records."
-    >
-      <main className="mx-auto max-w-7xl p-4 lg:p-8">
-        <div className="mb-2 md:flex md:justify-between">
-          <div className="mb-8">
-            <h1 className="mb-2 text-3xl font-bold">Attendance</h1>
-            <p className="text-muted-foreground">
-              Manage and track attendance records.
-            </p>
-          </div>
+    // <AdminSidebar
+    //   titlePage="Attendance"
+    //   descriptionPage="Manage and track attendance records."
+    // >
+    <main className="mx-auto max-w-7xl p-4 lg:p-8">
+      <div className="mb-2 md:flex md:justify-between">
+        <div className="mb-8">
+          <h1 className="mb-2 text-3xl font-bold">Attendance</h1>
+          <p className="text-muted-foreground">
+            Manage and track attendance records.
+          </p>
         </div>
-        <div className="mb-6 flex flex-col flex-wrap items-start gap-y-2 space-y-4 sm:flex-row sm:items-center sm:space-x-4 sm:space-y-0">
-          <div className="flex items-center space-x-2 sm:w-auto">
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal sm:w-[200px]"
-                >
-                  {format(selectedDate, "PPP")}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={handleDateChange}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-          <div className="flex w-full items-center space-x-2 sm:w-auto">
-            <Filter className="h-4 w-4 text-muted-foreground" />
-            <select
-              value={selectedEvent || "all"}
-              onChange={handleEventName}
-              className="rounded-md border border-input bg-background p-2"
-            >
-              <option value="all">All Events</option>
-              {uniqueEvent.map((events, index) => (
-                <option key={index} value={events}>
-                  {events}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex w-full items-center space-x-2 sm:w-auto">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <select
-              value={selectedTime}
-              onChange={handleTimeChange}
-              className="rounded-md border border-input bg-background p-2"
-            >
-              <option value="" disabled={availableTimes.length === 0}>
-                {availableTimes.length > 0 ? "All time" : "No time available"}
-              </option>
-              {availableTimes.map((time) => (
-                <option key={time} value={time}>
-                  {time}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex w-full items-center space-x-2 sm:w-auto">
-            <Filter className="h-4 w-4 text-muted-foreground" />
-            <select
-              value={statusFilter}
-              onChange={handleStatusChange}
-              className="rounded-md border border-input bg-background p-2"
-            >
-              <option value="all">All Status</option>
-              <option value="attended">Attended</option>
-              <option value="pending">Pending</option>
-            </select>
-          </div>
-          <Button
-            onClick={handleExportExcel}
-            variant="outline"
-            className="w-20"
+      </div>
+      <div className="mb-6 flex flex-col flex-wrap items-start gap-y-2 space-y-4 sm:flex-row sm:items-center sm:space-x-4 sm:space-y-0">
+        <div className="flex items-center space-x-2 sm:w-auto">
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-start text-left font-normal sm:w-[200px]"
+              >
+                {format(selectedDate, "PPP")}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={handleDateChange}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        <div className="flex w-full items-center space-x-2 sm:w-auto">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <select
+            value={selectedEvent || "all"}
+            onChange={handleEventName}
+            className="rounded-md border border-input bg-background p-2"
           >
-            <img src={downloadIcon} alt="Download Icon" />
-          </Button>
+            <option value="all">All Events</option>
+            {uniqueEvent.map((events, index) => (
+              <option key={index} value={events}>
+                {events}
+              </option>
+            ))}
+          </select>
         </div>
-        <div className="sm:mb-2 sm:ml-8 sm:w-44">
-          <NewAttendanceRegister BtnName="Add" />
-          {/* <DialogWalkInRegister
+        <div className="flex w-full items-center space-x-2 sm:w-auto">
+          <Clock className="h-4 w-4 text-muted-foreground" />
+          <select
+            value={selectedTime}
+            onChange={handleTimeChange}
+            className="rounded-md border border-input bg-background p-2"
+          >
+            <option value="" disabled={availableTimes.length === 0}>
+              {availableTimes.length > 0 ? "All time" : "No time available"}
+            </option>
+            {availableTimes.map((time) => (
+              <option key={time} value={time}>
+                {time}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex w-full items-center space-x-2 sm:w-auto">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <select
+            value={statusFilter}
+            onChange={handleStatusChange}
+            className="rounded-md border border-input bg-background p-2"
+          >
+            <option value="all">All Status</option>
+            <option value="attended">Attended</option>
+            <option value="pending">Pending</option>
+          </select>
+        </div>
+        <Button onClick={handleExportExcel} variant="outline" className="w-20">
+          <img src={downloadIcon} alt="Download Icon" />
+        </Button>
+      </div>
+      <div className="sm:mb-2 sm:ml-8 sm:w-44">
+        <NewAttendanceRegister BtnName="Add" />
+        {/* <DialogWalkInRegister
             btnName="Add"
             title="Add manually"
             description="Add attendance manually"
             btnSubmit="Submit"
           /> */}
-        </div>
-        <div className="rounded-lg bg-card shadow">
-          {loading ? (
-            <div className="p-8 text-center">
-              <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
-              <p className="mt-4 text-muted-foreground">
-                Loading attendance records...
-              </p>
-            </div>
-          ) : error ? (
-            <div className="p-8 text-center">
-              <p className="text-destructive">{error}</p>
-            </div>
-          ) : data.length > 0 ? (
-            <>
-              <Table headers={headers} rows={rows} />
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
+      </div>
+      <div className="rounded-lg bg-card shadow">
+        {loading ? (
+          <div className="p-8 text-center">
+            <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
+            <p className="mt-4 text-muted-foreground">
+              Loading attendance records...
+            </p>
+          </div>
+        ) : error ? (
+          <div className="p-8 text-center">
+            <p className="text-destructive">{error}</p>
+          </div>
+        ) : data.length > 0 ? (
+          <>
+            <Table headers={headers} rows={rows} />
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+                    }}
+                  />
+                </PaginationItem>
+                {Array.from({ length: totalPages }, (_, index) => (
+                  <PaginationItem key={index}>
+                    <PaginationLink
                       href="#"
+                      isActive={currentPage === index + 1}
                       onClick={(e) => {
                         e.preventDefault();
-                        if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+                        setCurrentPage(index + 1);
                       }}
-                    />
+                    >
+                      {index + 1}
+                    </PaginationLink>
                   </PaginationItem>
-                  {Array.from({ length: totalPages }, (_, index) => (
-                    <PaginationItem key={index}>
-                      <PaginationLink
-                        href="#"
-                        isActive={currentPage === index + 1}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setCurrentPage(index + 1);
-                        }}
-                      >
-                        {index + 1}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (currentPage < totalPages)
-                          setCurrentPage((prev) => prev + 1);
-                      }}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </>
-          ) : (
-            <div className="p-8 text-center">
-              <p className="text-muted-foreground">
-                No attendance records found.
-              </p>
-            </div>
-          )}
-        </div>
-      </main>
-    </AdminSidebar>
+                ))}
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (currentPage < totalPages)
+                        setCurrentPage((prev) => prev + 1);
+                    }}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </>
+        ) : (
+          <div className="p-8 text-center">
+            <p className="text-muted-foreground">
+              No attendance records found.
+            </p>
+          </div>
+        )}
+      </div>
+    </main>
+    // </AdminSidebar>
   );
 }

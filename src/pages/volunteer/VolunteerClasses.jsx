@@ -29,7 +29,7 @@ export default function VolunteerClasses() {
   const { userData } = useUserData();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isJoinDialogOpen, setIsJoinDialogOpen] = useState(false);
-  const { register, handleSubmit, reset:resetAddClass } = useForm();
+  const { register, handleSubmit, reset: resetAddClass } = useForm();
   const {
     register: registerJoinClass,
     handleSubmit: submitJoinClass,
@@ -77,7 +77,9 @@ export default function VolunteerClasses() {
     }
     const { error, data } = await supabase
       .from("volunteer_classes")
-      .insert([{ class_name: input.classname, user_id: userData?.user_id }]).select("id").single();
+      .insert([{ class_name: input.classname, user_id: userData?.user_id }])
+      .select("id")
+      .single();
 
     console.log("Supabase response:", error);
     if (error) throw new Error(error.message || "Unknown error occurred");
@@ -129,7 +131,6 @@ export default function VolunteerClasses() {
     //   throw new Error(joinError.message || "Unknown error occurred");
   };
 
-
   const deleteClass = async (id) => {
     const { error } = await supabase
       .from("volunteer_classes")
@@ -164,7 +165,12 @@ export default function VolunteerClasses() {
       case "volunteer":
         const volunteerResponse = await supabase
           .from("participant_volunteers")
-          .insert([{ name: `${userData?.user_name} ${userData?.user_last_name}`, class_id: classId }]);
+          .insert([
+            {
+              name: `${userData?.user_name} ${userData?.user_last_name}`,
+              class_id: classId,
+            },
+          ]);
 
         error = volunteerResponse.error;
         break;
@@ -172,7 +178,12 @@ export default function VolunteerClasses() {
       case "parent":
         const parentResponse = await supabase
           .from("participant_parents")
-          .insert([{ name: `${userData?.user_name} ${userData?.user_last_name}`, class_id: classId }]);
+          .insert([
+            {
+              name: `${userData?.user_name} ${userData?.user_last_name}`,
+              class_id: classId,
+            },
+          ]);
 
         error = parentResponse.error;
         break;
@@ -180,7 +191,12 @@ export default function VolunteerClasses() {
       case "child":
         const childResponse = await supabase
           .from("participant_children")
-          .insert([{ name: `${userData?.user_name} ${userData?.user_last_name}`, class_id: classId }]);
+          .insert([
+            {
+              name: `${userData?.user_name} ${userData?.user_last_name}`,
+              class_id: classId,
+            },
+          ]);
 
         error = childResponse.error;
         break;
@@ -193,13 +209,13 @@ export default function VolunteerClasses() {
       throw new Error(insertJoinError.message || "Unknown error occurred");
 
     const { error: addError } = await supabase
-    .from("volunteer_classes")
-    .update({ class_total_students: classData.class_total_students + 1 })
-    .eq("id", classId); // Replace classId with the actual class ID you want to update
-  
-  if (addError) {
-    throw new Error(addError.message || "Error updating total count");
-  }
+      .from("volunteer_classes")
+      .update({ class_total_students: classData.class_total_students + 1 })
+      .eq("id", classId); // Replace classId with the actual class ID you want to update
+
+    if (addError) {
+      throw new Error(addError.message || "Error updating total count");
+    }
     if (error) throw new Error(error.message || "Unknown error occurred");
   };
 
@@ -211,14 +227,13 @@ export default function VolunteerClasses() {
   const mutation = useMutation({
     mutationFn: addClass,
     onSuccess: () => {
-      resetAddClass
+      resetAddClass;
       toast({
         title: "Success",
         description: "Class added.",
       });
-     
+
       setIsDialogOpen(false);
-    
     },
     onError: (error) => {
       console.error("Mutation error:", error);
@@ -229,7 +244,6 @@ export default function VolunteerClasses() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["classes"] });
- 
     },
   });
   const joinClassMutation = useMutation({
@@ -254,8 +268,6 @@ export default function VolunteerClasses() {
       queryClient.invalidateQueries({ queryKey: ["classes"] });
     },
   });
-
-
 
   const deleteMutation = useMutation({
     mutationFn: deleteClass,
@@ -314,7 +326,6 @@ export default function VolunteerClasses() {
     joinClassMutation.mutate(input);
   };
 
-
   const deleteMutateClass = (id) => {
     deleteMutation.mutate(id);
   };
@@ -323,107 +334,107 @@ export default function VolunteerClasses() {
   console.log("data i am getting", data);
 
   return (
-    <VolunteerSidebar>
-      <main className="h-screen overflow-y-scroll p-8">
-        <div className="mb-4 flex justify-between">
-          <Title>Your Classes</Title>
-          <div className="flex gap-2">
-            <Dialog open={isJoinDialogOpen} onOpenChange={setIsJoinDialogOpen}>
-              <DialogTrigger>
-                <Button onClick={() => setIsJoinDialogOpen(true)}>
-                  Join Class
+    // <VolunteerSidebar>
+    <main className="h-screen overflow-y-scroll p-8">
+      <div className="mb-4 flex justify-between">
+        <Title>Your Classes</Title>
+        <div className="flex gap-2">
+          <Dialog open={isJoinDialogOpen} onOpenChange={setIsJoinDialogOpen}>
+            <DialogTrigger>
+              <Button onClick={() => setIsJoinDialogOpen(true)}>
+                Join Class
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="rounded-md">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">Join Class</DialogTitle>
+                <Separator />
+              </DialogHeader>
+              <div>
+                <div>
+                  <Label htmlFor="classCode">Class Code</Label>
+                  <Input
+                    {...registerJoinClass("classCode", {
+                      required: "Class code is required",
+                    })}
+                    placeholder="Place your class code here"
+                    className="mt-1"
+                    id="classcode"
+                  />
+                </div>
+              </div>
+              <DialogFooter className="mx-2 flex gap-2 sm:justify-between">
+                <Button
+                  onClick={() => setIsJoinDialogOpen(false)}
+                  variant="destructive"
+                >
+                  Cancel
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="rounded-md">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl">Join Class</DialogTitle>
-                  <Separator />
-                </DialogHeader>
+                <Button
+                  onClick={submitJoinClass(joinClass)}
+                  // form="joinForm"
+                  // type="submit"
+                  disabled={mutation.isLoading}
+                >
+                  {mutation.isLoading ? "Joining..." : "Join Class"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger>
+              <Button onClick={() => setIsDialogOpen(true)}>Add Class</Button>
+            </DialogTrigger>
+            <DialogContent className="rounded-md">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">Create Class</DialogTitle>
+                <Separator />
+              </DialogHeader>
+              <div>
                 <div>
-                  <div>
-                    <Label htmlFor="classCode">Class Code</Label>
-                    <Input
-                      {...registerJoinClass("classCode", {
-                        required: "Class code is required",
-                      })}
-                      placeholder="Place your class code here"
-                      className="mt-1"
-                      id="classcode"
-                    />
-                  </div>
+                  <Label htmlFor="classname">Class Name</Label>
+                  <Input
+                    {...register("classname", {
+                      required: "Class name is required",
+                    })}
+                    placeholder="Bible Study"
+                    className="mt-1"
+                    // id="classname"
+                  />
                 </div>
-                <DialogFooter className="mx-2 flex gap-2 sm:justify-between">
-                  <Button
-                    onClick={() => setIsJoinDialogOpen(false)}
-                    variant="destructive"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={submitJoinClass(joinClass)}
-                    // form="joinForm"
-                    // type="submit"
-                    disabled={mutation.isLoading}
-                  >
-                    {mutation.isLoading ? "Joining..." : "Join Class"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger>
-                <Button onClick={() => setIsDialogOpen(true)}>Add Class</Button>
-              </DialogTrigger>
-              <DialogContent className="rounded-md">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl">Create Class</DialogTitle>
-                  <Separator />
-                </DialogHeader>
-                <div>
-                  <div>
-                    <Label htmlFor="classname">Class Name</Label>
-                    <Input
-                      {...register("classname", {
-                        required: "Class name is required",
-                      })}
-                      placeholder="Bible Study"
-                      className="mt-1"
-                      // id="classname"
-                    />
-                  </div>
-                </div>
-                <DialogFooter className="mx-2 flex gap-2 sm:justify-between">
-                  <Button
-                    onClick={() => setIsDialogOpen(false)}
-                    variant="destructive"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    form="addClassForm"
-                    onClick={handleSubmit(createClass)}
-                    disabled={mutation.isLoading}
-                  >
-                    {mutation.isLoading ? "Adding..." : "Add"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
+              </div>
+              <DialogFooter className="mx-2 flex gap-2 sm:justify-between">
+                <Button
+                  onClick={() => setIsDialogOpen(false)}
+                  variant="destructive"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  form="addClassForm"
+                  onClick={handleSubmit(createClass)}
+                  disabled={mutation.isLoading}
+                >
+                  {mutation.isLoading ? "Adding..." : "Add"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
+      </div>
 
-        {isLoading ? (
-          <p>loading...</p>
-        ) : (
-          <ClassesTable
-            classes={data}
-            // updateClass={updateMutateClass}
-            deleteClass={deleteMutateClass}
-            handleCopy={handleCopy}
-          />
-        )}
-      </main>
-    </VolunteerSidebar>
+      {isLoading ? (
+        <p>loading...</p>
+      ) : (
+        <ClassesTable
+          classes={data}
+          // updateClass={updateMutateClass}
+          deleteClass={deleteMutateClass}
+          handleCopy={handleCopy}
+        />
+      )}
+    </main>
+    // </VolunteerSidebar>
   );
 }

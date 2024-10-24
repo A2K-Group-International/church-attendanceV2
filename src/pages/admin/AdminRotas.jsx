@@ -125,72 +125,72 @@ const AdminRotas = () => {
   }, [selectedUser, selectedGroup]);
 
   return (
-    <AdminSidebar>
-      <div className="flex h-screen">
-        {/* Selection portion on the left side */}
-        <div className="flex w-1/3 flex-col p-4">
-          {/* Group Selector */}
+    // <AdminSidebar>
+    <div className="flex h-screen">
+      {/* Selection portion on the left side */}
+      <div className="flex w-1/3 flex-col p-4">
+        {/* Group Selector */}
+        <div className="mb-2 flex items-center">
+          <label htmlFor="groupSelect" className="mr-2">
+            Select Group:
+          </label>
+          <select
+            id="groupSelect"
+            value={selectedGroup || ""}
+            onChange={(e) => {
+              setSelectedGroup(e.target.value);
+              setSelectedUser(null); // Reset user when group changes
+            }}
+            className="rounded border p-2"
+          >
+            <option value="" disabled>
+              Select a group
+            </option>
+            {groups.map((group) => (
+              <option key={group.group_id} value={group.group_id}>
+                {group.group_name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* User Selector */}
+        {selectedGroup && (
           <div className="mb-2 flex items-center">
-            <label htmlFor="groupSelect" className="mr-2">
-              Select Group:
+            <label htmlFor="userSelect" className="mr-2">
+              Select User:
             </label>
             <select
-              id="groupSelect"
-              value={selectedGroup || ""}
-              onChange={(e) => {
-                setSelectedGroup(e.target.value);
-                setSelectedUser(null); // Reset user when group changes
-              }}
+              id="userSelect"
+              value={selectedUser || ""}
+              onChange={(e) => setSelectedUser(e.target.value)}
               className="rounded border p-2"
             >
               <option value="" disabled>
-                Select a group
+                Select a user
               </option>
-              {groups.map((group) => (
-                <option key={group.group_id} value={group.group_id}>
-                  {group.group_name}
+              {users.map((user) => (
+                <option key={user.user_id} value={user.user_id}>
+                  {user.user_name}
                 </option>
               ))}
             </select>
           </div>
+        )}
 
-          {/* User Selector */}
-          {selectedGroup && (
-            <div className="mb-2 flex items-center">
-              <label htmlFor="userSelect" className="mr-2">
-                Select User:
-              </label>
-              <select
-                id="userSelect"
-                value={selectedUser || ""}
-                onChange={(e) => setSelectedUser(e.target.value)}
-                className="rounded border p-2"
-              >
-                <option value="" disabled>
-                  Select a user
-                </option>
-                {users.map((user) => (
-                  <option key={user.user_id} value={user.user_id}>
-                    {user.user_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+        {/* Duties list */}
+        <DutiesList duties={duties} loading={loading} error={error} />
+      </div>
 
-          {/* Duties list */}
-          <DutiesList duties={duties} loading={loading} error={error} />
-        </div>
-
-        {/* Right side: Calendar stretching vertically */}
-        <div className="flex w-2/3 flex-col p-4">
-          <h2 className="mb-4 text-xl font-bold">Calendar</h2>
-          <div className="h-full flex-grow rounded-lg border border-gray-300 p-4">
-            <DashboardCalendar duties={duties} />
-          </div>
+      {/* Right side: Calendar stretching vertically */}
+      <div className="flex w-2/3 flex-col p-4">
+        <h2 className="mb-4 text-xl font-bold">Calendar</h2>
+        <div className="h-full flex-grow rounded-lg border border-gray-300 p-4">
+          <DashboardCalendar duties={duties} />
         </div>
       </div>
-    </AdminSidebar>
+    </div>
+    // </AdminSidebar>
   );
 };
 
