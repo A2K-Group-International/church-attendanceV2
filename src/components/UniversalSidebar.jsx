@@ -10,7 +10,7 @@ import HamburgerIcon from "../assets/svg/hamburgerIcon.svg";
 import RequestIcon from "../assets/svg/requestIcon.svg";
 import BlackBoardIcon from "../assets/svg/blackboard.svg";
 import DashboardIcon from "../assets/svg/dashboard.svg"; // Add import for DashboardIcon
-import CheckListIcon from "../assets/svg/checkList.svg"; // Add import for CheckListIcon
+import CheckListIcon from "../assets/svg/checklist.svg";
 import PersonIcon from "../assets/svg/person.svg"; // Add import for PersonIcon
 import { useUser } from "../context/UserContext"; // Import the context
 
